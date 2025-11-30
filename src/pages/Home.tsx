@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Heart } from 'lucide-react';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import HeroSection from '@/components/HeroSection';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -47,16 +48,7 @@ const Home = () => {
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       {/* Hero Section */}
-      <section className="bg-gradient-hero text-primary-foreground py-20">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center animate-fade-in">
-            <h1 className="text-5xl font-bold mb-6">مرحباً بك في متجرنا</h1>
-            <p className="text-xl opacity-90">
-              اكتشف أفضل المنتجات بأسعار مميزة
-            </p>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* Categories */}
       <section className="py-16">
