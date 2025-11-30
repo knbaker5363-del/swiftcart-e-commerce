@@ -14,6 +14,7 @@ import Favorites from "./pages/Favorites";
 import Deals from "./pages/Deals";
 import AllProducts from "./pages/AllProducts";
 import Brands from "./pages/Brands";
+import Category from "./pages/Category";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/deals" element={<Deals />} />
                   <Route path="/products" element={<AllProducts />} />
                   <Route path="/brands" element={<Brands />} />
+                  <Route path="/category/:id" element={<Category />} />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
