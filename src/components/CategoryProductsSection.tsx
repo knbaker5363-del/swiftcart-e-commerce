@@ -112,7 +112,7 @@ export const CategoryProductsSection = ({ category }: CategoryProductsSectionPro
                 className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="relative">
-                  <Link to={`/product/${product.id}`}>
+                  <Link to={`/product/${product.id}`} className="block h-40 overflow-hidden">
                     <ProductImageCarousel
                       mainImage={mainImage}
                       additionalImages={additionalImages}
@@ -150,6 +150,37 @@ export const CategoryProductsSection = ({ category }: CategoryProductsSectionPro
                   <p className="text-base font-bold text-primary">
                     {product.price.toFixed(2)} ر.س
                   </p>
+
+                  {product.options && (
+                    <div className="space-y-1.5">
+                      {product.options.sizes && product.options.sizes.length > 0 && (
+                        <div className="flex flex-wrap gap-1 items-center">
+                          <span className="text-xs text-muted-foreground">المقاسات:</span>
+                          {product.options.sizes.map((size: string, idx: number) => (
+                            <span key={idx} className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              {size}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {product.options.colors && product.options.colors.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          <span className="text-xs text-muted-foreground">الألوان:</span>
+                          <div className="flex gap-1">
+                            {product.options.colors.map((color: string, idx: number) => (
+                              <div
+                                key={idx}
+                                className="w-5 h-5 rounded-full border-2 border-border"
+                                style={{ backgroundColor: color }}
+                                title={color}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <Button
                     onClick={() => handleAddToCart(product)}
