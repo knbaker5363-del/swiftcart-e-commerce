@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { Link } from 'react-router-dom';
 
 interface PublicHeaderProps {
@@ -12,6 +13,7 @@ interface PublicHeaderProps {
 export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
   const { items } = useCart();
   const { favorites } = useFavorites();
+  const { settings } = useSettings();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
 
@@ -20,7 +22,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2 space-x-reverse">
           <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            متجري
+            {settings?.store_name || 'متجري'}
           </h1>
         </Link>
         <div className="flex items-center gap-2">

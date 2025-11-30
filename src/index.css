@@ -104,6 +104,151 @@ All colors MUST be HSL.
     --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
     --shadow-button: 0 2px 8px rgba(18, 62%, 55%, 0.3);
   }
+
+  /* Night Theme - Dark blues and purples */
+  [data-theme="night"] {
+    --background: 240 20% 8%;
+    --foreground: 240 10% 95%;
+
+    --card: 240 15% 12%;
+    --card-foreground: 240 10% 95%;
+
+    --primary: 250 60% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 15% 18%;
+    --secondary-foreground: 240 10% 95%;
+
+    --muted: 240 15% 15%;
+    --muted-foreground: 240 8% 65%;
+
+    --accent: 270 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 240 15% 20%;
+    --input: 240 15% 18%;
+    --ring: 250 60% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(250, 60%, 60%), hsl(270, 70%, 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(250, 60%, 60%), hsl(270, 70%, 55%));
+    --gradient-card: linear-gradient(180deg, hsl(240, 15%, 12%), hsl(240, 15%, 14%));
+  }
+
+  /* Day Theme - Bright oranges and yellows */
+  [data-theme="day"] {
+    --background: 45 100% 96%;
+    --foreground: 30 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 20% 15%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 90% 92%;
+    --secondary-foreground: 30 20% 15%;
+
+    --muted: 45 80% 90%;
+    --muted-foreground: 30 15% 45%;
+
+    --accent: 45 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 45 60% 85%;
+    --input: 45 60% 88%;
+    --ring: 25 95% 53%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 90%, 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 90%, 60%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(45, 90%, 98%));
+  }
+
+  /* Pink Theme */
+  [data-theme="pink"] {
+    --background: 330 40% 96%;
+    --foreground: 330 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 330 30% 15%;
+
+    --primary: 330 81% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 330 50% 92%;
+    --secondary-foreground: 330 30% 15%;
+
+    --muted: 330 40% 90%;
+    --muted-foreground: 330 20% 45%;
+
+    --accent: 340 82% 67%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 330 30% 85%;
+    --input: 330 30% 88%;
+    --ring: 330 81% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(330, 81%, 60%), hsl(340, 82%, 67%));
+    --gradient-hero: linear-gradient(135deg, hsl(330, 81%, 60%), hsl(340, 82%, 67%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(330, 50%, 98%));
+  }
+
+  /* Green Theme */
+  [data-theme="green"] {
+    --background: 145 40% 96%;
+    --foreground: 145 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 145 30% 15%;
+
+    --primary: 145 84% 41%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 50% 92%;
+    --secondary-foreground: 145 30% 15%;
+
+    --muted: 145 40% 90%;
+    --muted-foreground: 145 20% 45%;
+
+    --accent: 160 84% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 145 30% 85%;
+    --input: 145 30% 88%;
+    --ring: 145 84% 41%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(145, 84%, 41%), hsl(160, 84%, 52%));
+    --gradient-hero: linear-gradient(135deg, hsl(145, 84%, 41%), hsl(160, 84%, 52%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(145, 50%, 98%));
+  }
+
+  /* Orange Theme */
+  [data-theme="orange"] {
+    --background: 30 50% 96%;
+    --foreground: 30 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 30% 15%;
+
+    --primary: 35 91% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 30 50% 92%;
+    --secondary-foreground: 30 30% 15%;
+
+    --muted: 30 40% 90%;
+    --muted-foreground: 30 20% 45%;
+
+    --accent: 25 95% 61%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 30 30% 85%;
+    --input: 30 30% 88%;
+    --ring: 35 91% 56%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(35, 91%, 56%), hsl(25, 95%, 61%));
+    --gradient-hero: linear-gradient(135deg, hsl(35, 91%, 56%), hsl(25, 95%, 61%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(30, 50%, 98%));
+  }
 }
 
 @layer base {
