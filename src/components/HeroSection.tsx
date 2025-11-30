@@ -19,27 +19,27 @@ const HeroSection = () => {
   const slides: HeroSlide[] = [
     {
       id: 1,
-      title: 'تسوق الآن',
-      subtitle: 'وصيل متوفر',
-      description: 'واستمتع بتجربة تسوق فريدة - رجال، نساء، أطفال',
+      title: '',
+      subtitle: '',
+      description: '',
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
-      buttonText: 'تسوق الآن',
+      buttonText: '',
     },
     {
       id: 2,
-      title: 'عروض حصرية',
-      subtitle: 'خصومات تصل إلى 50%',
-      description: 'على جميع الفئات - لا تفوت الفرصة',
+      title: '',
+      subtitle: '',
+      description: '',
       image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b',
-      buttonText: 'اكتشف العروض',
+      buttonText: '',
     },
     {
       id: 3,
-      title: 'أحدث المنتجات',
-      subtitle: 'وصل حديثاً',
-      description: 'تشكيلة جديدة من أفضل الماركات',
+      title: '',
+      subtitle: '',
+      description: '',
       image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b',
-      buttonText: 'شاهد الجديد',
+      buttonText: '',
     },
   ];
 
@@ -104,24 +104,11 @@ const HeroSection = () => {
                   index === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
               >
-                <div className="absolute inset-0 bg-gradient-to-l from-primary/90 to-accent/80" />
                 <img
                   src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover mix-blend-overlay"
+                  alt={`شريحة ${index + 1}`}
+                  className="w-full h-full object-cover"
                 />
-                
-                {/* محتوى الشريحة */}
-                <div className="absolute inset-0 flex items-center justify-center lg:justify-start px-8 lg:px-16">
-                  <div className="text-center lg:text-right text-primary-foreground max-w-2xl animate-fade-in">
-                    <p className="text-xl lg:text-2xl mb-2 font-medium">{slide.subtitle}</p>
-                    <h2 className="text-4xl lg:text-6xl font-bold mb-4">{slide.title}</h2>
-                    <p className="text-lg lg:text-xl mb-6 opacity-90">{slide.description}</p>
-                    <button className="bg-background text-foreground px-8 py-3 rounded-lg font-bold hover:bg-background/90 transition-colors shadow-lg">
-                      {slide.buttonText}
-                    </button>
-                  </div>
-                </div>
               </div>
             ))}
 
