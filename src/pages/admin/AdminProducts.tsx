@@ -117,9 +117,16 @@ const AdminProducts = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.category_id) {
+      toast({ title: 'الرجاء اختيار التصنيف', variant: 'destructive' });
+      return;
+    }
+    
     const data = {
       ...formData,
       price: parseFloat(formData.price),
+      category_id: formData.category_id || null,
       options: options,
     };
 
@@ -207,9 +214,8 @@ const AdminProducts = () => {
                   <Select
                     value={formData.category_id}
                     onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-                    required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={!formData.category_id ? 'border-destructive' : ''}>
                       <SelectValue placeholder="اختر التصنيف" />
                     </SelectTrigger>
                     <SelectContent>
@@ -220,6 +226,9 @@ const AdminProducts = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  {!formData.category_id && (
+                    <p className="text-xs text-destructive mt-1">التصنيف مطلوب</p>
+                  )}
                 </div>
               </div>
               <div>
