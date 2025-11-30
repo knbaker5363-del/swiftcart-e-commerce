@@ -11,6 +11,7 @@ import { Heart } from 'lucide-react';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import HeroSection from '@/components/HeroSection';
+import DealsBar from '@/components/DealsBar';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -49,6 +50,9 @@ const Home = () => {
 
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Deals Bar */}
+      <DealsBar />
 
       {/* Categories */}
       <section className="py-16">
