@@ -274,6 +274,8 @@ export type Database = {
           store_name: string
           theme: string
           updated_at: string
+          whatsapp_country_code: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           created_at?: string
@@ -283,6 +285,8 @@ export type Database = {
           store_name?: string
           theme?: string
           updated_at?: string
+          whatsapp_country_code?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           created_at?: string
@@ -292,6 +296,8 @@ export type Database = {
           store_name?: string
           theme?: string
           updated_at?: string
+          whatsapp_country_code?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }

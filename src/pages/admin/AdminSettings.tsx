@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Palette, Upload, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Palette, Upload, X, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,6 +26,8 @@ const AdminSettings = () => {
   const [location, setLocation] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('972');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   useEffect(() => {
     if (settings) {
@@ -32,6 +35,8 @@ const AdminSettings = () => {
       setSelectedTheme(settings.theme);
       setLocation(settings.location || '');
       setLogoUrl(settings.logo_url);
+      setWhatsappCountryCode((settings as any).whatsapp_country_code || '972');
+      setWhatsappNumber((settings as any).whatsapp_number || '');
     }
   }, [settings]);
 
@@ -85,7 +90,37 @@ const AdminSettings = () => {
   };
 
   const handleSave = async () => {
-    await updateSettings(storeName, selectedTheme, logoUrl, location);
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .update({
+          store_name: storeName,
+          theme: selectedTheme,
+          logo_url: logoUrl,
+          location: location,
+          whatsapp_country_code: whatsappCountryCode,
+          whatsapp_number: whatsappNumber,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', settings?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'تم الحفظ',
+        description: 'تم حفظ الإعدادات بنجاح',
+      });
+      
+      // Reload settings
+      window.location.reload();
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل حفظ الإعدادات',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -168,6 +203,49 @@ const AdminSettings = () => {
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="مثال: الرياض، المملكة العربية السعودية"
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              إعدادات واتساب
+            </CardTitle>
+            <CardDescription>رقم واتساب المتجر لاستقبال الطلبات</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="countryCode">رمز الدولة</Label>
+              <Select value={whatsappCountryCode} onValueChange={setWhatsappCountryCode}>
+                <SelectTrigger id="countryCode">
+                  <SelectValue placeholder="اختر رمز الدولة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="972">+972 (فلسطين)</SelectItem>
+                  <SelectItem value="970">+970 (فلسطين)</SelectItem>
+                  <SelectItem value="966">+966 (السعودية)</SelectItem>
+                  <SelectItem value="962">+962 (الأردن)</SelectItem>
+                  <SelectItem value="20">+20 (مصر)</SelectItem>
+                  <SelectItem value="971">+971 (الإمارات)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="whatsappNumber">رقم واتساب</Label>
+              <Input
+                id="whatsappNumber"
+                type="tel"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
+                placeholder="مثال: 123456789"
+                maxLength={15}
+              />
+              <p className="text-sm text-muted-foreground">
+                الرقم الكامل: +{whatsappCountryCode}{whatsappNumber}
+              </p>
             </div>
           </CardContent>
         </Card>
