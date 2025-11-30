@@ -8,11 +8,19 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import QuickLinks from '@/components/QuickLinks';
-import { CategoryProductsSection } from '@/components/CategoryProductsSection';
+import { Heart, ShoppingCart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
+
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
@@ -26,6 +34,37 @@ const Home = () => {
     },
   });
 
+  const { data: products, isLoading: productsLoading } = useQuery({
+    queryKey: ['all-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleAddToCart = (product: any) => {
+    addItem({
+      id: product.id,
+      product_id: product.id,
+      name: product.name,
+      price: product.discount_percentage 
+        ? product.price * (1 - product.discount_percentage / 100)
+        : product.price,
+      image_url: product.image_url,
+      quantity: 1,
+      selected_options: {},
+    });
+    toast({
+      title: "تمت الإضافة إلى السلة",
+      description: `تم إضافة ${product.name} إلى سلة التسوق`,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
@@ -36,9 +75,6 @@ const Home = () => {
 
       {/* Deals Bar */}
       <DealsBar />
-
-      {/* Quick Links */}
-      <QuickLinks />
 
       {/* Categories */}
       <section className="py-12">
@@ -79,10 +115,122 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Products by Category */}
-      {categories?.map((category) => (
-        <CategoryProductsSection key={category.id} category={category} />
-      ))}
+      {/* All Products */}
+      <section className="py-12 bg-muted/30">
+        <div className="container">
+          <h2 className="text-2xl font-bold mb-6">كافة المنتجات</h2>
+          {productsLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {[...Array(10)].map((_, i) => (
+                <Skeleton key={i} className="h-80 rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {products?.map((product) => {
+                const additionalImages = product.additional_images as string[] | null;
+                
+                const options = product.options as { sizes?: string[], colors?: string[] } | null;
+                const hasDiscount = product.discount_percentage && product.discount_percentage > 0;
+                const discountedPrice = hasDiscount 
+                  ? product.price * (1 - product.discount_percentage / 100)
+                  : product.price;
+
+                return (
+                  <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
+                    <div className="relative">
+                      <Link to={`/product/${product.id}`}>
+                        <ProductImageCarousel 
+                          mainImage={product.image_url || '/placeholder.svg'}
+                          additionalImages={additionalImages || []}
+                          productName={product.name}
+                        />
+                      </Link>
+                      {hasDiscount && (
+                        <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-md text-sm font-bold">
+                          {product.discount_percentage}% خصم
+                        </div>
+                      )}
+                      <button
+                        onClick={() => toggleFavorite(product.id)}
+                        className="absolute top-2 right-2 p-2 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors"
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${
+                            isFavorite(product.id)
+                              ? 'fill-destructive text-destructive'
+                              : 'text-foreground'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <Link to={`/product/${product.id}`}>
+                        <h3 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                      </Link>
+                      <div className="flex items-center gap-2 mb-3">
+                        {hasDiscount ? (
+                          <>
+                            <span className="text-lg font-bold text-primary">
+                              {discountedPrice.toFixed(2)} ر.س
+                            </span>
+                            <span className="text-sm text-muted-foreground line-through">
+                              {product.price.toFixed(2)} ر.س
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-lg font-bold text-primary">
+                            {product.price.toFixed(2)} ر.س
+                          </span>
+                        )}
+                      </div>
+                      
+                      {options && (options.sizes || options.colors) && (
+                        <div className="mb-3 space-y-2">
+                          {options.sizes && options.sizes.length > 0 && (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-muted-foreground">المقاسات:</span>
+                              {options.sizes.map((size, idx) => (
+                                <span key={idx} className="text-xs px-2 py-1 bg-muted rounded">
+                                  {size}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {options.colors && options.colors.length > 0 && (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-muted-foreground">الألوان:</span>
+                              {options.colors.map((color, idx) => (
+                                <div
+                                  key={idx}
+                                  className="w-6 h-6 rounded-full border-2 border-border"
+                                  style={{ backgroundColor: color }}
+                                  title={color}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <Button 
+                        onClick={() => handleAddToCart(product)}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <ShoppingCart className="ml-2 h-4 w-4" />
+                        أضف للسلة
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
