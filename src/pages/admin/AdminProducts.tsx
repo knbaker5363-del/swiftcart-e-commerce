@@ -31,7 +31,7 @@ const AdminProducts = () => {
     colors: [],
   });
   const [newSize, setNewSize] = useState('');
-  const [newColor, setNewColor] = useState('');
+  const [newColor, setNewColor] = useState('#000000');
   const [uploading, setUploading] = useState(false);
 
   const { data: products } = useQuery({
@@ -338,16 +338,17 @@ const AdminProducts = () => {
                 <Label>الألوان</Label>
                 <div className="flex gap-2 mb-2">
                   <Input
-                    placeholder="أضف لون"
+                    type="color"
                     value={newColor}
                     onChange={(e) => setNewColor(e.target.value)}
+                    className="w-20 h-10 cursor-pointer"
                   />
                   <Button
                     type="button"
                     onClick={() => {
-                      if (newColor.trim()) {
-                        setOptions({ ...options, colors: [...options.colors, newColor.trim()] });
-                        setNewColor('');
+                      if (newColor) {
+                        setOptions({ ...options, colors: [...options.colors, newColor] });
+                        setNewColor('#000000');
                       }
                     }}
                   >
@@ -356,8 +357,12 @@ const AdminProducts = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {options.colors.map((color, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-muted rounded-full">
-                      {color}
+                    <span key={i} className="inline-flex items-center gap-2 px-3 py-1 bg-muted rounded-full">
+                      <span 
+                        className="w-5 h-5 rounded-full border border-border" 
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="text-xs">{color}</span>
                       <button
                         type="button"
                         onClick={() => setOptions({ ...options, colors: options.colors.filter((_, idx) => idx !== i) })}
