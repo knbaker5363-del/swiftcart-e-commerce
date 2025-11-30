@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Palette } from 'lucide-react';
+import { Palette, Upload, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const themes = [
   { id: 'default', name: 'الافتراضي', colors: 'من #9b87f5 إلى #7E69AB' },
@@ -17,18 +19,73 @@ const themes = [
 
 const AdminSettings = () => {
   const { settings, loading, updateSettings } = useSettings();
+  const { toast } = useToast();
   const [storeName, setStoreName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('default');
+  const [location, setLocation] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (settings) {
       setStoreName(settings.store_name);
       setSelectedTheme(settings.theme);
+      setLocation(settings.location || '');
+      setLogoUrl(settings.logo_url);
     }
   }, [settings]);
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى اختيار صورة فقط',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `logo-${Date.now()}.${fileExt}`;
+      const { error: uploadError, data } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setLogoUrl(publicUrl);
+      
+      toast({
+        title: 'تم الرفع',
+        description: 'تم رفع الشعار بنجاح',
+      });
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل رفع الشعار',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoUrl(null);
+  };
+
   const handleSave = async () => {
-    await updateSettings(storeName, selectedTheme);
+    await updateSettings(storeName, selectedTheme, logoUrl, location);
   };
 
   if (loading) {
@@ -50,9 +107,48 @@ const AdminSettings = () => {
         <Card>
           <CardHeader>
             <CardTitle>معلومات المتجر</CardTitle>
-            <CardDescription>تخصيص اسم المتجر</CardDescription>
+            <CardDescription>تخصيص معلومات المتجر الأساسية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* شعار المتجر */}
+            <div className="space-y-2">
+              <Label>شعار المتجر</Label>
+              <div className="flex items-center gap-4">
+                {logoUrl ? (
+                  <div className="relative">
+                    <img
+                      src={logoUrl}
+                      alt="شعار المتجر"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                    />
+                    <button
+                      onClick={handleRemoveLogo}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={uploading}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {uploading ? 'جاري الرفع...' : 'اختر صورة للشعار'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* اسم المتجر */}
             <div className="space-y-2">
               <Label htmlFor="storeName">اسم المتجر</Label>
               <Input
@@ -60,6 +156,17 @@ const AdminSettings = () => {
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 placeholder="اسم متجرك"
+              />
+            </div>
+
+            {/* الموقع */}
+            <div className="space-y-2">
+              <Label htmlFor="location">الموقع</Label>
+              <Input
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="مثال: الرياض، المملكة العربية السعودية"
               />
             </div>
           </CardContent>

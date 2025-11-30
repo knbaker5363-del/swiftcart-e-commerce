@@ -6,12 +6,14 @@ interface Settings {
   id: string;
   store_name: string;
   theme: string;
+  logo_url: string | null;
+  location: string | null;
 }
 
 interface SettingsContextType {
   settings: Settings | null;
   loading: boolean;
-  updateSettings: (storeName: string, theme: string) => Promise<void>;
+  updateSettings: (storeName: string, theme: string, logoUrl?: string | null, location?: string | null) => Promise<void>;
   applyTheme: (theme: string) => void;
 }
 
@@ -50,18 +52,37 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     fetchSettings();
   }, []);
 
-  const updateSettings = async (storeName: string, theme: string) => {
+  const updateSettings = async (storeName: string, theme: string, logoUrl?: string | null, location?: string | null) => {
     try {
       if (!settings) return;
 
+      const updateData: any = { 
+        store_name: storeName, 
+        theme 
+      };
+      
+      if (logoUrl !== undefined) {
+        updateData.logo_url = logoUrl;
+      }
+      
+      if (location !== undefined) {
+        updateData.location = location;
+      }
+
       const { error } = await supabase
         .from('settings')
-        .update({ store_name: storeName, theme })
+        .update(updateData)
         .eq('id', settings.id);
 
       if (error) throw error;
 
-      setSettings({ ...settings, store_name: storeName, theme });
+      setSettings({ 
+        ...settings, 
+        store_name: storeName, 
+        theme,
+        logo_url: logoUrl !== undefined ? logoUrl : settings.logo_url,
+        location: location !== undefined ? location : settings.location
+      });
       applyTheme(theme);
       
       toast({

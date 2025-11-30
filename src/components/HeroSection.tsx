@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface HeroSlide {
   id: number;
@@ -15,19 +13,7 @@ interface HeroSlide {
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const { data: categories } = useQuery({
-    queryKey: ['categories-hero'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { settings } = useSettings();
 
   // شرائح البانر - يمكن جعلها ديناميكية من قاعدة البيانات
   const slides: HeroSlide[] = [
@@ -77,28 +63,34 @@ const HeroSection = () => {
     <section className="bg-background py-6">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* قائمة التصنيفات - على اليمين في الديسكتوب */}
-          <div className="hidden lg:block bg-card rounded-lg shadow-card p-4">
-            <h3 className="font-bold text-lg mb-4 pb-3 border-b">التصنيفات</h3>
-            <div className="space-y-2">
-              {categories?.map((category) => (
-                <Link
-                  key={category.id}
-                  to={`/category/${category.id}`}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors group"
-                >
-                  {category.image_url && (
-                    <img
-                      src={category.image_url}
-                      alt={category.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  )}
-                  <span className="text-sm group-hover:text-primary transition-colors">
-                    {category.name}
+          {/* معلومات المتجر - على اليمين في الديسكتوب */}
+          <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
+            {/* شعار المتجر */}
+            <div className="w-32 h-32 rounded-full overflow-hidden mb-4 shadow-hover border-4 border-primary/20">
+              {settings?.logo_url ? (
+                <img
+                  src={settings.logo_url}
+                  alt={settings.store_name || 'شعار المتجر'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
+                  <span className="text-4xl font-bold text-primary-foreground">
+                    {settings?.store_name?.charAt(0) || 'م'}
                   </span>
-                </Link>
-              ))}
+                </div>
+              )}
+            </div>
+            
+            {/* اسم المتجر */}
+            <h2 className="text-2xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent">
+              {settings?.store_name || 'متجري'}
+            </h2>
+            
+            {/* الموقع */}
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
             </div>
           </div>
 
