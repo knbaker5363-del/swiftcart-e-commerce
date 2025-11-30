@@ -34,18 +34,28 @@ const Home = () => {
     },
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 20;
+
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ['all-products'],
+    queryKey: ['all-products', currentPage],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const from = (currentPage - 1) * productsPerPage;
+      const to = from + productsPerPage - 1;
+      
+      const { data, error, count } = await supabase
         .from('products')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      
       if (error) throw error;
-      return data;
+      return { data, count };
     },
   });
+
+  const totalPages = products?.count ? Math.ceil(products.count / productsPerPage) : 1;
 
   const handleAddToCart = (product: any) => {
     addItem({
@@ -127,7 +137,7 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {products?.map((product) => {
+              {products?.data?.map((product) => {
                 const additionalImages = product.additional_images as string[] | null;
                 
                 const options = product.options as { sizes?: string[], colors?: string[] } | null;
@@ -227,6 +237,40 @@ const Home = () => {
                   </Card>
                 );
               })}
+            </div>
+          )}
+          
+          {/* Pagination */}
+          {!productsLoading && products?.data && products.data.length > 0 && totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                السابق
+              </Button>
+              
+              <div className="flex gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    onClick={() => setCurrentPage(page)}
+                    className="w-10"
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+              
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                التالي
+              </Button>
             </div>
           )}
         </div>

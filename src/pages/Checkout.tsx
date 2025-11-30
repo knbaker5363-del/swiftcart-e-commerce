@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PublicHeader } from '@/components/PublicHeader';
 import { Button } from '@/components/ui/button';
@@ -23,11 +23,26 @@ const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     address: '',
   });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('settings')
+        .select('whatsapp_country_code, whatsapp_number')
+        .single();
+      
+      if (data && data.whatsapp_number) {
+        setWhatsappNumber(`${data.whatsapp_country_code}${data.whatsapp_number}`);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,8 +118,15 @@ const Checkout = () => {
       message += `\n💰 المجموع: ${total.toFixed(2)} ر.س`;
 
       // 4. Open WhatsApp
-      // تغيير الرقم إلى رقم واتساب المتجر الخاص بك
-      const whatsappNumber = '966500000000'; // غيّر هذا الرقم إلى رقم واتساب متجرك
+      if (!whatsappNumber) {
+        toast({
+          title: 'خطأ',
+          description: 'لم يتم تعيين رقم واتساب في الإعدادات',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
 
