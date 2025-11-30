@@ -15,18 +15,14 @@ const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories-with-products'],
+    queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categories')
-        .select(`
-          *,
-          product_categories(product_id)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      // Filter categories that have at least one product
-      return data?.filter(cat => cat.product_categories && cat.product_categories.length > 0) || [];
+      return data;
     },
   });
 
