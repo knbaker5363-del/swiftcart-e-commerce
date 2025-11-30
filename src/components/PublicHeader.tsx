@@ -1,7 +1,8 @@
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import { Link } from 'react-router-dom';
 
 interface PublicHeaderProps {
@@ -10,7 +11,9 @@ interface PublicHeaderProps {
 
 export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
   const { items } = useCart();
+  const { favorites } = useFavorites();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const favoritesCount = favorites.length;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,22 +23,40 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
             متجري
           </h1>
         </Link>
-        <Button
-          variant="outline"
-          size="icon"
-          className="relative"
-          onClick={onCartOpen}
-        >
-          <ShoppingCart className="h-5 w-5" />
-          {itemCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+        <div className="flex items-center gap-2">
+          <Link to="/favorites">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
             >
-              {itemCount}
-            </Badge>
-          )}
-        </Button>
+              <Heart className="h-5 w-5" />
+              {favoritesCount > 0 && (
+                <Badge
+                  className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-600"
+                >
+                  {favoritesCount}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            onClick={onCartOpen}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {itemCount > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {itemCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
       </div>
     </header>
   );

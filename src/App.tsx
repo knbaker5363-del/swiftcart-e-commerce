@@ -5,9 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
+import Favorites from "./pages/Favorites";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -21,29 +23,32 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
+        <FavoritesProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/favorites" element={<Favorites />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="categories" element={<AdminCategories />} />
-                <Route path="orders" element={<AdminOrders />} />
-              </Route>
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                </Route>
 
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </FavoritesProvider>
       </CartProvider>
     </AuthProvider>
   </QueryClientProvider>
