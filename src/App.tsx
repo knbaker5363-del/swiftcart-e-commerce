@@ -12,6 +12,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import Favorites from "./pages/Favorites";
 import Deals from "./pages/Deals";
+import AllProducts from "./pages/AllProducts";
+import Brands from "./pages/Brands";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -39,6 +41,8 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/deals" element={<Deals />} />
+                  <Route path="/products" element={<AllProducts />} />
+                  <Route path="/brands" element={<Brands />} />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
