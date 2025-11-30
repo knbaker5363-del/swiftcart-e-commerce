@@ -1,21 +1,27 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Award } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from 'react-router-dom';
 
 const Brands = () => {
   const [cartOpen, setCartOpen] = useState(false);
 
-  // علامات تجارية تجريبية - يمكن ربطها بقاعدة البيانات لاحقاً
-  const brands = [
-    { id: 1, name: 'Adidas', logo: 'https://images.unsplash.com/photo-1556906781-9a412961c28c' },
-    { id: 2, name: 'Nike', logo: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff' },
-    { id: 3, name: 'Puma', logo: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5' },
-    { id: 4, name: 'Reebok', logo: 'https://images.unsplash.com/photo-1605348532760-6753d2c43329' },
-    { id: 5, name: 'Under Armour', logo: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa' },
-    { id: 6, name: 'New Balance', logo: 'https://images.unsplash.com/photo-1539185441755-769473a23570' },
-  ];
+  const { data: brands, isLoading } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -40,25 +46,49 @@ const Brands = () => {
       {/* Brands Grid */}
       <section className="py-16">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {brands.map((brand) => (
-              <Card
-                key={brand.id}
-                className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="aspect-square p-6 flex items-center justify-center bg-white">
-                  <img
-                    src={brand.logo}
-                    alt={brand.name}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4 bg-card">
-                  <h3 className="font-bold text-center text-lg">{brand.name}</h3>
-                </div>
-              </Card>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-48 rounded-lg" />
+              ))}
+            </div>
+          ) : brands && brands.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              {brands.map((brand) => (
+                <Link key={brand.id} to={`/brand/${brand.id}`}>
+                  <Card className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                    <div className="aspect-square p-6 flex items-center justify-center bg-white">
+                      {brand.logo_url ? (
+                        <img
+                          src={brand.logo_url}
+                          alt={brand.name}
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary">
+                          {brand.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4 bg-card">
+                      <h3 className="font-bold text-center text-lg">{brand.name}</h3>
+                      {brand.description && (
+                        <p className="text-sm text-muted-foreground text-center mt-1 line-clamp-2">
+                          {brand.description}
+                        </p>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <Award className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-2xl font-bold mb-2">لا توجد علامات تجارية</h3>
+              <p className="text-muted-foreground">سيتم إضافة العلامات التجارية قريباً</p>
+            </div>
+          )}
 
           {/* Info Box */}
           <div className="mt-12 text-center max-w-2xl mx-auto">
