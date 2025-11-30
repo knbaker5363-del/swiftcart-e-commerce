@@ -113,7 +113,9 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products?.map((product) => {
                 const options = product.options as any;
-                const discount = Math.floor(Math.random() * 30) + 10; // خصم عشوائي بين 10-40%
+                // خصم ثابت لكل منتج بناءً على product.id
+                const discountSeed = parseInt(product.id.split('-')[0], 16) % 30 + 10;
+                const discount = discountSeed;
                 const originalPrice = product.price / (1 - discount / 100);
                 
                 const handleQuickAdd = (e: React.MouseEvent) => {

@@ -103,7 +103,8 @@ const Checkout = () => {
       message += `\n💰 المجموع: ${total.toFixed(2)} ر.س`;
 
       // 4. Open WhatsApp
-      const whatsappNumber = '966500000000'; // Replace with your WhatsApp number
+      // تغيير الرقم إلى رقم واتساب المتجر الخاص بك
+      const whatsappNumber = '966500000000'; // غيّر هذا الرقم إلى رقم واتساب متجرك
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
 
