@@ -62,7 +62,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) =>
                       )}
                     </div>
                     <p className="text-primary font-semibold mt-1">
-                      {item.price.toFixed(2)} ر.س
+                      {item.price.toFixed(2)} ₪
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <Button
@@ -102,7 +102,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) =>
             <div className="w-full space-y-4">
               <div className="flex justify-between text-lg font-semibold">
                 <span>المجموع:</span>
-                <span className="text-primary">{total.toFixed(2)} ر.س</span>
+                <span className="text-primary">{total.toFixed(2)} ₪</span>
               </div>
               <Button
                 className="w-full bg-gradient-primary shadow-button"

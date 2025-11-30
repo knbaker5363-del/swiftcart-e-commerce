@@ -28,6 +28,9 @@ const AdminSettings = () => {
   const [uploading, setUploading] = useState(false);
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('972');
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [deliveryWestBank, setDeliveryWestBank] = useState('20');
+  const [deliveryJerusalem, setDeliveryJerusalem] = useState('50');
+  const [deliveryInside, setDeliveryInside] = useState('70');
 
   useEffect(() => {
     if (settings) {
@@ -37,6 +40,9 @@ const AdminSettings = () => {
       setLogoUrl(settings.logo_url);
       setWhatsappCountryCode((settings as any).whatsapp_country_code || '972');
       setWhatsappNumber((settings as any).whatsapp_number || '');
+      setDeliveryWestBank(String((settings as any).delivery_west_bank || '20'));
+      setDeliveryJerusalem(String((settings as any).delivery_jerusalem || '50'));
+      setDeliveryInside(String((settings as any).delivery_inside || '70'));
     }
   }, [settings]);
 
@@ -100,6 +106,9 @@ const AdminSettings = () => {
           location: location,
           whatsapp_country_code: whatsappCountryCode,
           whatsapp_number: whatsappNumber,
+          delivery_west_bank: parseFloat(deliveryWestBank),
+          delivery_jerusalem: parseFloat(deliveryJerusalem),
+          delivery_inside: parseFloat(deliveryInside),
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -246,6 +255,55 @@ const AdminSettings = () => {
               <p className="text-sm text-muted-foreground">
                 الرقم الكامل: +{whatsappCountryCode}{whatsappNumber}
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>أسعار التوصيل</CardTitle>
+            <CardDescription>تحديد أسعار التوصيل للمناطق المختلفة (بالشيكل)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="deliveryWestBank">الضفة الغربية</Label>
+                <Input
+                  id="deliveryWestBank"
+                  type="number"
+                  value={deliveryWestBank}
+                  onChange={(e) => setDeliveryWestBank(e.target.value)}
+                  placeholder="20"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="deliveryJerusalem">القدس</Label>
+                <Input
+                  id="deliveryJerusalem"
+                  type="number"
+                  value={deliveryJerusalem}
+                  onChange={(e) => setDeliveryJerusalem(e.target.value)}
+                  placeholder="50"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="deliveryInside">الداخل (48)</Label>
+                <Input
+                  id="deliveryInside"
+                  type="number"
+                  value={deliveryInside}
+                  onChange={(e) => setDeliveryInside(e.target.value)}
+                  placeholder="70"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

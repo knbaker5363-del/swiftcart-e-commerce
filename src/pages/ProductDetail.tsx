@@ -144,7 +144,7 @@ const ProductDetail = () => {
                 </div>
                 <p className="text-muted-foreground">{product.categories?.name}</p>
                 <p className="text-3xl font-bold text-primary mt-4">
-                  {product.price.toFixed(2)} ر.س
+                  {product.price.toFixed(2)} ₪
                 </p>
               </div>
 

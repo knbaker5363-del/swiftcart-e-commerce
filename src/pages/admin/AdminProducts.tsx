@@ -399,7 +399,7 @@ const AdminProducts = () => {
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{product.name}</h3>
                 <p className="text-sm text-muted-foreground">{product.categories?.name}</p>
-                <p className="text-primary font-semibold mt-1">{product.price.toFixed(2)} ر.س</p>
+                <p className="text-primary font-semibold mt-1">{product.price.toFixed(2)} ₪</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {product.is_active ? '✓ نشط' : '✗ غير نشط'}
                 </p>

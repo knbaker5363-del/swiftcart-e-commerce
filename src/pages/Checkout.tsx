@@ -24,6 +24,12 @@ const Checkout = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [deliveryPrices, setDeliveryPrices] = useState({
+    west_bank: 20,
+    jerusalem: 50,
+    inside: 70,
+  });
+  const [selectedDelivery, setSelectedDelivery] = useState<'west_bank' | 'jerusalem' | 'inside'>('west_bank');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -34,11 +40,18 @@ const Checkout = () => {
     const fetchSettings = async () => {
       const { data } = await supabase
         .from('settings')
-        .select('whatsapp_country_code, whatsapp_number')
+        .select('whatsapp_country_code, whatsapp_number, delivery_west_bank, delivery_jerusalem, delivery_inside')
         .single();
       
-      if (data && data.whatsapp_number) {
-        setWhatsappNumber(`${data.whatsapp_country_code}${data.whatsapp_number}`);
+      if (data) {
+        if (data.whatsapp_number) {
+          setWhatsappNumber(`${data.whatsapp_country_code}${data.whatsapp_number}`);
+        }
+        setDeliveryPrices({
+          west_bank: (data as any).delivery_west_bank || 20,
+          jerusalem: (data as any).delivery_jerusalem || 50,
+          inside: (data as any).delivery_inside || 70,
+        });
       }
     };
     fetchSettings();
@@ -73,6 +86,9 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      const deliveryCost = deliveryPrices[selectedDelivery];
+      const totalWithDelivery = total + deliveryCost;
+      
       // 1. Create order
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -80,7 +96,7 @@ const Checkout = () => {
           customer_name: formData.name,
           customer_phone: formData.phone,
           customer_address: formData.address,
-          total_amount: total,
+          total_amount: totalWithDelivery,
           status: 'Pending',
         })
         .select()
@@ -108,14 +124,21 @@ const Checkout = () => {
       message += `👤 الاسم: ${formData.name}\n`;
       message += `📱 الهاتف: ${formData.phone}\n`;
       message += `📍 العنوان: ${formData.address}\n\n`;
+      const deliveryAreaNames = {
+        west_bank: 'الضفة الغربية',
+        jerusalem: 'القدس',
+        inside: 'الداخل (48)',
+      };
+      
       message += `📦 المنتجات:\n`;
       items.forEach((item) => {
         message += `• ${item.name}`;
         if (item.selected_options.size) message += ` (مقاس: ${item.selected_options.size})`;
         if (item.selected_options.color) message += ` (لون: ${item.selected_options.color})`;
-        message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ر.س\n`;
+        message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
       });
-      message += `\n💰 المجموع: ${total.toFixed(2)} ر.س`;
+      message += `\n🚚 التوصيل (${deliveryAreaNames[selectedDelivery]}): ${deliveryCost.toFixed(2)} ₪\n`;
+      message += `💰 المجموع الكلي: ${totalWithDelivery.toFixed(2)} ₪`;
 
       // 4. Open WhatsApp
       if (!whatsappNumber) {
@@ -201,6 +224,56 @@ const Checkout = () => {
                   maxLength={500}
                 />
               </div>
+              
+              <div>
+                <Label>منطقة التوصيل *</Label>
+                <div className="grid grid-cols-1 gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDelivery('west_bank')}
+                    className={`p-4 rounded-lg border-2 text-right transition-all ${
+                      selectedDelivery === 'west_bank'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">الضفة الغربية</span>
+                      <span className="text-primary font-bold">{deliveryPrices.west_bank.toFixed(2)} ₪</span>
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDelivery('jerusalem')}
+                    className={`p-4 rounded-lg border-2 text-right transition-all ${
+                      selectedDelivery === 'jerusalem'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">القدس</span>
+                      <span className="text-primary font-bold">{deliveryPrices.jerusalem.toFixed(2)} ₪</span>
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDelivery('inside')}
+                    className={`p-4 rounded-lg border-2 text-right transition-all ${
+                      selectedDelivery === 'inside'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">الداخل (48)</span>
+                      <span className="text-primary font-bold">{deliveryPrices.inside.toFixed(2)} ₪</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
               <Button
                 type="submit"
                 size="lg"
@@ -229,13 +302,23 @@ const Checkout = () => {
                       <p className="text-muted-foreground">الكمية: {item.quantity}</p>
                     </div>
                     <p className="font-medium">
-                      {(item.price * item.quantity).toFixed(2)} ر.س
+                      {(item.price * item.quantity).toFixed(2)} ₪
                     </p>
                   </div>
                 ))}
+                <div className="space-y-2 pt-4 border-t">
+                  <div className="flex justify-between text-sm">
+                    <span>المجموع الفرعي:</span>
+                    <span>{total.toFixed(2)} ₪</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>التوصيل:</span>
+                    <span>{deliveryPrices[selectedDelivery].toFixed(2)} ₪</span>
+                  </div>
+                </div>
                 <div className="flex justify-between text-xl font-bold pt-4 border-t-2">
-                  <span>المجموع:</span>
-                  <span className="text-primary">{total.toFixed(2)} ر.س</span>
+                  <span>المجموع الكلي:</span>
+                  <span className="text-primary">{(total + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
                 </div>
               </div>
             </Card>

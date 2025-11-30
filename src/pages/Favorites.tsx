@@ -121,7 +121,7 @@ const Favorites = () => {
 
                         <div className="flex items-baseline gap-2">
                           <span className="text-2xl font-bold text-green-600">
-                            {product.price.toFixed(0)} ر.س
+                            {product.price.toFixed(0)} ₪
                           </span>
                           <span className="text-sm text-gray-400 line-through">
                             {originalPrice.toFixed(0)} ر.س

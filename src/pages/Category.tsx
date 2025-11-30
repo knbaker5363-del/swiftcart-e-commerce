@@ -156,7 +156,7 @@ const Category = () => {
                       </Link>
 
                       <p className="text-lg font-bold text-primary">
-                        {product.price.toFixed(2)} ر.س
+                        {product.price.toFixed(2)} ₪
                       </p>
 
                       <Button
