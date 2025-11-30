@@ -23,6 +23,7 @@ const AdminProducts = () => {
     price: '',
     category_id: '',
     image_url: '',
+    additional_images: [] as string[],
     is_active: true,
   });
   const [options, setOptions] = useState<{ sizes: string[]; colors: string[] }>({
@@ -115,6 +116,41 @@ const AdminProducts = () => {
     setUploading(false);
   };
 
+  const handleAdditionalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fileName = `${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+      setUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName);
+
+    setFormData({ 
+      ...formData, 
+      additional_images: [...formData.additional_images, publicUrl] 
+    });
+    setUploading(false);
+    toast({ title: 'تم إضافة الصورة بنجاح' });
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setFormData({
+      ...formData,
+      additional_images: formData.additional_images.filter((_, i) => i !== index)
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -144,6 +180,7 @@ const AdminProducts = () => {
       price: '',
       category_id: '',
       image_url: '',
+      additional_images: [],
       is_active: true,
     });
     setOptions({ sizes: [], colors: [] });
@@ -158,6 +195,7 @@ const AdminProducts = () => {
       price: product.price.toString(),
       category_id: product.category_id,
       image_url: product.image_url || '',
+      additional_images: (product.additional_images as string[]) || [],
       is_active: product.is_active,
     });
     setOptions(product.options || { sizes: [], colors: [] });
@@ -232,11 +270,33 @@ const AdminProducts = () => {
                 </div>
               </div>
               <div>
-                <Label>صورة المنتج</Label>
+                <Label>صورة المنتج الرئيسية</Label>
                 <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
                 {formData.image_url && (
                   <img src={formData.image_url} alt="Preview" className="mt-2 h-32 w-32 object-cover rounded" />
                 )}
+              </div>
+
+              <div>
+                <Label>صور إضافية للمنتج</Label>
+                <Input type="file" accept="image/*" onChange={handleAdditionalImageUpload} disabled={uploading} />
+                {formData.additional_images.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {formData.additional_images.map((img, idx) => (
+                      <div key={idx} className="relative group">
+                        <img src={img} alt={`صورة ${idx + 1}`} className="h-24 w-24 object-cover rounded" />
+                        <button
+                          type="button"
+                          onClick={() => removeAdditionalImage(idx)}
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">يمكنك إضافة عدة صور. تظهر عند hover على المنتج.</p>
               </div>
 
               <div>
