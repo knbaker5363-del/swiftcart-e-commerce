@@ -12,6 +12,7 @@ import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
+import QuickLinks from '@/components/QuickLinks';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -54,36 +55,39 @@ const Home = () => {
       {/* Deals Bar */}
       <DealsBar />
 
+      {/* Quick Links */}
+      <QuickLinks />
+
       {/* Categories */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-8">التصنيفات</h2>
+          <h2 className="text-2xl font-bold mb-6">التصنيفات</h2>
           {categoriesLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-48 rounded-lg" />
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-28 rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {categories?.map((category) => (
                 <Link
                   key={category.id}
                   to={`/category/${category.id}`}
                   className="group"
                 >
-                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1">
+                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-2">
                     {category.image_url ? (
                       <img
                         src={category.image_url}
                         alt={category.name}
-                        className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-16 object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-32 bg-muted" />
+                      <div className="w-full h-16 bg-muted rounded-md" />
                     )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-center">{category.name}</h3>
+                    <div className="pt-2">
+                      <h3 className="font-medium text-xs text-center line-clamp-1">{category.name}</h3>
                     </div>
                   </Card>
                 </Link>
