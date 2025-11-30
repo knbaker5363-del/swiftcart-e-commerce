@@ -9,9 +9,11 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Heart } from 'lucide-react';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
@@ -110,10 +112,16 @@ const Home = () => {
               {products?.map((product) => {
                 const options = product.options as any;
                 const additionalImages = (product.additional_images as string[]) || [];
-                // خصم ثابت لكل منتج بناءً على product.id
                 const discountSeed = parseInt(product.id.split('-')[0], 16) % 30 + 10;
                 const discount = discountSeed;
                 const originalPrice = product.price / (1 - discount / 100);
+                const isProductFavorite = isFavorite(product.id);
+
+                const handleToggleFavorite = (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleFavorite(product.id);
+                };
                 
                 return (
                   <Link key={product.id} to={`/product/${product.id}`}>
@@ -125,13 +133,20 @@ const Home = () => {
                       
                       {/* Favorite Icon */}
                       <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        className="absolute top-3 left-3 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-md transition-all hover:scale-110"
+                        onClick={handleToggleFavorite}
+                        className={`absolute top-3 left-3 z-10 p-2 rounded-full shadow-md transition-all hover:scale-110 ${
+                          isProductFavorite
+                            ? 'bg-red-500 hover:bg-red-600'
+                            : 'bg-white/90 hover:bg-white'
+                        }`}
                       >
-                        <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+                        <Heart
+                          className={`w-5 h-5 transition-colors ${
+                            isProductFavorite
+                              ? 'text-white fill-white'
+                              : 'text-gray-600 hover:text-red-500'
+                          }`}
+                        />
                       </button>
                       
                       {/* Product Image Carousel */}

@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/contexts/CartContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Heart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('');
@@ -119,7 +121,27 @@ const ProductDetail = () => {
             {/* Product Info */}
             <div className="space-y-6">
               <div>
-                <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <h1 className="text-4xl font-bold flex-1">{product.name}</h1>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={`rounded-full ${
+                      isFavorite(product.id)
+                        ? 'bg-red-500 hover:bg-red-600 border-red-500'
+                        : ''
+                    }`}
+                    onClick={() => toggleFavorite(product.id)}
+                  >
+                    <Heart
+                      className={`h-6 w-6 ${
+                        isFavorite(product.id)
+                          ? 'text-white fill-white'
+                          : ''
+                      }`}
+                    />
+                  </Button>
+                </div>
                 <p className="text-muted-foreground">{product.categories?.name}</p>
                 <p className="text-3xl font-bold text-primary mt-4">
                   {product.price.toFixed(2)} ر.س
