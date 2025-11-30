@@ -99,7 +99,7 @@ const AdminOrders = () => {
               </div>
               <div className="text-left md:text-right">
                 <p className="text-2xl font-bold text-primary">
-                  {order.total_amount.toFixed(2)} ر.س
+                  {order.total_amount.toFixed(2)} ₪
                 </p>
                 <Select
                   value={order.status}
@@ -166,11 +166,11 @@ const AdminOrders = () => {
                           {item.selected_options?.color && ` • لون: ${item.selected_options.color}`}
                         </p>
                         <p className="text-sm">
-                          الكمية: {item.quantity} × {item.price_at_purchase.toFixed(2)} ر.س
+                          الكمية: {item.quantity} × {item.price_at_purchase.toFixed(2)} ₪
                         </p>
                       </div>
                       <p className="font-semibold">
-                        {(item.quantity * item.price_at_purchase).toFixed(2)} ر.س
+                        {(item.quantity * item.price_at_purchase).toFixed(2)} ₪
                       </p>
                     </div>
                   ))}
@@ -180,7 +180,7 @@ const AdminOrders = () => {
               <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
                 <span className="text-lg font-semibold">المجموع الكلي</span>
                 <span className="text-2xl font-bold text-primary">
-                  {selectedOrder.total_amount.toFixed(2)} ر.س
+                  {selectedOrder.total_amount.toFixed(2)} ₪
                 </span>
               </div>
             </div>

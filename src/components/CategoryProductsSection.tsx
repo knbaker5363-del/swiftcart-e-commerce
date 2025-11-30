@@ -148,7 +148,7 @@ export const CategoryProductsSection = ({ category }: CategoryProductsSectionPro
                   </Link>
 
                   <p className="text-base font-bold text-primary">
-                    {product.price.toFixed(2)} ر.س
+                    {product.price.toFixed(2)} ₪
                   </p>
 
                   {product.options && (

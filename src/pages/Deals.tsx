@@ -146,10 +146,10 @@ const Deals = () => {
 
                       <div className="flex items-center gap-2">
                         <p className="text-2xl font-bold text-primary">
-                          {discountedPrice.toFixed(2)} ر.س
+                          {discountedPrice.toFixed(2)} ₪
                         </p>
                         <p className="text-sm text-muted-foreground line-through">
-                          {product.price.toFixed(2)} ر.س
+                          {product.price.toFixed(2)} ₪
                         </p>
                       </div>
 
