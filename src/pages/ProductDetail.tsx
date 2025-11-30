@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -139,25 +139,23 @@ const ProductDetail = () => {
               {options?.sizes && Array.isArray(options.sizes) && options.sizes.length > 0 && (
                 <div>
                   <Label className="text-lg font-semibold mb-3 block">المقاس</Label>
-                  <RadioGroup value={selectedSize} onValueChange={setSelectedSize}>
-                    <div className="flex flex-wrap gap-2">
-                      {options.sizes.map((size: string) => (
-                        <div key={size}>
-                          <RadioGroupItem
-                            value={size}
-                            id={`size-${size}`}
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor={`size-${size}`}
-                            className="flex items-center justify-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground hover:border-primary/50"
-                          >
-                            {size}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
+                  <ToggleGroup 
+                    type="single" 
+                    value={selectedSize} 
+                    onValueChange={setSelectedSize}
+                    className="justify-start"
+                  >
+                    {options.sizes.map((size: string) => (
+                      <ToggleGroupItem
+                        key={size}
+                        value={size}
+                        aria-label={`Select size ${size}`}
+                        className="px-6 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                      >
+                        {size}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 </div>
               )}
 
@@ -165,25 +163,23 @@ const ProductDetail = () => {
               {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
                 <div>
                   <Label className="text-lg font-semibold mb-3 block">اللون</Label>
-                  <RadioGroup value={selectedColor} onValueChange={setSelectedColor}>
-                    <div className="flex flex-wrap gap-2">
-                      {options.colors.map((color: string) => (
-                        <div key={color}>
-                          <RadioGroupItem
-                            value={color}
-                            id={`color-${color}`}
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor={`color-${color}`}
-                            className="flex items-center justify-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground hover:border-primary/50"
-                          >
-                            {color}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
+                  <ToggleGroup 
+                    type="single" 
+                    value={selectedColor} 
+                    onValueChange={setSelectedColor}
+                    className="justify-start"
+                  >
+                    {options.colors.map((color: string) => (
+                      <ToggleGroupItem
+                        key={color}
+                        value={color}
+                        aria-label={`Select color ${color}`}
+                        className="px-6 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                      >
+                        {color}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 </div>
               )}
 
