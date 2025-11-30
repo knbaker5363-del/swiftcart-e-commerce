@@ -1,4 +1,4 @@
-import { ShoppingCart, Settings } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
@@ -20,30 +20,22 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
             متجري
           </h1>
         </Link>
-        <div className="flex items-center gap-2">
-          <Link to="/admin/login">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <Settings className="h-4 w-4" />
-              لوحة الإدارة
-            </Button>
-          </Link>
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative"
-            onClick={onCartOpen}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {itemCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {itemCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="relative"
+          onClick={onCartOpen}
+        >
+          <ShoppingCart className="h-5 w-5" />
+          {itemCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {itemCount}
+            </Badge>
+          )}
+        </Button>
       </div>
     </header>
   );

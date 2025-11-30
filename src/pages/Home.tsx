@@ -4,18 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ShoppingCart, Heart } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/hooks/use-toast';
+import { Heart } from 'lucide-react';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
-  const { addItem } = useCart();
-  const { toast } = useToast();
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
@@ -113,35 +109,17 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products?.map((product) => {
                 const options = product.options as any;
+                const additionalImages = (product.additional_images as string[]) || [];
                 // خصم ثابت لكل منتج بناءً على product.id
                 const discountSeed = parseInt(product.id.split('-')[0], 16) % 30 + 10;
                 const discount = discountSeed;
                 const originalPrice = product.price / (1 - discount / 100);
                 
-                const handleQuickAdd = (e: React.MouseEvent) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  
-                  addItem({
-                    id: '',
-                    product_id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image_url: product.image_url,
-                    quantity: 1,
-                    selected_options: {},
-                  });
-                  
-                  toast({
-                    title: 'تم إضافة المنتج إلى السلة',
-                  });
-                };
-                
                 return (
-                  <Card key={product.id} className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 group relative">
-                    <Link to={`/product/${product.id}`}>
+                  <Link key={product.id} to={`/product/${product.id}`}>
+                    <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 group relative h-full">
                       {/* Discount Badge */}
-                      <Badge className="absolute top-2 right-2 z-10 bg-green-500 hover:bg-green-600 text-white font-bold">
+                      <Badge className="absolute top-3 right-3 z-10 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-3 py-1">
                         -{discount}%
                       </Badge>
                       
@@ -151,78 +129,86 @@ const Home = () => {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
-                        className="absolute top-2 left-2 z-10 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+                        className="absolute top-3 left-3 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-md transition-all hover:scale-110"
                       >
-                        <Heart className="w-5 h-5 text-gray-600" />
+                        <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
                       </button>
                       
-                      {/* Product Image */}
-                      <div className="relative overflow-hidden bg-gray-50">
-                        {product.image_url ? (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-56 bg-muted flex items-center justify-center">
-                            <p className="text-muted-foreground">لا توجد صورة</p>
-                          </div>
-                        )}
-                      </div>
+                      {/* Product Image Carousel */}
+                      <ProductImageCarousel
+                        mainImage={product.image_url || ''}
+                        additionalImages={additionalImages}
+                        productName={product.name}
+                      />
                       
                       {/* Product Info */}
-                      <div className="p-4">
+                      <div className="p-4 space-y-3">
                         {/* Category */}
-                        <p className="text-xs text-gray-500 mb-1">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider">
                           {product.categories?.name}
                         </p>
                         
                         {/* Product Name */}
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
+                        <h3 className="font-bold text-gray-900 text-lg line-clamp-2 min-h-[3.5rem] leading-tight">
                           {product.name}
                         </h3>
                         
                         {/* Prices */}
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-bold text-green-600">
+                            {product.price.toFixed(0)} ر.س
+                          </span>
                           <span className="text-sm text-gray-400 line-through">
                             {originalPrice.toFixed(0)} ر.س
                           </span>
-                          <span className="text-xl font-bold text-green-600">
-                            {product.price.toFixed(0)} ر.س
-                          </span>
                         </div>
                         
-                        {/* Size Options */}
-                        {options?.sizes && Array.isArray(options.sizes) && options.sizes.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {options.sizes.slice(0, 5).map((size: string) => (
-                              <button
-                                key={size}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                }}
-                                className="px-2 py-1 text-xs border border-gray-300 rounded hover:border-gray-900 hover:bg-gray-50 transition-colors"
-                              >
-                                {size}
-                              </button>
-                            ))}
+                        {/* Colors Available */}
+                        {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-600 font-medium">الألوان المتوفرة:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {options.colors.slice(0, 4).map((color: string, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-2.5 py-1 text-xs bg-gray-100 text-gray-700 rounded-full border border-gray-200"
+                                >
+                                  {color}
+                                </span>
+                              ))}
+                              {options.colors.length > 4 && (
+                                <span className="px-2.5 py-1 text-xs text-gray-500">
+                                  +{options.colors.length - 4}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                         
-                        {/* Add to Cart Button */}
-                        <Button
-                          onClick={handleQuickAdd}
-                          className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-                          size="sm"
-                        >
-                          <ShoppingCart className="w-4 h-4 ml-2" />
-                          أضف للسلة
-                        </Button>
+                        {/* Sizes Available */}
+                        {options?.sizes && Array.isArray(options.sizes) && options.sizes.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-600 font-medium">المقاسات المتوفرة:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {options.sizes.slice(0, 6).map((size: string, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-2.5 py-1 text-xs font-medium border border-gray-300 rounded text-gray-700 hover:border-gray-900 transition-colors"
+                                >
+                                  {size}
+                                </span>
+                              ))}
+                              {options.sizes.length > 6 && (
+                                <span className="px-2.5 py-1 text-xs text-gray-500">
+                                  +{options.sizes.length - 6}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </Link>
-                  </Card>
+                    </Card>
+                  </Link>
                 );
               })}
             </div>

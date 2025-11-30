@@ -112,6 +112,7 @@ export type Database = {
       }
       products: {
         Row: {
+          additional_images: Json | null
           category_id: string | null
           created_at: string
           description: string | null
@@ -123,6 +124,7 @@ export type Database = {
           price: number
         }
         Insert: {
+          additional_images?: Json | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -134,6 +136,7 @@ export type Database = {
           price: number
         }
         Update: {
+          additional_images?: Json | null
           category_id?: string | null
           created_at?: string
           description?: string | null
