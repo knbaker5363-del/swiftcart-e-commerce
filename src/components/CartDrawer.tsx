@@ -26,11 +26,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) =>
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg" dir="rtl">
-        <SheetHeader>
+      <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col" dir="rtl">
+        <SheetHeader className="flex-shrink-0">
           <SheetTitle className="text-2xl">سلة التسوق</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto py-6">
+        <div className="flex-1 overflow-y-auto py-6 min-h-0">
           {items.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">
               سلة التسوق فارغة
@@ -98,7 +98,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) =>
           )}
         </div>
         {items.length > 0 && (
-          <SheetFooter className="border-t pt-4">
+          <SheetFooter className="border-t pt-4 flex-shrink-0">
             <div className="w-full space-y-4">
               <div className="flex justify-between text-lg font-semibold">
                 <span>المجموع:</span>
