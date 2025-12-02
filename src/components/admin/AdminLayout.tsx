@@ -3,7 +3,7 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { NavLink } from '@/components/NavLink';
-import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award } from 'lucide-react';
+import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const AdminLayout = () => {
@@ -70,7 +70,15 @@ const AdminLayout = () => {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t space-y-2">
+          <Button
+            variant="secondary"
+            className="w-full justify-start"
+            onClick={() => navigate('/')}
+          >
+            <Store className="ml-2 h-4 w-4" />
+            العودة إلى المتجر
+          </Button>
           <Button
             variant="outline"
             className="w-full justify-start"
