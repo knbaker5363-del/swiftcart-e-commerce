@@ -32,16 +32,17 @@ const BrandsSection = () => {
     );
   }
 
-  if (!brands || brands.length === 0) {
-    return null;
-  }
-
   return (
     <section className="py-12 bg-muted/30">
       <div className="container">
         <h2 className="text-2xl font-bold mb-6">البراندات الخاصة بنا</h2>
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {brands.map((brand) => (
+        {!brands || brands.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">لا توجد براندات حالياً</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {brands.map((brand) => (
             <Link
               key={brand.id}
               to={`/brands/${brand.id}`}
@@ -68,6 +69,7 @@ const BrandsSection = () => {
             </Link>
           ))}
         </div>
+        )}
       </div>
     </section>
   );
