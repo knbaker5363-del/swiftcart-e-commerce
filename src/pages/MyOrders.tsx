@@ -1,13 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PublicHeader } from '@/components/PublicHeader';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -20,46 +17,37 @@ interface Order {
 }
 
 const MyOrders = () => {
-  const [phone, setPhone] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!phone.trim()) {
-      toast({
-        title: 'خطأ',
-        description: 'يرجى إدخال رقم الهاتف',
-        variant: 'destructive',
-      });
-      return;
-    }
+  useEffect(() => {
+    fetchMyOrders();
+  }, []);
 
+  const fetchMyOrders = async () => {
     setLoading(true);
-    setSearched(true);
-
     try {
+      // Get order IDs from localStorage
+      const myOrderIds = JSON.parse(localStorage.getItem('my_orders') || '[]');
+      
+      if (myOrderIds.length === 0) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .eq('customer_phone', phone.trim())
+        .in('id', myOrderIds)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       setOrders(data || []);
-
-      if (!data || data.length === 0) {
-        toast({
-          title: 'لا توجد طلبات',
-          description: 'لم يتم العثور على طلبات بهذا الرقم',
-        });
-      }
     } catch (error: any) {
-      console.error('Search error:', error);
+      console.error('Fetch error:', error);
       toast({
         title: 'حدث خطأ',
         description: 'يرجى المحاولة مرة أخرى',
@@ -124,92 +112,73 @@ const MyOrders = () => {
       <PublicHeader onCartOpen={() => {}} />
 
       <div className="container py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">طلباتي</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">طلباتي</h1>
+          <p className="text-muted-foreground">
+            جميع الطلبات التي تمت من هذا الجهاز
+          </p>
+        </div>
 
-        <Card className="p-6 mb-8 shadow-card">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div>
-              <Label htmlFor="phone">رقم الهاتف</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="أدخل رقم هاتفك"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                maxLength={20}
-                className="text-lg"
-              />
-              <p className="text-sm text-muted-foreground mt-2">
-                أدخل رقم الهاتف الذي استخدمته عند إتمام الطلب
-              </p>
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-gradient-primary"
-              disabled={loading}
-            >
-              <Search className="ml-2 h-5 w-5" />
-              {loading ? 'جاري البحث...' : 'البحث عن طلباتي'}
-            </Button>
-          </form>
-        </Card>
-
-        {searched && orders.length === 0 && (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <p className="text-xl text-muted-foreground">لا توجد طلبات</p>
-            <p className="text-muted-foreground mt-2">
-              لم يتم العثور على أي طلبات بهذا الرقم
+            <ShoppingBag className="h-20 w-20 mx-auto text-muted-foreground mb-4" />
+            <p className="text-xl font-semibold mb-2">لا توجد طلبات</p>
+            <p className="text-muted-foreground">
+              لم تقم بإنشاء أي طلبات من هذا الجهاز بعد
             </p>
           </div>
-        )}
-
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <Card key={order.id} className="p-6 shadow-card">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-bold">
-                      طلب #{order.id.substring(0, 8).toUpperCase()}
-                    </h3>
-                    <Badge className={`${getStatusColor(order.status)} text-white flex items-center gap-1`}>
-                      {getStatusIcon(order.status)}
-                      {getStatusText(order.status)}
-                    </Badge>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <Card key={order.id} className="p-6 shadow-card">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-lg font-bold">
+                        طلب #{order.id.substring(0, 8).toUpperCase()}
+                      </h3>
+                      <Badge className={`${getStatusColor(order.status)} text-white flex items-center gap-1`}>
+                        {getStatusIcon(order.status)}
+                        {getStatusText(order.status)}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString('ar-SA', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(order.created_at).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+                  <div className="text-left">
+                    <p className="text-2xl font-bold text-primary">
+                      {order.total_amount.toFixed(2)} ₪
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-2xl font-bold text-primary">
-                    {order.total_amount.toFixed(2)} ₪
-                  </p>
-                </div>
-              </div>
 
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">الاسم:</span>
-                  <span className="font-medium">{order.customer_name}</span>
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">الاسم:</span>
+                    <span className="font-medium">{order.customer_name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">العنوان:</span>
+                    <span className="font-medium text-left max-w-[60%]">
+                      {order.customer_address}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">العنوان:</span>
-                  <span className="font-medium text-left max-w-[60%]">
-                    {order.customer_address}
-                  </span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
