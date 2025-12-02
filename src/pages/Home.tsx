@@ -166,8 +166,8 @@ const Home = () => {
                   : product.price;
 
                 return (
-                  <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
-                    <div className="relative">
+                  <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full">
+                    <div className="relative flex-shrink-0">
                       <Link to={`/product/${product.id}`}>
                         <ProductImageCarousel 
                           mainImage={product.image_url || '/placeholder.svg'}
@@ -193,9 +193,9 @@ const Home = () => {
                         />
                       </button>
                     </div>
-                    <div className="p-4">
-                      <Link to={`/product/${product.id}`}>
-                        <h3 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
+                    <div className="p-4 flex flex-col flex-grow">
+                      <Link to={`/product/${product.id}`} className="block mb-auto">
+                        <h3 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors min-h-[3rem]">
                           {product.name}
                         </h3>
                       </Link>
@@ -217,21 +217,24 @@ const Home = () => {
                       </div>
                       
                       {options && (options.sizes || options.colors) && (
-                        <div className="mb-3 space-y-2">
+                        <div className="mb-3 space-y-2 min-h-[3rem]">
                           {options.sizes && options.sizes.length > 0 && (
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs text-muted-foreground">المقاسات:</span>
-                              {options.sizes.map((size, idx) => (
+                              {options.sizes.slice(0, 3).map((size, idx) => (
                                 <span key={idx} className="text-xs px-2 py-1 bg-muted rounded">
                                   {size}
                                 </span>
                               ))}
+                              {options.sizes.length > 3 && (
+                                <span className="text-xs text-muted-foreground">+{options.sizes.length - 3}</span>
+                              )}
                             </div>
                           )}
                           {options.colors && options.colors.length > 0 && (
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs text-muted-foreground">الألوان:</span>
-                              {options.colors.map((color, idx) => (
+                              {options.colors.slice(0, 4).map((color, idx) => (
                                 <div
                                   key={idx}
                                   className="w-6 h-6 rounded-full border-2 border-border"
@@ -239,6 +242,9 @@ const Home = () => {
                                   title={color}
                                 />
                               ))}
+                              {options.colors.length > 4 && (
+                                <span className="text-xs text-muted-foreground">+{options.colors.length - 4}</span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -246,7 +252,7 @@ const Home = () => {
                       
                       <Button 
                         onClick={() => handleAddToCart(product)}
-                        className="w-full"
+                        className="w-full mt-auto"
                         size="sm"
                       >
                         <ShoppingCart className="ml-2 h-4 w-4" />
