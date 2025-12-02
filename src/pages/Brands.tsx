@@ -55,26 +55,24 @@ const Brands = () => {
           ) : brands && brands.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
               {brands.map((brand) => (
-                <Link key={brand.id} to={`/brands/${brand.id}`}>
-                  <Card className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-                    <div className="aspect-square p-6 flex items-center justify-center bg-white">
-                      {brand.logo_url ? (
-                        <img
-                          src={brand.logo_url}
-                          alt={brand.name}
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary">
-                          {brand.name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 bg-card">
-                      <h3 className="font-bold text-center text-lg">{brand.name}</h3>
-                    </div>
-                  </Card>
-                </Link>
+                <Card key={brand.id} className="overflow-hidden shadow-card">
+                  <div className="aspect-square p-6 flex items-center justify-center bg-white">
+                    {brand.logo_url ? (
+                      <img
+                        src={brand.logo_url}
+                        alt={brand.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary">
+                        {brand.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-card">
+                    <h3 className="font-bold text-center text-lg">{brand.name}</h3>
+                  </div>
+                </Card>
               ))}
             </div>
           ) : (
