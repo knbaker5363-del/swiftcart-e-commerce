@@ -160,9 +160,9 @@ const Home = () => {
                 const additionalImages = product.additional_images as string[] | null;
                 
                 const options = product.options as { sizes?: string[], colors?: string[] } | null;
-                const hasDiscount = product.discount_percentage && product.discount_percentage > 0;
+                const hasDiscount = (product.discount_percentage ?? 0) > 0;
                 const discountedPrice = hasDiscount 
-                  ? product.price * (1 - product.discount_percentage / 100)
+                  ? product.price * (1 - (product.discount_percentage ?? 0) / 100)
                   : product.price;
 
                 return (
