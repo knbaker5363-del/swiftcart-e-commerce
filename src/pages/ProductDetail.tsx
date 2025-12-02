@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Label } from '@/components/ui/label';
@@ -122,19 +123,13 @@ const ProductDetail = () => {
           </div>
         ) : product ? (
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Product Image */}
+            {/* Product Image Carousel */}
             <div className="relative overflow-hidden rounded-lg shadow-card bg-gradient-card">
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-auto object-cover"
-                />
-              ) : (
-                <div className="w-full h-96 bg-muted flex items-center justify-center">
-                  <p className="text-muted-foreground">لا توجد صورة</p>
-                </div>
-              )}
+              <ProductImageCarousel
+                mainImage={product.image_url}
+                additionalImages={product.additional_images as string[] || []}
+                productName={product.name}
+              />
             </div>
 
             {/* Product Info */}
