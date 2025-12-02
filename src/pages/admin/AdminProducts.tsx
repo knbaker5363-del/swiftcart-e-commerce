@@ -25,6 +25,8 @@ const AdminProducts = () => {
     image_url: '',
     additional_images: [] as string[],
     is_active: true,
+    discount_percentage: 0,
+    discount_end_date: '',
   });
   const [options, setOptions] = useState<{ sizes: string[]; colors: string[] }>({
     sizes: [],
@@ -164,6 +166,8 @@ const AdminProducts = () => {
       price: parseFloat(formData.price),
       category_id: formData.category_id || null,
       options: options,
+      discount_percentage: parseFloat(formData.discount_percentage.toString()) || 0,
+      discount_end_date: formData.discount_end_date || null,
     };
 
     if (editingProduct) {
@@ -182,6 +186,8 @@ const AdminProducts = () => {
       image_url: '',
       additional_images: [],
       is_active: true,
+      discount_percentage: 0,
+      discount_end_date: '',
     });
     setOptions({ sizes: [], colors: [] });
     setEditingProduct(null);
@@ -197,6 +203,8 @@ const AdminProducts = () => {
       image_url: product.image_url || '',
       additional_images: (product.additional_images as string[]) || [],
       is_active: product.is_active,
+      discount_percentage: product.discount_percentage || 0,
+      discount_end_date: product.discount_end_date || '',
     });
     setOptions(product.options || { sizes: [], colors: [] });
     setOpen(true);
@@ -267,6 +275,42 @@ const AdminProducts = () => {
                   {!formData.category_id && (
                     <p className="text-xs text-destructive mt-1">التصنيف مطلوب</p>
                   )}
+                </div>
+              </div>
+
+              {/* Discount Section */}
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <span className="text-destructive">%</span>
+                  إعدادات الخصم
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>نسبة الخصم (%)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={formData.discount_percentage}
+                      onChange={(e) => setFormData({ ...formData, discount_percentage: parseFloat(e.target.value) || 0 })}
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formData.discount_percentage > 0 && formData.price && 
+                        `السعر بعد الخصم: ${(parseFloat(formData.price) * (1 - formData.discount_percentage / 100)).toFixed(2)} ₪`
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <Label>تاريخ انتهاء الخصم</Label>
+                    <Input
+                      type="date"
+                      value={formData.discount_end_date}
+                      onChange={(e) => setFormData({ ...formData, discount_end_date: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">اتركه فارغاً إذا لم يكن هناك تاريخ محدد</p>
+                  </div>
                 </div>
               </div>
               <div>
@@ -404,7 +448,23 @@ const AdminProducts = () => {
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{product.name}</h3>
                 <p className="text-sm text-muted-foreground">{product.categories?.name}</p>
-                <p className="text-primary font-semibold mt-1">{product.price.toFixed(2)} ₪</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {product.discount_percentage > 0 ? (
+                    <>
+                      <p className="text-primary font-semibold">
+                        {(product.price * (1 - product.discount_percentage / 100)).toFixed(2)} ₪
+                      </p>
+                      <p className="text-sm text-muted-foreground line-through">
+                        {product.price.toFixed(2)} ₪
+                      </p>
+                      <span className="text-xs bg-destructive text-destructive-foreground px-2 py-0.5 rounded">
+                        خصم {product.discount_percentage}%
+                      </span>
+                    </>
+                  ) : (
+                    <p className="text-primary font-semibold">{product.price.toFixed(2)} ₪</p>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {product.is_active ? '✓ نشط' : '✗ غير نشط'}
                 </p>
