@@ -151,7 +151,11 @@ const Checkout = () => {
         return;
       }
       const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const whatsappUrl = isMobile 
+        ? `whatsapp://send?phone=${whatsappNumber}&text=${encodedMessage}`
+        : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
 
       // 5. Clear cart
       clearCart();
