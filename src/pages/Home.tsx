@@ -123,19 +123,19 @@ const Home = () => {
                   to={`/category/${category.id}`}
                   className="group"
                 >
-                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-2">
-                    {category.image_url ? (
-                      <img
-                        src={category.image_url}
-                        alt={category.name}
-                        className="w-full h-16 object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-16 bg-muted rounded-md" />
-                    )}
-                    <div className="pt-2">
-                      <h3 className="font-medium text-xs text-center line-clamp-1">{category.name}</h3>
+                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-3">
+                    <div className="aspect-square mb-2">
+                      {category.image_url ? (
+                        <img
+                          src={category.image_url}
+                          alt={category.name}
+                          className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-muted rounded-md" />
+                      )}
                     </div>
+                    <h3 className="font-medium text-sm text-center line-clamp-1">{category.name}</h3>
                   </Card>
                 </Link>
               ))}
