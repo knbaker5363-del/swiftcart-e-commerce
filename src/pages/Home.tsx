@@ -15,9 +15,12 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import BrandsButton from '@/components/BrandsButton';
+import ProductQuickView from '@/components/ProductQuickView';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addItem } = useCart();
@@ -77,22 +80,9 @@ const Home = () => {
 
   const totalPages = products?.count ? Math.ceil(products.count / productsPerPage) : 1;
 
-  const handleAddToCart = (product: any) => {
-    addItem({
-      id: product.id,
-      product_id: product.id,
-      name: product.name,
-      price: product.discount_percentage 
-        ? product.price * (1 - product.discount_percentage / 100)
-        : product.price,
-      image_url: product.image_url,
-      quantity: 1,
-      selected_options: {},
-    });
-    toast({
-      title: "تمت الإضافة إلى السلة",
-      description: `تم إضافة ${product.name} إلى سلة التسوق`,
-    });
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setQuickViewOpen(true);
   };
 
   return (
@@ -172,13 +162,13 @@ const Home = () => {
                 return (
                   <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full">
                     <div className="relative flex-shrink-0">
-                      <Link to={`/product/${product.id}`}>
+                      <div onClick={() => handleProductClick(product)} className="cursor-pointer">
                         <ProductImageCarousel 
                           mainImage={product.image_url || '/placeholder.svg'}
                           additionalImages={additionalImages || []}
                           productName={product.name}
                         />
-                      </Link>
+                      </div>
                       {hasDiscount && (
                         <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-md text-sm font-bold">
                           {product.discount_percentage}% خصم
@@ -198,11 +188,11 @@ const Home = () => {
                       </button>
                     </div>
                     <div className="p-4 flex flex-col flex-grow">
-                      <Link to={`/product/${product.id}`} className="block mb-auto">
+                      <div onClick={() => handleProductClick(product)} className="block mb-auto cursor-pointer">
                         <h3 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors min-h-[3rem]">
                           {product.name}
                         </h3>
-                      </Link>
+                      </div>
                       <div className="flex items-center gap-2 mb-3">
                         {hasDiscount ? (
                           <>
@@ -249,7 +239,7 @@ const Home = () => {
                       )}
                       
                       <Button 
-                        onClick={() => handleAddToCart(product)}
+                        onClick={() => handleProductClick(product)}
                         className="w-full mt-auto"
                         size="sm"
                       >
@@ -298,6 +288,15 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Quick View Dialog */}
+      {selectedProduct && (
+        <ProductQuickView
+          product={selectedProduct}
+          open={quickViewOpen}
+          onOpenChange={setQuickViewOpen}
+        />
+      )}
     </div>
   );
 };
