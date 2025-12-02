@@ -10,25 +10,26 @@ import { Lock, Mail } from 'lucide-react';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, isAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '' });
 
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user && isAdmin) {
       navigate('/admin/products');
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(loginData.email, loginData.password);
-    setLoading(false);
+    
     if (!error) {
-      navigate('/admin/products');
+      // Will be redirected by useEffect when isAdmin updates
     }
+    setLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
