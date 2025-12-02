@@ -24,6 +24,9 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
 
+  // Return null if product is not provided
+  if (!product) return null;
+
   const options = product.options as { sizes?: string[], colors?: string[] } | null;
   const hasOptions = options && (options.sizes || options.colors);
 
