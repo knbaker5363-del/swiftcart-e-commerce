@@ -189,16 +189,22 @@ const ProductDetail = () => {
                     type="single" 
                     value={selectedColor} 
                     onValueChange={setSelectedColor}
-                    className="justify-start"
+                    className="justify-start gap-3"
                   >
                     {options.colors.map((color: string) => (
                       <ToggleGroupItem
                         key={color}
                         value={color}
                         aria-label={`Select color ${color}`}
-                        className="px-6 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                        className="px-4 py-2 data-[state=on]:ring-2 data-[state=on]:ring-primary data-[state=on]:ring-offset-2"
                       >
-                        {color}
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="w-6 h-6 rounded-full border-2 border-border" 
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="text-sm font-medium">{color}</span>
+                        </div>
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
