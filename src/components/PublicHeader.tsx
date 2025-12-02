@@ -74,7 +74,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
             )}
           </Button>
 
-          {user ? (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -97,14 +97,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/auth')}
-            >
-              تسجيل الدخول
-            </Button>
           )}
         </div>
       </div>
