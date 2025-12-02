@@ -49,7 +49,7 @@ const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [storePhone, setStorePhone] = useState('');
   const [deliveryPrices, setDeliveryPrices] = useState({
     west_bank: 20,
     jerusalem: 50,
@@ -69,12 +69,12 @@ const Checkout = () => {
     const fetchSettings = async () => {
       const { data } = await supabase
         .from('settings')
-        .select('whatsapp_country_code, whatsapp_number, delivery_west_bank, delivery_jerusalem, delivery_inside')
+        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside')
         .single();
       
       if (data) {
-        if (data.whatsapp_number) {
-          setWhatsappNumber(`${data.whatsapp_country_code}${data.whatsapp_number}`);
+        if (data.store_phone) {
+          setStorePhone(data.store_phone);
         }
         setDeliveryPrices({
           west_bank: (data as any).delivery_west_bank || 20,
@@ -171,7 +171,7 @@ const Checkout = () => {
       message += `💰 المجموع الكلي: ${totalWithDelivery.toFixed(2)} ₪`;
 
       // 4. Show order details and call option
-      if (!whatsappNumber) {
+      if (!storePhone) {
         toast({
           title: 'خطأ',
           description: 'لم يتم تعيين رقم الهاتف في الإعدادات',
@@ -202,7 +202,7 @@ const Checkout = () => {
 
   const handleCall = () => {
     clearCart();
-    window.location.href = `tel:${whatsappNumber}`;
+    window.location.href = `tel:${storePhone}`;
     setShowOrderDialog(false);
     navigate('/');
   };
