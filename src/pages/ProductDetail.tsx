@@ -124,12 +124,20 @@ const ProductDetail = () => {
         ) : product ? (
           <div className="grid md:grid-cols-2 gap-8">
             {/* Product Image Carousel */}
-            <div className="relative overflow-hidden rounded-lg shadow-card bg-gradient-card">
-              <ProductImageCarousel
-                mainImage={product.image_url}
-                additionalImages={product.additional_images as string[] || []}
-                productName={product.name}
-              />
+            <div className="sticky top-24 h-fit">
+              <div className="relative overflow-hidden rounded-lg shadow-card bg-muted aspect-square">
+                {product.image_url ? (
+                  <ProductImageCarousel
+                    mainImage={product.image_url}
+                    additionalImages={product.additional_images as string[] || []}
+                    productName={product.name}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-muted-foreground">لا توجد صورة</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Product Info */}
