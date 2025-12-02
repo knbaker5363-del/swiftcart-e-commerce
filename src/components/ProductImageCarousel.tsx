@@ -30,22 +30,22 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
 
   if (allImages.length <= 1) {
     return (
-      <div className="relative overflow-hidden bg-background h-full w-full">
+      <div className="relative overflow-hidden bg-background w-full aspect-square">
         <img
           src={mainImage}
           alt={productName}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
     );
   }
 
   return (
-    <div className="relative overflow-hidden bg-background h-full w-full group/carousel">
+    <div className="relative overflow-hidden bg-background w-full aspect-square group/carousel">
       <img
         src={allImages[currentIndex]}
         alt={`${productName} - صورة ${currentIndex + 1}`}
-        className="w-full h-full object-contain transition-opacity duration-300"
+        className="w-full h-full object-cover transition-opacity duration-300"
       />
       
       {/* Navigation Buttons - تظهر عند hover */}
