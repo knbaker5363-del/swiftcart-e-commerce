@@ -16,6 +16,25 @@ const Favorites = () => {
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const navigate = useNavigate();
 
+  // Helper function to convert color names to hex values
+  const getColorValue = (colorName: string): string => {
+    const colorMap: { [key: string]: string } = {
+      'أحمر': '#ef4444',
+      'أزرق': '#3b82f6',
+      'أخضر': '#22c55e',
+      'أصفر': '#eab308',
+      'أسود': '#000000',
+      'أبيض': '#ffffff',
+      'رمادي': '#6b7280',
+      'بني': '#92400e',
+      'وردي': '#ec4899',
+      'برتقالي': '#f97316',
+      'بنفسجي': '#a855f7',
+      'سماوي': '#0ea5e9',
+    };
+    return colorMap[colorName] || '#9ca3af';
+  };
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['favorite-products', favorites],
     queryFn: async () => {
@@ -82,17 +101,19 @@ const Favorites = () => {
               products?.map((product) => {
                 const options = product.options as any;
                 const additionalImages = (product.additional_images as string[]) || [];
-                const discountSeed = parseInt(product.id.split('-')[0], 16) % 30 + 10;
-                const discount = discountSeed;
-                const originalPrice = product.price / (1 - discount / 100);
+                const discount = product.discount_percentage || 0;
+                const hasDiscount = discount > 0;
+                const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
 
                 return (
                   <Link key={product.id} to={`/product/${product.id}`}>
                     <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 group relative h-full">
                       {/* Discount Badge */}
-                      <Badge className="absolute top-3 right-3 z-10 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-3 py-1">
-                        -{discount}%
-                      </Badge>
+                      {hasDiscount && (
+                        <Badge className="absolute top-3 right-3 z-10 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-3 py-1">
+                          -{discount}%
+                        </Badge>
+                      )}
 
                       {/* Favorite Icon - Active */}
                       <button
@@ -123,21 +144,23 @@ const Favorites = () => {
                           <span className="text-2xl font-bold text-green-600">
                             {product.price.toFixed(0)} ₪
                           </span>
-                          <span className="text-sm text-gray-400 line-through">
-                            {originalPrice.toFixed(0)} ر.س
-                          </span>
+                          {hasDiscount && (
+                            <span className="text-sm text-gray-400 line-through">
+                              {originalPrice.toFixed(0)} ₪
+                            </span>
+                          )}
                         </div>
 
                         {/* Colors */}
                         {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {options.colors.slice(0, 4).map((color: string, idx: number) => (
-                              <span
+                          <div className="flex flex-wrap gap-2">
+                            {options.colors.slice(0, 6).map((color: string, idx: number) => (
+                              <div
                                 key={idx}
-                                className="px-2.5 py-1 text-xs bg-gray-100 text-gray-700 rounded-full border border-gray-200"
-                              >
-                                {color}
-                              </span>
+                                className="w-6 h-6 rounded-full border-2 border-gray-300"
+                                style={{ backgroundColor: getColorValue(color) }}
+                                title={color}
+                              />
                             ))}
                           </div>
                         )}
