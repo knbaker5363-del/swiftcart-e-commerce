@@ -6,15 +6,40 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Send } from 'lucide-react';
 import { z } from 'zod';
 
+const PALESTINIAN_CITIES = {
+  west_bank: [
+    'رام الله', 'البيرة', 'نابلس', 'الخليل', 'بيت لحم', 'جنين', 'طولكرم', 'قلقيلية', 
+    'سلفيت', 'أريحا', 'طوباس', 'بيت جالا', 'بيت ساحور', 'دورا', 'يطا', 'الظاهرية',
+    'حلحول', 'سعير', 'بني نعيم', 'قباطية', 'عرابة', 'سيلة الحارثية', 'يعبد', 'برقين',
+    'عنبتا', 'كفر قدوم', 'بيتا', 'حوارة', 'عصيرة الشمالية', 'عزون', 'كفل حارس',
+    'دير استيا', 'بديا', 'الزبابدة', 'طمون'
+  ],
+  jerusalem: [
+    'القدس', 'أبو ديس', 'العيزرية', 'السواحرة', 'صور باهر', 'بيت حنينا', 'شعفاط',
+    'العيسوية', 'سلوان', 'جبل المكبر', 'بيت صفافا'
+  ],
+  inside: [
+    'حيفا', 'الناصرة', 'عكا', 'أم الفحم', 'الطيبة', 'باقة الغربية', 'كفر قاسم',
+    'يافا', 'اللد', 'الرملة', 'شفاعمرو', 'سخنين', 'طمرة', 'كفر كنا', 'عرابة',
+    'الطيرة', 'كفر قرع', 'قلنسوة', 'جت', 'يافة الناصرة', 'المغار', 'طرعان',
+    'كابول', 'دير الأسد', 'بئر المكسور', 'جلجولية', 'الطيبة', 'كفر مندا',
+    'البعنة', 'دير حنا', 'عيلوط', 'ترشيحا', 'المزرعة', 'معليا', 'فسوطة',
+    'حرفيش', 'الجديدة-المكر', 'يركا', 'أبو سنان', 'جسر الزرقاء', 'الفريديس',
+    'عين ماهل', 'ام الفحم', 'البقيعة', 'كسرى-سميع', 'الرينة', 'عرعرة', 'بسمة طبعون'
+  ]
+};
+
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, { message: 'الاسم يجب أن يكون حرفين على الأقل' }).max(100),
   phone: z.string().trim().min(10, { message: 'رقم الهاتف غير صحيح' }).max(20),
+  city: z.string().min(1, { message: 'يرجى اختيار المدينة' }),
   address: z.string().trim().min(10, { message: 'العنوان يجب أن يكون 10 أحرف على الأقل' }).max(500),
 });
 
@@ -33,6 +58,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    city: '',
     address: '',
   });
 
@@ -123,6 +149,7 @@ const Checkout = () => {
       let message = `🛍️ طلب جديد #${order.id.substring(0, 8)}\n\n`;
       message += `👤 الاسم: ${formData.name}\n`;
       message += `📱 الهاتف: ${formData.phone}\n`;
+      message += `🏙️ المدينة: ${formData.city}\n`;
       message += `📍 العنوان: ${formData.address}\n\n`;
       const deliveryAreaNames = {
         west_bank: 'الضفة الغربية',
@@ -217,10 +244,38 @@ const Checkout = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="address">عنوان التوصيل *</Label>
+                <Label htmlFor="city">المدينة *</Label>
+                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                  <SelectTrigger id="city" className="w-full">
+                    <SelectValue placeholder="اختر المدينة" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-border max-h-[300px]">
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-semibold">الضفة الغربية</SelectLabel>
+                      {PALESTINIAN_CITIES.west_bank.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-semibold">القدس</SelectLabel>
+                      {PALESTINIAN_CITIES.jerusalem.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-semibold">الداخل (48)</SelectLabel>
+                      {PALESTINIAN_CITIES.inside.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="address">عنوان التوصيل التفصيلي *</Label>
                 <Textarea
                   id="address"
-                  placeholder="أدخل عنوان التوصيل بالتفصيل"
+                  placeholder="أدخل الحي، الشارع، رقم المنزل، أو أي تفاصيل إضافية"
                   rows={4}
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
