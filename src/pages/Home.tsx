@@ -22,6 +22,25 @@ const Home = () => {
   const { addItem } = useCart();
   const { toast } = useToast();
 
+  const getColorValue = (color: string) => {
+    const colorMap: Record<string, string> = {
+      'أبيض': '#FFFFFF',
+      'أسود': '#000000',
+      'أحمر': '#FF0000',
+      'أزرق': '#0000FF',
+      'أخضر': '#00FF00',
+      'أصفر': '#FFFF00',
+      'برتقالي': '#FFA500',
+      'بني': '#8B4513',
+      'رمادي': '#808080',
+      'زهري': '#FFC0CB',
+      'بنفسجي': '#800080',
+      'كحلي': '#000080',
+      'أزرق غامق': '#00008B',
+    };
+    return color.startsWith('#') ? color : (colorMap[color] || color);
+  };
+
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -216,7 +235,7 @@ const Home = () => {
                                 <div
                                   key={idx}
                                   className="w-6 h-6 rounded-full border-2 border-border"
-                                  style={{ backgroundColor: color }}
+                                  style={{ backgroundColor: getColorValue(color) }}
                                   title={color}
                                 />
                               ))}

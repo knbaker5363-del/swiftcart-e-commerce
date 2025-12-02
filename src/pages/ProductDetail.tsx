@@ -24,6 +24,25 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
 
+  const getColorValue = (color: string) => {
+    const colorMap: Record<string, string> = {
+      'أبيض': '#FFFFFF',
+      'أسود': '#000000',
+      'أحمر': '#FF0000',
+      'أزرق': '#0000FF',
+      'أخضر': '#00FF00',
+      'أصفر': '#FFFF00',
+      'برتقالي': '#FFA500',
+      'بني': '#8B4513',
+      'رمادي': '#808080',
+      'زهري': '#FFC0CB',
+      'بنفسجي': '#800080',
+      'كحلي': '#000080',
+      'أزرق غامق': '#00008B',
+    };
+    return color.startsWith('#') ? color : (colorMap[color] || color);
+  };
+
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
@@ -201,7 +220,7 @@ const ProductDetail = () => {
                         <div className="flex items-center gap-2">
                           <span 
                             className="w-6 h-6 rounded-full border-2 border-border" 
-                            style={{ backgroundColor: color }}
+                            style={{ backgroundColor: getColorValue(color) }}
                           />
                           <span className="text-sm font-medium">{color}</span>
                         </div>
