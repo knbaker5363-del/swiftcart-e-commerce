@@ -23,15 +23,14 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const { addItem } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
   // Return null if product is not provided
   if (!product) return null;
 
   const options = product.options as { sizes?: string[], colors?: string[] } | null;
   const hasOptions = options && (options.sizes || options.colors);
-
-  const [selectedSize, setSelectedSize] = useState<string>('');
-  const [selectedColor, setSelectedColor] = useState<string>('');
 
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
