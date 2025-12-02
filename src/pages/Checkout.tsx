@@ -184,6 +184,11 @@ const Checkout = () => {
       setOrderMessage(message);
       setShowOrderDialog(true);
       
+      // Save order ID to localStorage for this device
+      const myOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
+      myOrders.push(order.id);
+      localStorage.setItem('my_orders', JSON.stringify(myOrders));
+      
       toast({
         title: 'تم حفظ الطلب بنجاح',
         description: 'الآن يمكنك الاتصال لإتمام الطلب',
