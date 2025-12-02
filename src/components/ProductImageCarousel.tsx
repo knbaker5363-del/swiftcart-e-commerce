@@ -30,46 +30,46 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
 
   if (allImages.length <= 1) {
     return (
-      <div className="relative overflow-hidden bg-gray-50 h-64">
+      <div className="relative overflow-hidden bg-background h-full w-full">
         <img
           src={mainImage}
           alt={productName}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-contain"
         />
       </div>
     );
   }
 
   return (
-    <div className="relative overflow-hidden bg-gray-50 h-64 group/carousel">
+    <div className="relative overflow-hidden bg-background h-full w-full group/carousel">
       <img
         src={allImages[currentIndex]}
         alt={`${productName} - صورة ${currentIndex + 1}`}
-        className="w-full h-full object-cover transition-opacity duration-300"
+        className="w-full h-full object-contain transition-opacity duration-300"
       />
       
       {/* Navigation Buttons - تظهر عند hover */}
-      <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
+      <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
         <Button
           size="icon"
           variant="secondary"
-          className="h-8 w-8 rounded-full shadow-lg bg-white/90 hover:bg-white"
+          className="h-10 w-10 rounded-full shadow-lg bg-white/90 hover:bg-white"
           onClick={prevImage}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
         <Button
           size="icon"
           variant="secondary"
-          className="h-8 w-8 rounded-full shadow-lg bg-white/90 hover:bg-white"
+          className="h-10 w-10 rounded-full shadow-lg bg-white/90 hover:bg-white"
           onClick={nextImage}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
       </div>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
         {allImages.map((_, idx) => (
           <button
             key={idx}
@@ -78,10 +78,10 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
               e.stopPropagation();
               setCurrentIndex(idx);
             }}
-            className={`h-1.5 rounded-full transition-all ${
+            className={`h-2 rounded-full transition-all ${
               idx === currentIndex
-                ? 'w-6 bg-white'
-                : 'w-1.5 bg-white/50 hover:bg-white/75'
+                ? 'w-8 bg-primary'
+                : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
             }`}
           />
         ))}
