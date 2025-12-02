@@ -6,13 +6,16 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import ProductQuickView from '@/components/ProductQuickView';
 
 const Favorites = () => {
   const [cartOpen, setCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const navigate = useNavigate();
 
@@ -33,6 +36,11 @@ const Favorites = () => {
       'سماوي': '#0ea5e9',
     };
     return colorMap[colorName] || '#9ca3af';
+  };
+
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setQuickViewOpen(true);
   };
 
   const { data: products, isLoading } = useQuery({
@@ -106,7 +114,7 @@ const Favorites = () => {
                 const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
 
                 return (
-                  <Link key={product.id} to={`/product/${product.id}`}>
+                  <div key={product.id} onClick={() => handleProductClick(product)} className="cursor-pointer">
                     <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 group relative h-full">
                       {/* Discount Badge */}
                       {hasDiscount && (
@@ -166,13 +174,19 @@ const Favorites = () => {
                         )}
                       </div>
                     </Card>
-                  </Link>
+                  </div>
                 );
               })
             )}
           </div>
         )}
       </div>
+
+      <ProductQuickView
+        product={selectedProduct}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+      />
     </div>
   );
 };
