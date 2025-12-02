@@ -14,7 +14,7 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
-import BrandsSection from '@/components/BrandsSection';
+import BrandsButton from '@/components/BrandsButton';
 
 const Home = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -106,8 +106,8 @@ const Home = () => {
       {/* Deals Bar */}
       <DealsBar />
 
-      {/* Brands Section */}
-      <BrandsSection />
+      {/* Brands Button */}
+      <BrandsButton />
 
       {/* Categories */}
       <section className="py-12">

@@ -55,7 +55,7 @@ const Brands = () => {
           ) : brands && brands.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
               {brands.map((brand) => (
-                <Link key={brand.id} to={`/brand/${brand.id}`}>
+                <Link key={brand.id} to={`/brands/${brand.id}`}>
                   <Card className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer">
                     <div className="aspect-square p-6 flex items-center justify-center bg-white">
                       {brand.logo_url ? (
@@ -72,11 +72,6 @@ const Brands = () => {
                     </div>
                     <div className="p-4 bg-card">
                       <h3 className="font-bold text-center text-lg">{brand.name}</h3>
-                      {brand.description && (
-                        <p className="text-sm text-muted-foreground text-center mt-1 line-clamp-2">
-                          {brand.description}
-                        </p>
-                      )}
                     </div>
                   </Card>
                 </Link>
