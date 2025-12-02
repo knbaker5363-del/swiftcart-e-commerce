@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -15,6 +16,7 @@ import Deals from "./pages/Deals";
 import AllProducts from "./pages/AllProducts";
 import Brands from "./pages/Brands";
 import Category from "./pages/Category";
+import Auth from "./pages/Auth";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -46,10 +48,11 @@ const App = () => (
                   <Route path="/products" element={<AllProducts />} />
                   <Route path="/brands" element={<Brands />} />
                   <Route path="/category/:id" element={<Category />} />
+                  <Route path="/auth" element={<Auth />} />
 
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
                     <Route path="products" element={<AdminProducts />} />
                     <Route path="categories" element={<AdminCategories />} />
                     <Route path="brands" element={<AdminBrands />} />
