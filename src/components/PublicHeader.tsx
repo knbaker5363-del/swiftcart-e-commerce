@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Package } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
@@ -41,6 +41,15 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
           </h1>
         </Link>
         <div className="flex items-center gap-2">
+          <Link to="/my-orders">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+            >
+              <Package className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/favorites">
             <Button
               variant="ghost"

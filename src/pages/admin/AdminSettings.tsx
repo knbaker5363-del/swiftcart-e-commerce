@@ -26,6 +26,7 @@ const AdminSettings = () => {
   const [location, setLocation] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [storePhone, setStorePhone] = useState('');
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('972');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [deliveryWestBank, setDeliveryWestBank] = useState('20');
@@ -38,6 +39,7 @@ const AdminSettings = () => {
       setSelectedTheme(settings.theme);
       setLocation(settings.location || '');
       setLogoUrl(settings.logo_url);
+      setStorePhone((settings as any).store_phone || '');
       setWhatsappCountryCode((settings as any).whatsapp_country_code || '972');
       setWhatsappNumber((settings as any).whatsapp_number || '');
       setDeliveryWestBank(String((settings as any).delivery_west_bank || '20'));
@@ -104,6 +106,7 @@ const AdminSettings = () => {
           theme: selectedTheme,
           logo_url: logoUrl,
           location: location,
+          store_phone: storePhone,
           whatsapp_country_code: whatsappCountryCode,
           whatsapp_number: whatsappNumber,
           delivery_west_bank: parseFloat(deliveryWestBank),
@@ -212,6 +215,22 @@ const AdminSettings = () => {
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="مثال: الرياض، المملكة العربية السعودية"
               />
+            </div>
+            
+            {/* رقم هاتف المتجر */}
+            <div className="space-y-2">
+              <Label htmlFor="storePhone">رقم هاتف المتجر</Label>
+              <Input
+                id="storePhone"
+                type="tel"
+                value={storePhone}
+                onChange={(e) => setStorePhone(e.target.value)}
+                placeholder="مثال: 0591234567 أو +972591234567"
+                maxLength={20}
+              />
+              <p className="text-sm text-muted-foreground">
+                الرقم الذي سيتصل به العملاء لإتمام الطلب
+              </p>
             </div>
           </CardContent>
         </Card>

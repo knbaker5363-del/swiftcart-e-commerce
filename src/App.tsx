@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import Favorites from "./pages/Favorites";
+import MyOrders from "./pages/MyOrders";
 import Deals from "./pages/Deals";
 import AllProducts from "./pages/AllProducts";
 import Brands from "./pages/Brands";
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/my-orders" element={<MyOrders />} />
                   <Route path="/deals" element={<Deals />} />
                   <Route path="/products" element={<AllProducts />} />
                   <Route path="/brands" element={<Brands />} />

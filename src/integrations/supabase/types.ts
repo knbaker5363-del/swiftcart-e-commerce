@@ -299,6 +299,7 @@ export type Database = {
           location: string | null
           logo_url: string | null
           store_name: string
+          store_phone: string | null
           theme: string
           updated_at: string
           whatsapp_country_code: string | null
@@ -313,6 +314,7 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           store_name?: string
+          store_phone?: string | null
           theme?: string
           updated_at?: string
           whatsapp_country_code?: string | null
@@ -327,6 +329,7 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           store_name?: string
+          store_phone?: string | null
           theme?: string
           updated_at?: string
           whatsapp_country_code?: string | null
