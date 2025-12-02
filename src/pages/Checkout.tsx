@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Send } from 'lucide-react';
+import { ArrowRight, Phone, Copy } from 'lucide-react';
 import { z } from 'zod';
 
 const PALESTINIAN_CITIES = {
@@ -61,6 +62,8 @@ const Checkout = () => {
     city: '',
     address: '',
   });
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [orderMessage, setOrderMessage] = useState('');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -167,32 +170,24 @@ const Checkout = () => {
       message += `\n🚚 التوصيل (${deliveryAreaNames[selectedDelivery]}): ${deliveryCost.toFixed(2)} ₪\n`;
       message += `💰 المجموع الكلي: ${totalWithDelivery.toFixed(2)} ₪`;
 
-      // 4. Open WhatsApp
+      // 4. Show order details and call option
       if (!whatsappNumber) {
         toast({
           title: 'خطأ',
-          description: 'لم يتم تعيين رقم واتساب في الإعدادات',
+          description: 'لم يتم تعيين رقم الهاتف في الإعدادات',
           variant: 'destructive',
         });
         setLoading(false);
         return;
       }
-      const encodedMessage = encodeURIComponent(message);
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const whatsappUrl = isMobile 
-        ? `whatsapp://send?phone=${whatsappNumber}&text=${encodedMessage}`
-        : `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
-      window.open(whatsappUrl, '_blank');
-
-      // 5. Clear cart
-      clearCart();
-
+      
+      setOrderMessage(message);
+      setShowOrderDialog(true);
+      
       toast({
-        title: 'تم إرسال الطلب بنجاح',
-        description: 'سيتم التواصل معك قريباً',
+        title: 'تم حفظ الطلب بنجاح',
+        description: 'الآن يمكنك الاتصال لإتمام الطلب',
       });
-
-      navigate('/');
     } catch (error: any) {
       console.error('Checkout error:', error);
       toast({
@@ -205,9 +200,61 @@ const Checkout = () => {
     }
   };
 
+  const handleCall = () => {
+    clearCart();
+    window.location.href = `tel:${whatsappNumber}`;
+    setShowOrderDialog(false);
+    navigate('/');
+  };
+
+  const handleCopyOrder = () => {
+    navigator.clipboard.writeText(orderMessage);
+    toast({
+      title: 'تم النسخ',
+      description: 'تم نسخ تفاصيل الطلب',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => {}} />
+      
+      <AlertDialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
+        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 text-right">
+                <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
+                  {orderMessage}
+                </div>
+                <p className="text-muted-foreground">
+                  يمكنك الآن الاتصال بنا مباشرة لإتمام الطلب، أو نسخ تفاصيل الطلب وإرسالها عبر الواتساب
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={handleCopyOrder}
+              className="gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              نسخ التفاصيل
+            </Button>
+            <AlertDialogAction asChild>
+              <Button
+                onClick={handleCall}
+                className="gap-2 bg-gradient-primary"
+              >
+                <Phone className="h-4 w-4" />
+                اتصل الآن
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="container py-8 max-w-4xl">
         <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
@@ -339,8 +386,8 @@ const Checkout = () => {
                 className="w-full bg-gradient-primary shadow-button"
                 disabled={loading}
               >
-                <Send className="ml-2 h-5 w-5" />
-                {loading ? 'جاري الإرسال...' : 'إرسال الطلب عبر واتساب'}
+                <Phone className="ml-2 h-5 w-5" />
+                {loading ? 'جاري الحفظ...' : 'حفظ الطلب والاتصال'}
               </Button>
             </form>
           </div>
