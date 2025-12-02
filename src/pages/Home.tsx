@@ -226,9 +226,6 @@ const Home = () => {
                                   {size}
                                 </span>
                               ))}
-                              {options.sizes.length > 3 && (
-                                <span className="text-xs text-muted-foreground">+{options.sizes.length - 3}</span>
-                              )}
                             </div>
                           )}
                           {options.colors && options.colors.length > 0 && (
@@ -242,9 +239,6 @@ const Home = () => {
                                   title={color}
                                 />
                               ))}
-                              {options.colors.length > 4 && (
-                                <span className="text-xs text-muted-foreground">+{options.colors.length - 4}</span>
-                              )}
                             </div>
                           )}
                         </div>
