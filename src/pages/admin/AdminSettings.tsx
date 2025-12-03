@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Upload, X, MessageCircle } from 'lucide-react';
+import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,6 +32,8 @@ const AdminSettings = () => {
   const [deliveryWestBank, setDeliveryWestBank] = useState('20');
   const [deliveryJerusalem, setDeliveryJerusalem] = useState('50');
   const [deliveryInside, setDeliveryInside] = useState('70');
+  const [bannerImages, setBannerImages] = useState<string[]>([]);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -45,6 +47,7 @@ const AdminSettings = () => {
       setDeliveryWestBank(String((settings as any).delivery_west_bank || '20'));
       setDeliveryJerusalem(String((settings as any).delivery_jerusalem || '50'));
       setDeliveryInside(String((settings as any).delivery_inside || '70'));
+      setBannerImages((settings as any).banner_images || []);
     }
   }, [settings]);
 
@@ -97,6 +100,58 @@ const AdminSettings = () => {
     setLogoUrl(null);
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى اختيار صورة فقط',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploadingBanner(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `banner-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setBannerImages([...bannerImages, publicUrl]);
+      
+      toast({
+        title: 'تم الرفع',
+        description: 'تم رفع صورة البانر بنجاح',
+      });
+    } catch (error) {
+      console.error('Error uploading banner:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل رفع صورة البانر',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingBanner(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveBanner = (index: number) => {
+    const newBanners = bannerImages.filter((_, i) => i !== index);
+    setBannerImages(newBanners);
+  };
+
   const handleSave = async () => {
     try {
       const { error } = await supabase
@@ -112,6 +167,7 @@ const AdminSettings = () => {
           delivery_west_bank: parseFloat(deliveryWestBank),
           delivery_jerusalem: parseFloat(deliveryJerusalem),
           delivery_inside: parseFloat(deliveryInside),
+          banner_images: bannerImages,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -324,6 +380,64 @@ const AdminSettings = () => {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              صور البانر
+            </CardTitle>
+            <CardDescription>إدارة صور البانر الرئيسي (يُنصح بـ 3-5 صور)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* عرض الصور الحالية */}
+            {bannerImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {bannerImages.map((img, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={img}
+                      alt={`بانر ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                    <button
+                      onClick={() => handleRemoveBanner(index)}
+                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <span className="absolute bottom-2 left-2 bg-background/80 text-foreground text-xs px-2 py-1 rounded">
+                      {index + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* زر إضافة صورة */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerUpload}
+                  disabled={uploadingBanner}
+                  className="cursor-pointer"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  {uploadingBanner ? 'جاري الرفع...' : 'أضف صورة للبانر (حجم مثالي: 1920x600)'}
+                </p>
+              </div>
+            </div>
+            
+            {bannerImages.length === 0 && (
+              <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                <Image className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">لم يتم إضافة صور للبانر بعد</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

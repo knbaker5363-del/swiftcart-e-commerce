@@ -8,6 +8,7 @@ interface Settings {
   theme: string;
   logo_url: string | null;
   location: string | null;
+  banner_images: string[];
 }
 
 interface SettingsContextType {
@@ -37,7 +38,11 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
       
-      setSettings(data);
+      const parsedSettings = {
+        ...data,
+        banner_images: Array.isArray(data.banner_images) ? data.banner_images : []
+      };
+      setSettings(parsedSettings as Settings);
       if (data?.theme) {
         applyTheme(data.theme);
       }
