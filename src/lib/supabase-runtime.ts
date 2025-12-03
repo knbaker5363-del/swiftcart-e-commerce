@@ -1,0 +1,93 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+
+export interface RuntimeConfig {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+  isConfigured: boolean;
+}
+
+const CONFIG_KEY = 'store_config';
+
+// Check if environment variables are set (for Lovable Cloud / development)
+const hasEnvConfig = (): boolean => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return !!url && !!key && url !== '' && key !== '';
+};
+
+export const getStoredConfig = (): RuntimeConfig | null => {
+  // First check if env variables are set (Lovable Cloud environment)
+  if (hasEnvConfig()) {
+    return {
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+      supabaseAnonKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      isConfigured: true,
+    };
+  }
+  
+  // Otherwise check localStorage (self-hosted environment)
+  try {
+    const stored = localStorage.getItem(CONFIG_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Error reading config from localStorage:', e);
+  }
+  return null;
+};
+
+export const saveConfig = (config: RuntimeConfig): void => {
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  } catch (e) {
+    console.error('Error saving config to localStorage:', e);
+  }
+};
+
+export const clearConfig = (): void => {
+  try {
+    localStorage.removeItem(CONFIG_KEY);
+  } catch (e) {
+    console.error('Error clearing config from localStorage:', e);
+  }
+};
+
+export const isStoreConfigured = (): boolean => {
+  // If env variables exist, store is configured
+  if (hasEnvConfig()) {
+    return true;
+  }
+  
+  // Otherwise check localStorage
+  const config = getStoredConfig();
+  return config?.isConfigured === true && !!config.supabaseUrl && !!config.supabaseAnonKey;
+};
+
+export const createRuntimeSupabaseClient = (url: string, anonKey: string): SupabaseClient<Database> => {
+  return createClient<Database>(url, anonKey, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  });
+};
+
+export const testSupabaseConnection = async (url: string, anonKey: string): Promise<boolean> => {
+  try {
+    const client = createRuntimeSupabaseClient(url, anonKey);
+    // Try a simple query to test connection
+    const { error } = await client.from('settings').select('id').limit(1);
+    // If table doesn't exist, that's expected on first setup
+    if (error && !error.message.includes('does not exist')) {
+      console.error('Connection test error:', error);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Connection test failed:', e);
+    return false;
+  }
+};

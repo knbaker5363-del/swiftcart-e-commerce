@@ -7,7 +7,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { ConfigProvider } from "@/contexts/ConfigContext";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
+import { SetupGuard } from "@/components/SetupGuard";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -18,6 +20,7 @@ import AllProducts from "./pages/AllProducts";
 import Brands from "./pages/Brands";
 import Category from "./pages/Category";
 import Auth from "./pages/Auth";
+import Setup from "./pages/Setup";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -31,46 +34,53 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SettingsProvider>
-        <CartProvider>
-          <FavoritesProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/my-orders" element={<MyOrders />} />
-                  <Route path="/deals" element={<Deals />} />
-                  <Route path="/products" element={<AllProducts />} />
-                  <Route path="/brands" element={<Brands />} />
-                  <Route path="/category/:id" element={<Category />} />
-                  <Route path="/auth" element={<Auth />} />
+    <ConfigProvider>
+      <BrowserRouter>
+        <SetupGuard>
+          <AuthProvider>
+            <SettingsProvider>
+              <CartProvider>
+                <FavoritesProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <Routes>
+                      {/* Setup Route */}
+                      <Route path="/setup" element={<Setup />} />
 
-                  {/* Admin Routes */}
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
-                    <Route path="products" element={<AdminProducts />} />
-                    <Route path="categories" element={<AdminCategories />} />
-                    <Route path="brands" element={<AdminBrands />} />
-                    <Route path="orders" element={<AdminOrders />} />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
+                      {/* Public Routes */}
+                      <Route path="/" element={<Home />} />
+                      <Route path="/product/:id" element={<ProductDetail />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/favorites" element={<Favorites />} />
+                      <Route path="/my-orders" element={<MyOrders />} />
+                      <Route path="/deals" element={<Deals />} />
+                      <Route path="/products" element={<AllProducts />} />
+                      <Route path="/brands" element={<Brands />} />
+                      <Route path="/category/:id" element={<Category />} />
+                      <Route path="/auth" element={<Auth />} />
 
-                  {/* 404 */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </FavoritesProvider>
-        </CartProvider>
-      </SettingsProvider>
-    </AuthProvider>
+                      {/* Admin Routes */}
+                      <Route path="/admin/login" element={<AdminLogin />} />
+                      <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+                        <Route path="products" element={<AdminProducts />} />
+                        <Route path="categories" element={<AdminCategories />} />
+                        <Route path="brands" element={<AdminBrands />} />
+                        <Route path="orders" element={<AdminOrders />} />
+                        <Route path="settings" element={<AdminSettings />} />
+                      </Route>
+
+                      {/* 404 */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </TooltipProvider>
+                </FavoritesProvider>
+              </CartProvider>
+            </SettingsProvider>
+          </AuthProvider>
+        </SetupGuard>
+      </BrowserRouter>
+    </ConfigProvider>
   </QueryClientProvider>
 );
 
