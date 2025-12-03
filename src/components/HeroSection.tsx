@@ -15,33 +15,25 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { settings } = useSettings();
 
-  // شرائح البانر - يمكن جعلها ديناميكية من قاعدة البيانات
-  const slides: HeroSlide[] = [
-    {
-      id: 1,
-      title: '',
-      subtitle: '',
-      description: '',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
-      buttonText: '',
-    },
-    {
-      id: 2,
-      title: '',
-      subtitle: '',
-      description: '',
-      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b',
-      buttonText: '',
-    },
-    {
-      id: 3,
-      title: '',
-      subtitle: '',
-      description: '',
-      image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b',
-      buttonText: '',
-    },
+  // شرائح البانر من الإعدادات أو افتراضية
+  const defaultImages = [
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
+    'https://images.unsplash.com/photo-1483985988355-763728e1935b',
+    'https://images.unsplash.com/photo-1523381210434-271e8be1f52b',
   ];
+
+  const bannerImages = (settings as any)?.banner_images?.length > 0 
+    ? (settings as any).banner_images 
+    : defaultImages;
+
+  const slides: HeroSlide[] = bannerImages.map((image: string, index: number) => ({
+    id: index + 1,
+    title: '',
+    subtitle: '',
+    description: '',
+    image,
+    buttonText: '',
+  }));
 
   useEffect(() => {
     const interval = setInterval(() => {
