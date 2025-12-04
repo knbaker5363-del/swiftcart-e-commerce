@@ -54,6 +54,34 @@ const HeroSection = () => {
   return (
     <section className="bg-background py-6">
       <div className="container">
+        {/* معلومات المتجر للجوال - فوق الشرائح */}
+        <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
+          <div className="w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0">
+            {settings?.logo_url ? (
+              <img
+                src={settings.logo_url}
+                alt={settings.store_name || 'شعار المتجر'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
+                <span className="text-xl font-bold text-primary-foreground">
+                  {settings?.store_name?.charAt(0) || 'م'}
+                </span>
+              </div>
+            )}
+          </div>
+          <div>
+            <h2 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+              {settings?.store_name || 'متجري'}
+            </h2>
+            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+              <MapPin className="h-3 w-3 text-primary" />
+              <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
           <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
