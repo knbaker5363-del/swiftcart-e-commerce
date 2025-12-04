@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2, Instagram, Facebook, Check } from 'lucide-react';
+import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ThemePreview from '@/components/ThemePreview';
 
 const themes = [
   { id: 'default', name: 'كلاسيكي (أبيض وأسود)', colors: 'أبيض وأسود (بدون تدرج)', noGradient: true },
@@ -34,11 +35,22 @@ const themes = [
   { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ (بدون تدرج)', noGradient: true },
 ];
 
+const animationEffects = [
+  { id: 'none', name: 'بدون تأثير', icon: '✕' },
+  { id: 'snow', name: 'ثلج', icon: '❄️' },
+  { id: 'stars', name: 'نجوم', icon: '⭐' },
+  { id: 'hearts', name: 'قلوب', icon: '❤️' },
+  { id: 'confetti', name: 'احتفال', icon: '🎊' },
+  { id: 'bubbles', name: 'فقاعات', icon: '🫧' },
+  { id: 'leaves', name: 'أوراق', icon: '🍃' },
+];
+
 const AdminSettings = () => {
-  const { settings, loading, updateSettings } = useSettings();
+  const { settings, loading, applyTheme } = useSettings();
   const { toast } = useToast();
   const [storeName, setStoreName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('default');
+  const [previewTheme, setPreviewTheme] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -51,6 +63,7 @@ const AdminSettings = () => {
   const [bannerImages, setBannerImages] = useState<string[]>([]);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [storeNameBlack, setStoreNameBlack] = useState(false);
+  const [animationEffect, setAnimationEffect] = useState('none');
   // Social media
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
   const [socialInstagram, setSocialInstagram] = useState('');
@@ -72,6 +85,7 @@ const AdminSettings = () => {
       setDeliveryInside(String((settings as any).delivery_inside || '70'));
       setBannerImages((settings as any).banner_images || []);
       setStoreNameBlack((settings as any).store_name_black || false);
+      setAnimationEffect((settings as any).animation_effect || 'none');
       // Social media
       setSocialWhatsapp((settings as any).social_whatsapp || '');
       setSocialInstagram((settings as any).social_instagram || '');
@@ -80,6 +94,25 @@ const AdminSettings = () => {
       setSocialTiktok((settings as any).social_tiktok || '');
     }
   }, [settings]);
+
+  // Apply preview theme when hovering
+  const handleThemePreview = (themeId: string) => {
+    setPreviewTheme(themeId);
+    applyTheme(themeId);
+  };
+
+  // Reset to selected theme when not hovering
+  const handleThemePreviewEnd = () => {
+    setPreviewTheme(null);
+    applyTheme(selectedTheme);
+  };
+
+  // Select theme
+  const handleThemeSelect = (themeId: string) => {
+    setSelectedTheme(themeId);
+    setPreviewTheme(null);
+    applyTheme(themeId);
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,7 +131,7 @@ const AdminSettings = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `logo-${Date.now()}.${fileExt}`;
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('product-images')
         .upload(fileName, file);
 
@@ -172,7 +205,6 @@ const AdminSettings = () => {
       });
     } finally {
       setUploadingBanner(false);
-      // Reset file input
       e.target.value = '';
     }
   };
@@ -180,6 +212,14 @@ const AdminSettings = () => {
   const handleRemoveBanner = (index: number) => {
     const newBanners = bannerImages.filter((_, i) => i !== index);
     setBannerImages(newBanners);
+  };
+
+  const handleClearAllBanners = () => {
+    setBannerImages([]);
+    toast({
+      title: 'تم الحذف',
+      description: 'تم حذف جميع صور البانر',
+    });
   };
 
   const handleSave = async () => {
@@ -199,6 +239,7 @@ const AdminSettings = () => {
           delivery_inside: parseFloat(deliveryInside),
           banner_images: bannerImages,
           store_name_black: storeNameBlack,
+          animation_effect: animationEffect === 'none' ? null : animationEffect,
           social_whatsapp: socialWhatsapp || null,
           social_instagram: socialInstagram || null,
           social_facebook: socialFacebook || null,
@@ -215,7 +256,6 @@ const AdminSettings = () => {
         description: 'تم حفظ الإعدادات بنجاح',
       });
       
-      // Reload settings
       window.location.reload();
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -242,7 +282,104 @@ const AdminSettings = () => {
         <p className="text-muted-foreground mt-2">إدارة إعدادات المتجر والمظهر</p>
       </div>
 
-      <div className="grid gap-6 max-w-2xl">
+      <div className="grid gap-6 max-w-4xl">
+        {/* المظهر والثيم */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              المظهر
+            </CardTitle>
+            <CardDescription>اختر مظهر المتجر - انقر على الثيم لمعاينته</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* معاينة الثيم */}
+            <div className="mb-6">
+              <Label className="text-base font-medium mb-3 block">معاينة الثيم المختار</Label>
+              <ThemePreview themeId={previewTheme || selectedTheme} />
+            </div>
+
+            {/* خيار إبقاء اسم المتجر أسود */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="storeNameBlack" className="text-base font-medium">
+                  إبقاء اسم المتجر أسود
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
+                </p>
+              </div>
+              <Switch
+                id="storeNameBlack"
+                checked={storeNameBlack}
+                onCheckedChange={setStoreNameBlack}
+              />
+            </div>
+
+            {/* اختيار الثيم */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">اختر الثيم</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {themes.map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => handleThemeSelect(theme.id)}
+                    onMouseEnter={() => handleThemePreview(theme.id)}
+                    onMouseLeave={handleThemePreviewEnd}
+                    className={`p-3 rounded-lg border-2 text-right transition-all hover:scale-[1.02] ${
+                      selectedTheme === theme.id
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-sm">{theme.name}</div>
+                      {selectedTheme === theme.id && (
+                        <div className="bg-primary text-primary-foreground rounded-full p-1">
+                          <Check className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">{theme.colors}</div>
+                    {theme.noGradient && (
+                      <span className="inline-block mt-1 text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
+                        بدون تدرج
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* التأثيرات المتحركة */}
+            <div>
+              <Label className="text-base font-medium mb-3 flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                التأثيرات المتحركة
+              </Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                أضف تأثيرات متحركة على خلفية الموقع (مثل ثلج، نجوم، قلوب...)
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                {animationEffects.map((effect) => (
+                  <button
+                    key={effect.id}
+                    onClick={() => setAnimationEffect(effect.id)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                      animationEffect === effect.id
+                        ? 'border-primary bg-primary/10 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{effect.icon}</div>
+                    <div className="text-xs font-medium">{effect.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>معلومات المتجر</CardTitle>
@@ -433,26 +570,41 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             {/* عرض الصور الحالية */}
             {bannerImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {bannerImages.map((img, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={img}
-                      alt={`بانر ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border"
-                    />
-                    <button
-                      onClick={() => handleRemoveBanner(index)}
-                      className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    <span className="absolute bottom-2 left-2 bg-background/80 text-foreground text-xs px-2 py-1 rounded">
-                      {index + 1}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    {bannerImages.length} صور مضافة
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleClearAllBanners}
+                  >
+                    <Trash2 className="h-4 w-4 ml-2" />
+                    حذف الكل
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {bannerImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={img}
+                        alt={`بانر ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <button
+                        onClick={() => handleRemoveBanner(index)}
+                        className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <span className="absolute bottom-2 left-2 bg-background/80 text-foreground text-xs px-2 py-1 rounded">
+                        {index + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
             
             {/* زر إضافة صورة */}
@@ -543,63 +695,6 @@ const AdminSettings = () => {
                 placeholder="مثال: https://tiktok.com/@yourstore"
                 dir="ltr"
               />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              المظهر
-            </CardTitle>
-            <CardDescription>اختر مظهر المتجر</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* خيار إبقاء اسم المتجر أسود */}
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div className="space-y-0.5">
-                <Label htmlFor="storeNameBlack" className="text-base font-medium">
-                  إبقاء اسم المتجر أسود
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
-                </p>
-              </div>
-              <Switch
-                id="storeNameBlack"
-                checked={storeNameBlack}
-                onCheckedChange={setStoreNameBlack}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {themes.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => setSelectedTheme(theme.id)}
-                  className={`p-4 rounded-lg border-2 text-right transition-all ${
-                    selectedTheme === theme.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold text-lg mb-1">{theme.name}</div>
-                    {selectedTheme === theme.id && (
-                      <div className="bg-primary text-primary-foreground rounded-full p-1">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{theme.colors}</div>
-                  {theme.noGradient && (
-                    <span className="inline-block mt-2 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
-                      بدون تدرج
-                    </span>
-                  )}
-                </button>
-              ))}
             </div>
           </CardContent>
         </Card>

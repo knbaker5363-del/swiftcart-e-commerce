@@ -9,6 +9,7 @@ interface Settings {
   logo_url: string | null;
   location: string | null;
   banner_images: string[];
+  animation_effect: string | null;
 }
 
 interface SettingsContextType {
@@ -44,7 +45,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       
       const parsedSettings = {
         ...data,
-        banner_images: Array.isArray(data.banner_images) ? data.banner_images : []
+        banner_images: Array.isArray(data.banner_images) ? data.banner_images : [],
+        animation_effect: data.animation_effect || null
       };
       setSettings(parsedSettings as Settings);
       if (data?.theme) {
