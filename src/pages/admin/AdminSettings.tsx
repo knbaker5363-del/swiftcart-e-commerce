@@ -39,6 +39,7 @@ const AdminSettings = () => {
   const [socialInstagram, setSocialInstagram] = useState('');
   const [socialFacebook, setSocialFacebook] = useState('');
   const [socialSnapchat, setSocialSnapchat] = useState('');
+  const [socialTiktok, setSocialTiktok] = useState('');
 
   useEffect(() => {
     if (settings) {
@@ -58,6 +59,7 @@ const AdminSettings = () => {
       setSocialInstagram((settings as any).social_instagram || '');
       setSocialFacebook((settings as any).social_facebook || '');
       setSocialSnapchat((settings as any).social_snapchat || '');
+      setSocialTiktok((settings as any).social_tiktok || '');
     }
   }, [settings]);
 
@@ -182,6 +184,7 @@ const AdminSettings = () => {
           social_instagram: socialInstagram || null,
           social_facebook: socialFacebook || null,
           social_snapchat: socialSnapchat || null,
+          social_tiktok: socialTiktok || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -505,6 +508,17 @@ const AdminSettings = () => {
                 value={socialSnapchat}
                 onChange={(e) => setSocialSnapchat(e.target.value)}
                 placeholder="مثال: https://snapchat.com/add/yourstore"
+                dir="ltr"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="socialTiktok">تيك توك</Label>
+              <Input
+                id="socialTiktok"
+                value={socialTiktok}
+                onChange={(e) => setSocialTiktok(e.target.value)}
+                placeholder="مثال: https://tiktok.com/@yourstore"
                 dir="ltr"
               />
             </div>
