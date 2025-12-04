@@ -291,6 +291,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          accent_color: string | null
           animation_effect: string | null
           banner_images: Json | null
           created_at: string
@@ -308,12 +309,14 @@ export type Database = {
           store_name: string
           store_name_black: boolean | null
           store_phone: string | null
+          text_style: string | null
           theme: string
           updated_at: string
           whatsapp_country_code: string | null
           whatsapp_number: string | null
         }
         Insert: {
+          accent_color?: string | null
           animation_effect?: string | null
           banner_images?: Json | null
           created_at?: string
@@ -331,12 +334,14 @@ export type Database = {
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
+          text_style?: string | null
           theme?: string
           updated_at?: string
           whatsapp_country_code?: string | null
           whatsapp_number?: string | null
         }
         Update: {
+          accent_color?: string | null
           animation_effect?: string | null
           banner_images?: Json | null
           created_at?: string
@@ -354,6 +359,7 @@ export type Database = {
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
+          text_style?: string | null
           theme?: string
           updated_at?: string
           whatsapp_country_code?: string | null
