@@ -72,7 +72,9 @@ const AdminSettings = () => {
   const [previewTheme, setPreviewTheme] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [storePhone, setStorePhone] = useState('');
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('972');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -97,6 +99,7 @@ const AdminSettings = () => {
       setSelectedTheme(settings.theme);
       setLocation((settings as any).location || '');
       setLogoUrl(settings.logo_url);
+      setFaviconUrl((settings as any).favicon_url || null);
       setStorePhone((settings as any).store_phone || '');
       setWhatsappCountryCode((settings as any).whatsapp_country_code || '972');
       setWhatsappNumber((settings as any).whatsapp_number || '');
@@ -194,6 +197,55 @@ const AdminSettings = () => {
     setLogoUrl(null);
   };
 
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى اختيار صورة فقط',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploadingFavicon(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `favicon-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setFaviconUrl(publicUrl);
+      
+      toast({
+        title: 'تم الرفع',
+        description: 'تم رفع أيقونة المتجر بنجاح',
+      });
+    } catch (error) {
+      console.error('Error uploading favicon:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل رفع أيقونة المتجر',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingFavicon(false);
+    }
+  };
+
+  const handleRemoveFavicon = () => {
+    setFaviconUrl(null);
+  };
+
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -261,6 +313,7 @@ const AdminSettings = () => {
           store_name: storeName,
           theme: selectedTheme,
           logo_url: logoUrl,
+          favicon_url: faviconUrl,
           location: location,
           store_phone: storePhone,
           whatsapp_country_code: whatsappCountryCode,
@@ -495,6 +548,47 @@ const AdminSettings = () => {
                   />
                   <p className="text-sm text-muted-foreground mt-1">
                     {uploading ? 'جاري الرفع...' : 'اختر صورة للشعار'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* أيقونة المتجر (Favicon) */}
+            <div className="space-y-2">
+              <Label>أيقونة المتجر (Favicon)</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                هذه الأيقونة تظهر في شريط المتصفح بجانب عنوان الصفحة
+              </p>
+              <div className="flex items-center gap-4">
+                {faviconUrl ? (
+                  <div className="relative">
+                    <img
+                      src={faviconUrl}
+                      alt="أيقونة المتجر"
+                      className="w-16 h-16 rounded-lg object-cover border-2 border-primary/20"
+                    />
+                    <button
+                      onClick={handleRemoveFavicon}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                    <Image className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFaviconUpload}
+                    disabled={uploadingFavicon}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {uploadingFavicon ? 'جاري الرفع...' : 'اختر صورة للأيقونة (يفضل حجم 32x32 أو 64x64)'}
                   </p>
                 </div>
               </div>
