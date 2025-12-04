@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { Package, Clock, Loader2, CheckCircle, XCircle, Truck } from 'lucide-react';
 
 const AdminOrders = () => {
   const { toast } = useToast();
@@ -39,6 +39,29 @@ const AdminOrders = () => {
       return data;
     },
   });
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    if (!orders) return { thisMonth: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+    
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    
+    const thisMonthOrders = orders.filter(order => {
+      const orderDate = new Date(order.created_at);
+      return orderDate >= monthStart && orderDate <= monthEnd;
+    });
+
+    return {
+      thisMonth: thisMonthOrders.length,
+      pending: orders.filter(o => o.status === 'Pending').length,
+      processing: orders.filter(o => o.status === 'Processing').length,
+      shipped: orders.filter(o => o.status === 'Shipped').length,
+      delivered: orders.filter(o => o.status === 'Delivered').length,
+      cancelled: orders.filter(o => o.status === 'Cancelled').length,
+    };
+  }, [orders]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -77,6 +100,57 @@ const AdminOrders = () => {
     <div>
       <h1 className="text-3xl font-bold mb-6">إدارة الطلبات</h1>
 
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <Card className="p-4 bg-card border">
+          <div className="flex items-center gap-2 mb-2">
+            <Package className="h-5 w-5 text-primary" />
+            <span className="text-sm text-muted-foreground">هذا الشهر</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.thisMonth}</p>
+        </Card>
+        
+        <Card className="p-4 bg-yellow-500/10 border-yellow-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="h-5 w-5 text-yellow-600" />
+            <span className="text-sm text-muted-foreground">قيد الانتظار</span>
+          </div>
+          <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+        </Card>
+        
+        <Card className="p-4 bg-blue-500/10 border-blue-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Loader2 className="h-5 w-5 text-blue-600" />
+            <span className="text-sm text-muted-foreground">قيد المعالجة</span>
+          </div>
+          <p className="text-2xl font-bold text-blue-600">{stats.processing}</p>
+        </Card>
+        
+        <Card className="p-4 bg-purple-500/10 border-purple-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Truck className="h-5 w-5 text-purple-600" />
+            <span className="text-sm text-muted-foreground">تم الشحن</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-600">{stats.shipped}</p>
+        </Card>
+        
+        <Card className="p-4 bg-green-500/10 border-green-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span className="text-sm text-muted-foreground">تم التسليم</span>
+          </div>
+          <p className="text-2xl font-bold text-green-600">{stats.delivered}</p>
+        </Card>
+        
+        <Card className="p-4 bg-red-500/10 border-red-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <XCircle className="h-5 w-5 text-red-600" />
+            <span className="text-sm text-muted-foreground">ملغي</span>
+          </div>
+          <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
+        </Card>
+      </div>
+
       <div className="grid gap-4">
         {orders?.map((order) => (
           <Card key={order.id} className="p-4 shadow-card cursor-pointer hover:shadow-card-hover transition-shadow"
@@ -107,7 +181,7 @@ const AdminOrders = () => {
                     updateStatusMutation.mutate({ id: order.id, status });
                   }}
                 >
-                  <SelectTrigger className="mt-2 w-40" onClick={(e) => e.stopPropagation()}>
+                  <SelectTrigger className="mt-2 w-40 bg-card" onClick={(e) => e.stopPropagation()}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
