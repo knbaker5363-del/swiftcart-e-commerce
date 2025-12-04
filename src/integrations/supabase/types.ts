@@ -305,6 +305,7 @@ export type Database = {
           social_tiktok: string | null
           social_whatsapp: string | null
           store_name: string
+          store_name_black: boolean | null
           store_phone: string | null
           theme: string
           updated_at: string
@@ -326,6 +327,7 @@ export type Database = {
           social_tiktok?: string | null
           social_whatsapp?: string | null
           store_name?: string
+          store_name_black?: boolean | null
           store_phone?: string | null
           theme?: string
           updated_at?: string
@@ -347,6 +349,7 @@ export type Database = {
           social_tiktok?: string | null
           social_whatsapp?: string | null
           store_name?: string
+          store_name_black?: boolean | null
           store_phone?: string | null
           theme?: string
           updated_at?: string
