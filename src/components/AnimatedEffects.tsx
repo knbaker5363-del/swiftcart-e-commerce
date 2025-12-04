@@ -15,6 +15,16 @@ interface AnimatedEffectsProps {
 
 const AnimatedEffects = ({ effect }: AnimatedEffectsProps) => {
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!effect || effect === 'none') {
@@ -22,7 +32,8 @@ const AnimatedEffects = ({ effect }: AnimatedEffectsProps) => {
       return;
     }
 
-    const count = effect === 'snow' ? 50 : effect === 'stars' ? 30 : 25;
+    // Reduced counts - stars especially reduced
+    const count = effect === 'snow' ? 30 : effect === 'stars' ? 12 : 20;
     const newParticles: Particle[] = [];
     
     for (let i = 0; i < count; i++) {
@@ -69,16 +80,23 @@ const AnimatedEffects = ({ effect }: AnimatedEffectsProps) => {
           />
         );
       case 'stars':
+        // Stars follow scroll and stay in viewport
+        const starY = (particle.y + (scrollY * 0.05 * (particle.id % 3 + 1))) % 100;
         return (
           <div
             key={particle.id}
             className="animate-twinkle"
             style={{
-              ...baseStyle,
-              top: `${particle.y}%`,
+              position: 'absolute',
+              left: `${particle.x}%`,
+              top: `${starY}%`,
               fontSize: particle.size,
               color: '#FFD700',
               textShadow: '0 0 10px #FFD700',
+              pointerEvents: 'none',
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
+              transition: 'top 0.1s ease-out',
             }}
           >
             ★
