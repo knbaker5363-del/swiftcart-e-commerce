@@ -1,38 +1,38 @@
 import { useState, useEffect } from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings, accentColors } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Sparkles } from 'lucide-react';
+import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Sparkles, Paintbrush } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ThemePreview from '@/components/ThemePreview';
 
 const themes = [
-  { id: 'default', name: 'كلاسيكي (أبيض وأسود)', colors: 'أبيض وأسود (بدون تدرج)', noGradient: true },
+  { id: 'default', name: 'كلاسيكي (أبيض وأسود)', colors: 'أبيض وأسود', noGradient: true },
   { id: 'night', name: 'ليلي', colors: 'أزرق داكن مع بنفسجي', noGradient: false },
   { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع مع أصفر', noGradient: false },
   { id: 'pink', name: 'زهري', colors: 'وردي مع فوشيا', noGradient: false },
   { id: 'green', name: 'أخضر', colors: 'أخضر زمردي', noGradient: false },
   { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ', noGradient: false },
-  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي (بدون تدرج)', noGradient: true },
-  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح (بدون تدرج)', noGradient: true },
+  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي', noGradient: true },
+  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح', noGradient: true },
   { id: 'coral', name: 'مرجاني', colors: 'مرجاني مع وردي', noGradient: false },
-  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي (بدون تدرج)', noGradient: true },
+  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي', noGradient: true },
   { id: 'sunset', name: 'غروب', colors: 'برتقالي مع أحمر', noGradient: false },
-  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق (بدون تدرج)', noGradient: true },
+  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق', noGradient: true },
   { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي مع وردي', noGradient: false },
   { id: 'forest', name: 'غابة', colors: 'أخضر غامق مع زيتي', noGradient: false },
   { id: 'gold', name: 'ذهبي', colors: 'ذهبي مع برتقالي', noGradient: false },
-  { id: 'ruby', name: 'ياقوتي', colors: 'أحمر ياقوتي (بدون تدرج)', noGradient: true },
-  { id: 'sky', name: 'سماوي', colors: 'أزرق سماوي فاتح (بدون تدرج)', noGradient: true },
+  { id: 'ruby', name: 'ياقوتي', colors: 'أحمر ياقوتي', noGradient: true },
+  { id: 'sky', name: 'سماوي', colors: 'أزرق سماوي فاتح', noGradient: true },
   { id: 'plum', name: 'برقوقي', colors: 'بنفسجي غامق', noGradient: false },
-  { id: 'teal', name: 'فيروزي', colors: 'فيروزي داكن (بدون تدرج)', noGradient: true },
+  { id: 'teal', name: 'فيروزي', colors: 'فيروزي داكن', noGradient: true },
   { id: 'rose', name: 'وردي فاتح', colors: 'وردي فاتح مع زهري', noGradient: false },
-  { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ (بدون تدرج)', noGradient: true },
+  { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ', noGradient: true },
 ];
 
 const animationEffects = [
@@ -45,8 +45,27 @@ const animationEffects = [
   { id: 'leaves', name: 'أوراق', icon: '🍃' },
 ];
 
+const accentColorOptions = [
+  { id: 'default', name: 'حسب الثيم', color: 'var(--gradient-primary)' },
+  { id: 'blue', name: 'أزرق', color: 'hsl(210, 100%, 50%)' },
+  { id: 'red', name: 'أحمر', color: 'hsl(0, 85%, 55%)' },
+  { id: 'green', name: 'أخضر', color: 'hsl(145, 80%, 42%)' },
+  { id: 'purple', name: 'بنفسجي', color: 'hsl(270, 70%, 55%)' },
+  { id: 'orange', name: 'برتقالي', color: 'hsl(25, 95%, 53%)' },
+  { id: 'pink', name: 'وردي', color: 'hsl(330, 85%, 60%)' },
+  { id: 'teal', name: 'فيروزي', color: 'hsl(175, 75%, 40%)' },
+  { id: 'yellow', name: 'أصفر', color: 'hsl(45, 95%, 50%)' },
+  { id: 'indigo', name: 'نيلي', color: 'hsl(245, 70%, 55%)' },
+  { id: 'rose', name: 'وردي غامق', color: 'hsl(350, 90%, 60%)' },
+  { id: 'cyan', name: 'سماوي', color: 'hsl(190, 90%, 45%)' },
+  { id: 'amber', name: 'كهرماني', color: 'hsl(38, 92%, 50%)' },
+  { id: 'lime', name: 'ليموني', color: 'hsl(84, 80%, 45%)' },
+  { id: 'emerald', name: 'زمردي', color: 'hsl(158, 64%, 42%)' },
+  { id: 'black', name: 'أسود', color: 'hsl(0, 0%, 15%)' },
+];
+
 const AdminSettings = () => {
-  const { settings, loading, applyTheme } = useSettings();
+  const { settings, loading, applyTheme, applyAccentColor } = useSettings();
   const { toast } = useToast();
   const [storeName, setStoreName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('default');
@@ -64,6 +83,7 @@ const AdminSettings = () => {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [storeNameBlack, setStoreNameBlack] = useState(false);
   const [animationEffect, setAnimationEffect] = useState('none');
+  const [accentColor, setAccentColor] = useState('default');
   // Social media
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
   const [socialInstagram, setSocialInstagram] = useState('');
@@ -75,7 +95,7 @@ const AdminSettings = () => {
     if (settings) {
       setStoreName(settings.store_name);
       setSelectedTheme(settings.theme);
-      setLocation(settings.location || '');
+      setLocation((settings as any).location || '');
       setLogoUrl(settings.logo_url);
       setStorePhone((settings as any).store_phone || '');
       setWhatsappCountryCode((settings as any).whatsapp_country_code || '972');
@@ -86,6 +106,7 @@ const AdminSettings = () => {
       setBannerImages((settings as any).banner_images || []);
       setStoreNameBlack((settings as any).store_name_black || false);
       setAnimationEffect((settings as any).animation_effect || 'none');
+      setAccentColor((settings as any).accent_color || 'default');
       // Social media
       setSocialWhatsapp((settings as any).social_whatsapp || '');
       setSocialInstagram((settings as any).social_instagram || '');
@@ -99,12 +120,15 @@ const AdminSettings = () => {
   const handleThemePreview = (themeId: string) => {
     setPreviewTheme(themeId);
     applyTheme(themeId);
+    // Reset accent to see theme's default
+    applyAccentColor(accentColor === 'default' ? null : accentColor);
   };
 
   // Reset to selected theme when not hovering
   const handleThemePreviewEnd = () => {
     setPreviewTheme(null);
     applyTheme(selectedTheme);
+    applyAccentColor(accentColor === 'default' ? null : accentColor);
   };
 
   // Select theme
@@ -112,6 +136,13 @@ const AdminSettings = () => {
     setSelectedTheme(themeId);
     setPreviewTheme(null);
     applyTheme(themeId);
+    applyAccentColor(accentColor === 'default' ? null : accentColor);
+  };
+
+  // Handle accent color change
+  const handleAccentColorChange = (colorId: string) => {
+    setAccentColor(colorId);
+    applyAccentColor(colorId === 'default' ? null : colorId);
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,6 +271,7 @@ const AdminSettings = () => {
           banner_images: bannerImages,
           store_name_black: storeNameBlack,
           animation_effect: animationEffect === 'none' ? null : animationEffect,
+          accent_color: accentColor === 'default' ? null : accentColor,
           social_whatsapp: socialWhatsapp || null,
           social_instagram: socialInstagram || null,
           social_facebook: socialFacebook || null,
@@ -288,9 +320,9 @@ const AdminSettings = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="h-5 w-5" />
-              المظهر
+              ثيم الخلفية
             </CardTitle>
-            <CardDescription>اختر مظهر المتجر - انقر على الثيم لمعاينته</CardDescription>
+            <CardDescription>اختر مظهر وألوان الخلفية للمتجر</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* معاينة الثيم */}
@@ -299,27 +331,10 @@ const AdminSettings = () => {
               <ThemePreview themeId={previewTheme || selectedTheme} />
             </div>
 
-            {/* خيار إبقاء اسم المتجر أسود */}
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div className="space-y-0.5">
-                <Label htmlFor="storeNameBlack" className="text-base font-medium">
-                  إبقاء اسم المتجر أسود
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
-                </p>
-              </div>
-              <Switch
-                id="storeNameBlack"
-                checked={storeNameBlack}
-                onCheckedChange={setStoreNameBlack}
-              />
-            </div>
-
             {/* اختيار الثيم */}
             <div>
-              <Label className="text-base font-medium mb-3 block">اختر الثيم</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <Label className="text-base font-medium mb-3 block">اختر ثيم الخلفية</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {themes.map((theme) => (
                   <button
                     key={theme.id}
@@ -341,26 +356,87 @@ const AdminSettings = () => {
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">{theme.colors}</div>
-                    {theme.noGradient && (
-                      <span className="inline-block mt-1 text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
-                        بدون تدرج
-                      </span>
-                    )}
                   </button>
                 ))}
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* لون الأزرار */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Paintbrush className="h-5 w-5" />
+              لون الأزرار والعناصر التفاعلية
+            </CardTitle>
+            <CardDescription>اختر لوناً منفصلاً للأزرار بشكل مستقل عن ثيم الخلفية</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+              {accentColorOptions.map((color) => (
+                <button
+                  key={color.id}
+                  onClick={() => handleAccentColorChange(color.id)}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                    accentColor === color.id
+                      ? 'border-primary shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-background shadow-sm"
+                    style={{ background: color.color }}
+                  />
+                  <span className="text-xs font-medium text-center">{color.name}</span>
+                  {accentColor === color.id && (
+                    <Check className="h-3 w-3 text-primary" />
+                  )}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              اختر "حسب الثيم" لاستخدام لون الأزرار الافتراضي للثيم المختار
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* خيارات إضافية للمظهر */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              خيارات المظهر الإضافية
+            </CardTitle>
+            <CardDescription>تخصيصات إضافية للمظهر</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* خيار إبقاء اسم المتجر أسود */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="storeNameBlack" className="text-base font-medium">
+                  إبقاء اسم المتجر أسود
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
+                </p>
+              </div>
+              <Switch
+                id="storeNameBlack"
+                checked={storeNameBlack}
+                onCheckedChange={setStoreNameBlack}
+              />
             </div>
 
             {/* التأثيرات المتحركة */}
             <div>
               <Label className="text-base font-medium mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
                 التأثيرات المتحركة
               </Label>
               <p className="text-sm text-muted-foreground mb-3">
                 أضف تأثيرات متحركة على خلفية الموقع (مثل ثلج، نجوم، قلوب...)
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+              <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
                 {animationEffects.map((effect) => (
                   <button
                     key={effect.id}
