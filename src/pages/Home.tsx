@@ -240,10 +240,9 @@ const Home = () => {
                       
                       <Button 
                         onClick={() => handleProductClick(product)}
-                        className="w-full mt-auto"
-                        size="sm"
+                        className="w-full mt-auto text-xs md:text-sm py-3"
                       >
-                        <ShoppingCart className="ml-2 h-4 w-4" />
+                        <ShoppingCart className="ml-1.5 h-4 w-4" />
                         أضف للسلة
                       </Button>
                     </div>
