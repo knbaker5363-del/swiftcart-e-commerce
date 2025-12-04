@@ -64,6 +64,7 @@ const Checkout = () => {
   });
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [orderMessage, setOrderMessage] = useState('');
+  const [dialogStep, setDialogStep] = useState<'copy' | 'contact'>('copy');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -205,59 +206,85 @@ const Checkout = () => {
     }
   };
 
-  const handleCall = () => {
-    clearCart();
-    window.location.href = `tel:${storePhone}`;
-    setShowOrderDialog(false);
-    navigate('/');
-  };
-
-  const handleCopyOrder = () => {
+  const handleCopyAndContinue = () => {
     navigator.clipboard.writeText(orderMessage);
     toast({
       title: 'تم النسخ',
       description: 'تم نسخ تفاصيل الطلب',
     });
+    setDialogStep('contact');
+  };
+
+  const handleContactAndFinish = () => {
+    clearCart();
+    setShowOrderDialog(false);
+    setDialogStep('copy');
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => {}} />
       
-      <AlertDialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
+      <AlertDialog open={showOrderDialog} onOpenChange={(open) => {
+        setShowOrderDialog(open);
+        if (!open) setDialogStep('copy');
+      }}>
         <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-4 text-right">
-                <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
-                  {orderMessage}
-                </div>
-                <p className="text-muted-foreground">
-                  يمكنك الآن الاتصال بنا مباشرة لإتمام الطلب، أو نسخ تفاصيل الطلب وإرسالها عبر الواتساب
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={handleCopyOrder}
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              نسخ التفاصيل
-            </Button>
-            <AlertDialogAction asChild>
-              <Button
-                onClick={handleCall}
-                className="gap-2 bg-gradient-primary"
-              >
-                <Phone className="h-4 w-4" />
-                اتصل الآن
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          {dialogStep === 'copy' ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-4 text-right">
+                    <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
+                      {orderMessage}
+                    </div>
+                    <p className="text-muted-foreground">
+                      انسخ تفاصيل الطلب ثم تواصل معنا لإتمام الطلب
+                    </p>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-2 justify-end">
+                <Button
+                  onClick={handleCopyAndContinue}
+                  className="gap-2 bg-gradient-primary"
+                >
+                  <Copy className="h-4 w-4" />
+                  نسخ البيانات ثم تواصل معنا
+                </Button>
+              </AlertDialogFooter>
+            </>
+          ) : (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl">تواصل معنا</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-6 text-center py-4">
+                    <div className="bg-muted p-6 rounded-lg">
+                      <p className="text-muted-foreground mb-2">رقم المتجر</p>
+                      <p className="text-3xl font-bold text-primary" dir="ltr">{storePhone}</p>
+                    </div>
+                    <p className="text-muted-foreground">
+                      تواصل معنا عبر الهاتف أو الواتساب وأرسل لنا تفاصيل الطلب التي تم نسخها
+                    </p>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-2 justify-center">
+                <AlertDialogAction asChild>
+                  <Button
+                    onClick={handleContactAndFinish}
+                    className="gap-2 bg-gradient-primary"
+                  >
+                    <Phone className="h-4 w-4" />
+                    تواصل معنا وأرسل لنا تفاصيل الطلب
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
         </AlertDialogContent>
       </AlertDialog>
 
