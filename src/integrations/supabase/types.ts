@@ -298,6 +298,7 @@ export type Database = {
           delivery_inside: number | null
           delivery_jerusalem: number | null
           delivery_west_bank: number | null
+          favicon_url: string | null
           id: string
           location: string | null
           logo_url: string | null
@@ -323,6 +324,7 @@ export type Database = {
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
+          favicon_url?: string | null
           id?: string
           location?: string | null
           logo_url?: string | null
@@ -348,6 +350,7 @@ export type Database = {
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
+          favicon_url?: string | null
           id?: string
           location?: string | null
           logo_url?: string | null

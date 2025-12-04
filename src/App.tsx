@@ -11,6 +11,7 @@ import { ConfigProvider } from "@/contexts/ConfigContext";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { SetupGuard } from "@/components/SetupGuard";
 import AnimatedEffects from "@/components/AnimatedEffects";
+import FaviconManager from "@/components/FaviconManager";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -36,6 +37,10 @@ const AnimatedEffectsWrapper = () => {
   return <AnimatedEffects effect={settings?.animation_effect || null} />;
 };
 
+const FaviconWrapper = () => {
+  return <FaviconManager />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -49,6 +54,7 @@ const App = () => (
                 <FavoritesProvider>
                   <TooltipProvider>
                     <AnimatedEffectsWrapper />
+                    <FaviconWrapper />
                     <Toaster />
                     <Sonner />
                     <Routes>
