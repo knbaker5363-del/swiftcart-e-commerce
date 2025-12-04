@@ -179,7 +179,7 @@ const HeroSection = () => {
           </div>
 
           {/* البانر الرئيسي - يأخذ 3 أعمدة */}
-          <div className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[300px] lg:h-[400px] group">
+          <div className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[180px] sm:h-[220px] lg:h-[400px] group">
             {/* الشرائح */}
             {slides.map((slide, index) => (
               <div
