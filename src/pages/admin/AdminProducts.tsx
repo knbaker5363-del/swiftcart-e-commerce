@@ -426,7 +426,7 @@ const AdminProducts = () => {
                 <Label>نشط</Label>
               </div>
 
-              <Button type="submit" className="w-full bg-gradient-primary">
+              <Button type="submit" className="w-full">
                 {editingProduct ? 'تحديث' : 'إضافة'}
               </Button>
             </form>

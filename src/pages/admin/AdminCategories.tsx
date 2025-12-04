@@ -116,7 +116,7 @@ const AdminCategories = () => {
         <h1 className="text-3xl font-bold">إدارة التصنيفات</h1>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-primary shadow-button">
+            <Button>
               <Plus className="ml-2 h-4 w-4" />
               إضافة تصنيف
             </Button>
@@ -152,7 +152,7 @@ const AdminCategories = () => {
                   />
                 )}
               </div>
-              <Button type="submit" className="w-full bg-gradient-primary">
+              <Button type="submit" className="w-full">
                 {editingCategory ? 'تحديث' : 'إضافة'}
               </Button>
             </form>

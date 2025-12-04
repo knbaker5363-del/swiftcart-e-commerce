@@ -109,7 +109,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4" dir="rtl">
       <Card className="w-full max-w-md p-8 shadow-card-hover">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-primary">
             لوحة التحكم
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -153,7 +153,7 @@ const AdminLogin = () => {
             </div>
             <Button
               type="submit"
-              className="w-full bg-gradient-primary shadow-button"
+              className="w-full"
               disabled={loading}
             >
               {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
@@ -239,7 +239,7 @@ const AdminLogin = () => {
             </div>
             <Button
               type="submit"
-              className="w-full bg-gradient-primary shadow-button"
+              className="w-full"
               disabled={loading}
             >
               {loading ? 'جاري الإنشاء...' : 'إنشاء حساب Admin'}
