@@ -106,13 +106,13 @@ const Home = () => {
         <div className="container">
           <h2 className="text-2xl font-bold mb-6">التصنيفات</h2>
           {categoriesLoading ? (
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-28 rounded-lg" />
+                <Skeleton key={i} className="h-40 rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {categories?.map((category) => (
                 <Link
                   key={category.id}
