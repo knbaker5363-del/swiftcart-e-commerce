@@ -291,6 +291,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          animation_effect: string | null
           banner_images: Json | null
           created_at: string
           delivery_inside: number | null
@@ -313,6 +314,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          animation_effect?: string | null
           banner_images?: Json | null
           created_at?: string
           delivery_inside?: number | null
@@ -335,6 +337,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          animation_effect?: string | null
           banner_images?: Json | null
           created_at?: string
           delivery_inside?: number | null

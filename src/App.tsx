@@ -6,10 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
-import { SettingsProvider } from "@/contexts/SettingsContext";
+import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
 import { ConfigProvider } from "@/contexts/ConfigContext";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { SetupGuard } from "@/components/SetupGuard";
+import AnimatedEffects from "@/components/AnimatedEffects";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -30,6 +31,11 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminSettings from "./pages/admin/AdminSettings";
 import NotFound from "./pages/NotFound";
 
+const AnimatedEffectsWrapper = () => {
+  const { settings } = useSettings();
+  return <AnimatedEffects effect={settings?.animation_effect || null} />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -42,6 +48,7 @@ const App = () => (
               <CartProvider>
                 <FavoritesProvider>
                   <TooltipProvider>
+                    <AnimatedEffectsWrapper />
                     <Toaster />
                     <Sonner />
                     <Routes>
