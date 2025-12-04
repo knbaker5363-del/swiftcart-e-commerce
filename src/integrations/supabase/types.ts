@@ -299,6 +299,10 @@ export type Database = {
           id: string
           location: string | null
           logo_url: string | null
+          social_facebook: string | null
+          social_instagram: string | null
+          social_snapchat: string | null
+          social_whatsapp: string | null
           store_name: string
           store_phone: string | null
           theme: string
@@ -315,6 +319,10 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_snapchat?: string | null
+          social_whatsapp?: string | null
           store_name?: string
           store_phone?: string | null
           theme?: string
@@ -331,6 +339,10 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_snapchat?: string | null
+          social_whatsapp?: string | null
           store_name?: string
           store_phone?: string | null
           theme?: string
