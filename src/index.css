@@ -249,6 +249,267 @@ All colors MUST be HSL.
     --gradient-hero: linear-gradient(135deg, hsl(35, 91%, 56%), hsl(25, 95%, 61%));
     --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(30, 50%, 98%));
   }
+
+  /* Ocean Theme - No gradient */
+  [data-theme="ocean"] {
+    --background: 200 30% 96%;
+    --foreground: 200 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 30% 15%;
+
+    --primary: 200 80% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 40% 92%;
+    --secondary-foreground: 200 30% 15%;
+
+    --muted: 200 30% 90%;
+    --muted-foreground: 200 20% 45%;
+
+    --accent: 180 70% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 200 25% 85%;
+    --input: 200 25% 88%;
+    --ring: 200 80% 50%;
+
+    --gradient-primary: hsl(200, 80%, 50%);
+    --gradient-hero: hsl(200, 80%, 50%);
+    --gradient-card: hsl(0, 0%, 100%);
+  }
+
+  /* Lavender Theme - No gradient */
+  [data-theme="lavender"] {
+    --background: 270 30% 97%;
+    --foreground: 270 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 270 25% 15%;
+
+    --primary: 270 60% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 35% 92%;
+    --secondary-foreground: 270 25% 15%;
+
+    --muted: 270 25% 90%;
+    --muted-foreground: 270 15% 45%;
+
+    --accent: 290 50% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 270 20% 85%;
+    --input: 270 20% 88%;
+    --ring: 270 60% 60%;
+
+    --gradient-primary: hsl(270, 60%, 60%);
+    --gradient-hero: hsl(270, 60%, 60%);
+    --gradient-card: hsl(0, 0%, 100%);
+  }
+
+  /* Coral Theme */
+  [data-theme="coral"] {
+    --background: 15 60% 97%;
+    --foreground: 15 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 15 30% 15%;
+
+    --primary: 15 85% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 15 50% 92%;
+    --secondary-foreground: 15 30% 15%;
+
+    --muted: 15 40% 90%;
+    --muted-foreground: 15 20% 45%;
+
+    --accent: 350 75% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 15 30% 85%;
+    --input: 15 30% 88%;
+    --ring: 15 85% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(15, 85%, 60%), hsl(350, 75%, 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(15, 85%, 60%), hsl(350, 75%, 55%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(15, 50%, 98%));
+  }
+
+  /* Mint Theme - No gradient */
+  [data-theme="mint"] {
+    --background: 160 35% 96%;
+    --foreground: 160 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 160 30% 15%;
+
+    --primary: 160 60% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 160 40% 92%;
+    --secondary-foreground: 160 30% 15%;
+
+    --muted: 160 30% 90%;
+    --muted-foreground: 160 20% 45%;
+
+    --accent: 140 55% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 160 25% 85%;
+    --input: 160 25% 88%;
+    --ring: 160 60% 45%;
+
+    --gradient-primary: hsl(160, 60%, 45%);
+    --gradient-hero: hsl(160, 60%, 45%);
+    --gradient-card: hsl(0, 0%, 100%);
+  }
+
+  /* Sunset Theme */
+  [data-theme="sunset"] {
+    --background: 35 50% 96%;
+    --foreground: 20 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 30% 15%;
+
+    --primary: 20 90% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 45% 92%;
+    --secondary-foreground: 20 30% 15%;
+
+    --muted: 35 35% 90%;
+    --muted-foreground: 20 20% 45%;
+
+    --accent: 340 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 35 25% 85%;
+    --input: 35 25% 88%;
+    --ring: 20 90% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(20, 90%, 55%), hsl(340, 80%, 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(20, 90%, 55%), hsl(340, 80%, 55%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(35, 45%, 98%));
+  }
+
+  /* Slate Theme - No gradient */
+  [data-theme="slate"] {
+    --background: 215 20% 96%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --primary: 215 50% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 25% 92%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 215 20% 90%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 200 45% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 215 15% 85%;
+    --input: 215 15% 88%;
+    --ring: 215 50% 50%;
+
+    --gradient-primary: hsl(215, 50%, 50%);
+    --gradient-hero: hsl(215, 50%, 50%);
+    --gradient-card: hsl(0, 0%, 100%);
+  }
+
+  /* Cherry Theme */
+  [data-theme="cherry"] {
+    --background: 350 40% 97%;
+    --foreground: 350 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 350 30% 15%;
+
+    --primary: 350 80% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 350 40% 92%;
+    --secondary-foreground: 350 30% 15%;
+
+    --muted: 350 30% 90%;
+    --muted-foreground: 350 20% 45%;
+
+    --accent: 330 70% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 350 25% 85%;
+    --input: 350 25% 88%;
+    --ring: 350 80% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(350, 80%, 55%), hsl(330, 70%, 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(350, 80%, 55%), hsl(330, 70%, 50%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(350, 40%, 98%));
+  }
+
+  /* Forest Theme */
+  [data-theme="forest"] {
+    --background: 120 20% 96%;
+    --foreground: 120 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 25% 15%;
+
+    --primary: 120 50% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 30% 92%;
+    --secondary-foreground: 120 25% 15%;
+
+    --muted: 120 20% 90%;
+    --muted-foreground: 120 15% 45%;
+
+    --accent: 90 45% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 120 15% 85%;
+    --input: 120 15% 88%;
+    --ring: 120 50% 40%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(120, 50%, 40%), hsl(90, 45%, 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(120, 50%, 40%), hsl(90, 45%, 45%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(120, 30%, 98%));
+  }
+
+  /* Gold Theme */
+  [data-theme="gold"] {
+    --background: 45 40% 96%;
+    --foreground: 45 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 45 30% 15%;
+
+    --primary: 45 85% 50%;
+    --primary-foreground: 45 30% 15%;
+
+    --secondary: 45 40% 92%;
+    --secondary-foreground: 45 30% 15%;
+
+    --muted: 45 30% 90%;
+    --muted-foreground: 45 20% 45%;
+
+    --accent: 35 80% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 45 25% 85%;
+    --input: 45 25% 88%;
+    --ring: 45 85% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(45, 85%, 50%), hsl(35, 80%, 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(45, 85%, 50%), hsl(35, 80%, 45%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(45, 40%, 98%));
+  }
 }
 
 @layer base {
