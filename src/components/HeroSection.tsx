@@ -104,6 +104,12 @@ const HeroSection = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  // Determine store name color based on settings
+  const storeNameBlack = (settings as any)?.store_name_black;
+  const storeNameClass = storeNameBlack 
+    ? 'text-foreground' 
+    : 'text-[hsl(var(--store-name-color))]';
+
   return (
     <section className="bg-background py-6">
       <div className="container">
@@ -117,7 +123,7 @@ const HeroSection = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
+              <div className="w-full h-full bg-primary flex items-center justify-center">
                 <span className="text-xl font-bold text-primary-foreground">
                   {settings?.store_name?.charAt(0) || 'م'}
                 </span>
@@ -125,7 +131,7 @@ const HeroSection = () => {
             )}
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className={`text-lg font-bold ${storeNameClass}`}>
               {settings?.store_name || 'متجري'}
             </h2>
             <div className="flex items-center gap-1 text-muted-foreground text-xs">
@@ -149,7 +155,7 @@ const HeroSection = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
+                <div className="w-full h-full bg-primary flex items-center justify-center">
                   <span className="text-4xl font-bold text-primary-foreground">
                     {settings?.store_name?.charAt(0) || 'م'}
                   </span>
@@ -158,7 +164,7 @@ const HeroSection = () => {
             </div>
             
             {/* اسم المتجر */}
-            <h2 className="text-2xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className={`text-2xl font-bold mb-3 ${storeNameClass}`}>
               {settings?.store_name || 'متجري'}
             </h2>
             

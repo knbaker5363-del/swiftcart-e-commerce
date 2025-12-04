@@ -16,8 +16,10 @@ import { useToast } from '@/hooks/use-toast';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import BrandsButton from '@/components/BrandsButton';
 import ProductQuickView from '@/components/ProductQuickView';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const Home = () => {
+  useDocumentTitle();
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);

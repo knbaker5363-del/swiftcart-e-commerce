@@ -5,26 +5,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2, Instagram, Facebook } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2, Instagram, Facebook, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const themes = [
-  { id: 'default', name: 'الافتراضي', colors: 'برتقالي دافئ مع تركواز' },
-  { id: 'night', name: 'ليلي', colors: 'أزرق داكن مع بنفسجي' },
-  { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع مع أصفر' },
-  { id: 'pink', name: 'زهري', colors: 'وردي مع فوشيا' },
-  { id: 'green', name: 'أخضر', colors: 'أخضر زمردي' },
-  { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ' },
-  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي (بدون تدرج)' },
-  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح (بدون تدرج)' },
-  { id: 'coral', name: 'مرجاني', colors: 'مرجاني مع وردي' },
-  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي (بدون تدرج)' },
-  { id: 'sunset', name: 'غروب', colors: 'برتقالي مع أحمر' },
-  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق (بدون تدرج)' },
-  { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي مع وردي' },
-  { id: 'forest', name: 'غابة', colors: 'أخضر غامق مع زيتي' },
-  { id: 'gold', name: 'ذهبي', colors: 'ذهبي مع برتقالي' },
+  { id: 'default', name: 'كلاسيكي (أبيض وأسود)', colors: 'أبيض وأسود (بدون تدرج)', noGradient: true },
+  { id: 'night', name: 'ليلي', colors: 'أزرق داكن مع بنفسجي', noGradient: false },
+  { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع مع أصفر', noGradient: false },
+  { id: 'pink', name: 'زهري', colors: 'وردي مع فوشيا', noGradient: false },
+  { id: 'green', name: 'أخضر', colors: 'أخضر زمردي', noGradient: false },
+  { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ', noGradient: false },
+  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي (بدون تدرج)', noGradient: true },
+  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح (بدون تدرج)', noGradient: true },
+  { id: 'coral', name: 'مرجاني', colors: 'مرجاني مع وردي', noGradient: false },
+  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي (بدون تدرج)', noGradient: true },
+  { id: 'sunset', name: 'غروب', colors: 'برتقالي مع أحمر', noGradient: false },
+  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق (بدون تدرج)', noGradient: true },
+  { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي مع وردي', noGradient: false },
+  { id: 'forest', name: 'غابة', colors: 'أخضر غامق مع زيتي', noGradient: false },
+  { id: 'gold', name: 'ذهبي', colors: 'ذهبي مع برتقالي', noGradient: false },
+  { id: 'ruby', name: 'ياقوتي', colors: 'أحمر ياقوتي (بدون تدرج)', noGradient: true },
+  { id: 'sky', name: 'سماوي', colors: 'أزرق سماوي فاتح (بدون تدرج)', noGradient: true },
+  { id: 'plum', name: 'برقوقي', colors: 'بنفسجي غامق', noGradient: false },
+  { id: 'teal', name: 'فيروزي', colors: 'فيروزي داكن (بدون تدرج)', noGradient: true },
+  { id: 'rose', name: 'وردي فاتح', colors: 'وردي فاتح مع زهري', noGradient: false },
+  { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ (بدون تدرج)', noGradient: true },
 ];
 
 const AdminSettings = () => {
@@ -43,6 +50,7 @@ const AdminSettings = () => {
   const [deliveryInside, setDeliveryInside] = useState('70');
   const [bannerImages, setBannerImages] = useState<string[]>([]);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [storeNameBlack, setStoreNameBlack] = useState(false);
   // Social media
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
   const [socialInstagram, setSocialInstagram] = useState('');
@@ -63,6 +71,7 @@ const AdminSettings = () => {
       setDeliveryJerusalem(String((settings as any).delivery_jerusalem || '50'));
       setDeliveryInside(String((settings as any).delivery_inside || '70'));
       setBannerImages((settings as any).banner_images || []);
+      setStoreNameBlack((settings as any).store_name_black || false);
       // Social media
       setSocialWhatsapp((settings as any).social_whatsapp || '');
       setSocialInstagram((settings as any).social_instagram || '');
@@ -189,6 +198,7 @@ const AdminSettings = () => {
           delivery_jerusalem: parseFloat(deliveryJerusalem),
           delivery_inside: parseFloat(deliveryInside),
           banner_images: bannerImages,
+          store_name_black: storeNameBlack,
           social_whatsapp: socialWhatsapp || null,
           social_instagram: socialInstagram || null,
           social_facebook: socialFacebook || null,
@@ -286,6 +296,9 @@ const AdminSettings = () => {
                 onChange={(e) => setStoreName(e.target.value)}
                 placeholder="اسم متجرك"
               />
+              <p className="text-sm text-muted-foreground">
+                سيظهر هذا الاسم في عنوان التبويب وأيقونة الموقع
+              </p>
             </div>
 
             {/* الموقع */}
@@ -542,7 +555,24 @@ const AdminSettings = () => {
             </CardTitle>
             <CardDescription>اختر مظهر المتجر</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
+            {/* خيار إبقاء اسم المتجر أسود */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="storeNameBlack" className="text-base font-medium">
+                  إبقاء اسم المتجر أسود
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
+                </p>
+              </div>
+              <Switch
+                id="storeNameBlack"
+                checked={storeNameBlack}
+                onCheckedChange={setStoreNameBlack}
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {themes.map((theme) => (
                 <button
@@ -554,8 +584,20 @@ const AdminSettings = () => {
                       : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <div className="font-semibold text-lg mb-1">{theme.name}</div>
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-lg mb-1">{theme.name}</div>
+                    {selectedTheme === theme.id && (
+                      <div className="bg-primary text-primary-foreground rounded-full p-1">
+                        <Check className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
                   <div className="text-sm text-muted-foreground">{theme.colors}</div>
+                  {theme.noGradient && (
+                    <span className="inline-block mt-2 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
+                      بدون تدرج
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
