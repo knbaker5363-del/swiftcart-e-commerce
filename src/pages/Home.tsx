@@ -113,7 +113,7 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories?.slice(0, 3).map((category) => (
+              {categories?.map((category) => (
                 <Link
                   key={category.id}
                   to={`/category/${category.id}`}
@@ -135,16 +135,6 @@ const Home = () => {
                   </Card>
                 </Link>
               ))}
-              {categories && categories.length > 3 && (
-                <Link to="/category/all" className="group">
-                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-3 h-full flex flex-col items-center justify-center bg-primary/10">
-                    <div className="aspect-square mb-2 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-primary">+{categories.length - 3}</span>
-                    </div>
-                    <h3 className="font-medium text-sm text-center text-primary">المزيد</h3>
-                  </Card>
-                </Link>
-              )}
             </div>
           )}
         </div>
@@ -225,26 +215,36 @@ const Home = () => {
                       {options && (options.sizes || options.colors) && (
                         <div className="mb-3 space-y-2 min-h-[3rem]">
                           {options.sizes && options.sizes.length > 0 && (
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="text-xs text-muted-foreground">المقاسات:</span>
                               {options.sizes.slice(0, 3).map((size, idx) => (
                                 <span key={idx} className="text-xs px-2 py-1 bg-muted rounded">
                                   {size}
                                 </span>
                               ))}
+                              {options.sizes.length > 3 && (
+                                <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.sizes.length - 3}
+                                </span>
+                              )}
                             </div>
                           )}
                           {options.colors && options.colors.length > 0 && (
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="text-xs text-muted-foreground">الألوان:</span>
-                              {options.colors.slice(0, 4).map((color, idx) => (
+                              {options.colors.slice(0, 3).map((color, idx) => (
                                 <div
                                   key={idx}
-                                  className="w-6 h-6 rounded-full border-2 border-border"
+                                  className="w-5 h-5 rounded-full border-2 border-border"
                                   style={{ backgroundColor: getColorValue(color) }}
                                   title={color}
                                 />
                               ))}
+                              {options.colors.length > 3 && (
+                                <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.colors.length - 3}
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
