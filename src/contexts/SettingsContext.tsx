@@ -29,6 +29,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.setAttribute('data-theme', theme);
   };
 
+  const updateDocumentTitle = (storeName: string) => {
+    document.title = `${storeName} - تسوق أفضل المنتجات`;
+  };
+
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -45,6 +49,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       setSettings(parsedSettings as Settings);
       if (data?.theme) {
         applyTheme(data.theme);
+      }
+      if (data?.store_name) {
+        updateDocumentTitle(data.store_name);
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -89,6 +96,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         location: location !== undefined ? location : settings.location
       });
       applyTheme(theme);
+      updateDocumentTitle(storeName);
       
       toast({
         title: 'تم التحديث',
