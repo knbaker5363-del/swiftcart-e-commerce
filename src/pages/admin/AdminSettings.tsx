@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2 } from 'lucide-react';
+import { Palette, Upload, X, MessageCircle, Image, Plus, Trash2, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,6 +34,11 @@ const AdminSettings = () => {
   const [deliveryInside, setDeliveryInside] = useState('70');
   const [bannerImages, setBannerImages] = useState<string[]>([]);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  // Social media
+  const [socialWhatsapp, setSocialWhatsapp] = useState('');
+  const [socialInstagram, setSocialInstagram] = useState('');
+  const [socialFacebook, setSocialFacebook] = useState('');
+  const [socialSnapchat, setSocialSnapchat] = useState('');
 
   useEffect(() => {
     if (settings) {
@@ -48,6 +53,11 @@ const AdminSettings = () => {
       setDeliveryJerusalem(String((settings as any).delivery_jerusalem || '50'));
       setDeliveryInside(String((settings as any).delivery_inside || '70'));
       setBannerImages((settings as any).banner_images || []);
+      // Social media
+      setSocialWhatsapp((settings as any).social_whatsapp || '');
+      setSocialInstagram((settings as any).social_instagram || '');
+      setSocialFacebook((settings as any).social_facebook || '');
+      setSocialSnapchat((settings as any).social_snapchat || '');
     }
   }, [settings]);
 
@@ -168,6 +178,10 @@ const AdminSettings = () => {
           delivery_jerusalem: parseFloat(deliveryJerusalem),
           delivery_inside: parseFloat(deliveryInside),
           banner_images: bannerImages,
+          social_whatsapp: socialWhatsapp || null,
+          social_instagram: socialInstagram || null,
+          social_facebook: socialFacebook || null,
+          social_snapchat: socialSnapchat || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -438,6 +452,62 @@ const AdminSettings = () => {
                 <p className="text-muted-foreground">لم يتم إضافة صور للبانر بعد</p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* روابط التواصل الاجتماعي */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Instagram className="h-5 w-5" />
+              روابط التواصل الاجتماعي
+            </CardTitle>
+            <CardDescription>أضف روابط صفحات التواصل الاجتماعي الخاصة بالمتجر</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="socialWhatsapp">واتساب (رابط أو رقم)</Label>
+              <Input
+                id="socialWhatsapp"
+                value={socialWhatsapp}
+                onChange={(e) => setSocialWhatsapp(e.target.value)}
+                placeholder="مثال: https://wa.me/972591234567"
+                dir="ltr"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="socialInstagram">انستغرام</Label>
+              <Input
+                id="socialInstagram"
+                value={socialInstagram}
+                onChange={(e) => setSocialInstagram(e.target.value)}
+                placeholder="مثال: https://instagram.com/yourstore"
+                dir="ltr"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="socialFacebook">فيسبوك</Label>
+              <Input
+                id="socialFacebook"
+                value={socialFacebook}
+                onChange={(e) => setSocialFacebook(e.target.value)}
+                placeholder="مثال: https://facebook.com/yourstore"
+                dir="ltr"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="socialSnapchat">سناب شات</Label>
+              <Input
+                id="socialSnapchat"
+                value={socialSnapchat}
+                onChange={(e) => setSocialSnapchat(e.target.value)}
+                placeholder="مثال: https://snapchat.com/add/yourstore"
+                dir="ltr"
+              />
+            </div>
           </CardContent>
         </Card>
 
