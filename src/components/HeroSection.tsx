@@ -27,8 +27,8 @@ interface HeroSlide {
 
 // Social icons component
 const SocialIcons = ({ settings, size = 'md' }: { settings: any; size?: 'sm' | 'md' }) => {
-  const iconSize = size === 'sm' ? 'h-4 w-4' : 'h-5 w-5';
-  const containerSize = size === 'sm' ? 'w-7 h-7' : 'w-9 h-9';
+  const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-5 w-5';
+  const containerSize = size === 'sm' ? 'w-6 h-6' : 'w-9 h-9';
   
   const socialLinks = [
     { key: 'social_whatsapp', icon: MessageCircle, color: 'bg-green-500 hover:bg-green-600' },
@@ -43,7 +43,7 @@ const SocialIcons = ({ settings, size = 'md' }: { settings: any; size?: 'sm' | '
   if (!hasAnySocial) return null;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 flex-wrap justify-end">
       {socialLinks.map(({ key, icon: Icon, color }) => {
         const url = settings?.[key];
         if (!url) return null;
