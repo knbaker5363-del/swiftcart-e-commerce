@@ -10,12 +10,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const themes = [
-  { id: 'default', name: 'الافتراضي', colors: 'من #9b87f5 إلى #7E69AB' },
-  { id: 'night', name: 'ليلي', colors: 'من #1A1F2C إلى #403E43' },
-  { id: 'day', name: 'نهاري', colors: 'من #F97316 إلى #FBBF24' },
-  { id: 'pink', name: 'زهري', colors: 'من #EC4899 إلى #F472B6' },
-  { id: 'green', name: 'أخضر', colors: 'من #10B981 إلى #34D399' },
-  { id: 'orange', name: 'برتقالي', colors: 'من #F59E0B إلى #FB923C' },
+  { id: 'default', name: 'الافتراضي', colors: 'برتقالي دافئ مع تركواز' },
+  { id: 'night', name: 'ليلي', colors: 'أزرق داكن مع بنفسجي' },
+  { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع مع أصفر' },
+  { id: 'pink', name: 'زهري', colors: 'وردي مع فوشيا' },
+  { id: 'green', name: 'أخضر', colors: 'أخضر زمردي' },
+  { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ' },
+  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي (بدون تدرج)' },
+  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح (بدون تدرج)' },
+  { id: 'coral', name: 'مرجاني', colors: 'مرجاني مع وردي' },
+  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي (بدون تدرج)' },
+  { id: 'sunset', name: 'غروب', colors: 'برتقالي مع أحمر' },
+  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق (بدون تدرج)' },
+  { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي مع وردي' },
+  { id: 'forest', name: 'غابة', colors: 'أخضر غامق مع زيتي' },
+  { id: 'gold', name: 'ذهبي', colors: 'ذهبي مع برتقالي' },
 ];
 
 const AdminSettings = () => {
