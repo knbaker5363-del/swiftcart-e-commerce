@@ -1,7 +1,7 @@
 -- =============================================
 -- دليل إعداد قاعدة البيانات الكامل
 -- للمتجر الإلكتروني - إصدار موحد
--- تاريخ التحديث: 2024-12-04
+-- تاريخ التحديث: 2024-12-05
 -- =============================================
 -- 
 -- تعليمات الاستخدام:
@@ -27,59 +27,7 @@ EXCEPTION
 END $$;
 
 -- =============================================
--- الجزء 2: الدوال (FUNCTIONS)
--- =============================================
-
--- دالة تحديث وقت التعديل
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SET search_path = public;
-
--- دالة التحقق من دور المستخدم
-CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
-RETURNS BOOLEAN
-LANGUAGE SQL
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.user_roles
-    WHERE user_id = _user_id
-      AND role = _role
-  )
-$$;
-
--- دالة إنشاء ملف شخصي للمستخدم الجديد
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', '')
-  );
-  
-  -- تعيين دور المستخدم العادي
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (NEW.id, 'user');
-  
-  RETURN NEW;
-END;
-$$;
-
--- =============================================
--- الجزء 3: الجداول الأساسية
+-- الجزء 2: الجداول الأساسية (قبل الدوال)
 -- =============================================
 
 -- جدول الفئات
@@ -135,7 +83,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
 
--- جدول أدوار المستخدمين
+-- جدول أدوار المستخدمين (مهم: يجب أن يكون قبل الدوال)
 CREATE TABLE IF NOT EXISTS public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -175,64 +123,104 @@ CREATE TABLE IF NOT EXISTS public.favorites (
   UNIQUE(user_id, product_id)
 );
 
--- جدول الإعدادات (شامل لكل الميزات)
+-- جدول الإعدادات
 CREATE TABLE IF NOT EXISTS public.settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  -- معلومات المتجر الأساسية
   store_name TEXT NOT NULL DEFAULT 'متجري',
   logo_url TEXT,
   favicon_url TEXT,
   location TEXT DEFAULT 'فلسطين',
   store_phone TEXT,
-  -- المظهر والتصميم
   theme TEXT NOT NULL DEFAULT 'default',
   accent_color TEXT DEFAULT 'primary',
   text_style TEXT DEFAULT 'default',
   store_name_black BOOLEAN DEFAULT false,
   animation_effect TEXT,
-  -- صور البانر
   banner_images JSONB DEFAULT '[]'::jsonb,
-  -- إعدادات الواتساب
   whatsapp_country_code TEXT DEFAULT '972',
   whatsapp_number TEXT,
-  -- روابط السوشيال ميديا
   social_whatsapp TEXT,
   social_instagram TEXT,
   social_facebook TEXT,
   social_snapchat TEXT,
   social_tiktok TEXT,
-  -- أسعار التوصيل
   delivery_west_bank NUMERIC DEFAULT 20,
   delivery_jerusalem NUMERIC DEFAULT 50,
   delivery_inside NUMERIC DEFAULT 70,
-  -- التواريخ
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
 
 -- =============================================
+-- الجزء 3: الدوال (FUNCTIONS) - بعد الجداول
+-- =============================================
+
+-- دالة تحديث وقت التعديل
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SET search_path = public;
+
+-- دالة التحقق من دور المستخدم
+CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.user_roles
+    WHERE user_id = _user_id
+      AND role = _role
+  )
+$$;
+
+-- دالة إنشاء ملف شخصي للمستخدم الجديد
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', '')
+  );
+  
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'user');
+  
+  RETURN NEW;
+END;
+$$;
+
+-- =============================================
 -- الجزء 4: Triggers
 -- =============================================
 
--- Trigger للمستخدمين الجدد
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Trigger لتحديث وقت التعديل في الإعدادات
 DROP TRIGGER IF EXISTS update_settings_updated_at ON public.settings;
 CREATE TRIGGER update_settings_updated_at
   BEFORE UPDATE ON public.settings
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Trigger لتحديث وقت التعديل في الملفات الشخصية
 DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Trigger لتحديث وقت التعديل في البراندات
 DROP TRIGGER IF EXISTS update_brands_updated_at ON public.brands;
 CREATE TRIGGER update_brands_updated_at
   BEFORE UPDATE ON public.brands
@@ -254,6 +242,7 @@ CREATE INDEX IF NOT EXISTS idx_product_categories_product ON public.product_cate
 CREATE INDEX IF NOT EXISTS idx_product_categories_category ON public.product_categories(category_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON public.favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON public.favorites(product_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 
 -- =============================================
 -- الجزء 6: تفعيل Row Level Security
@@ -354,12 +343,10 @@ CREATE POLICY "Admins can manage settings" ON public.settings FOR ALL USING (has
 -- الجزء 8: Storage (تخزين الصور)
 -- =============================================
 
--- إنشاء Bucket للصور
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- سياسات Storage
 DROP POLICY IF EXISTS "Public can view product images" ON storage.objects;
 DROP POLICY IF EXISTS "Anyone can view product images" ON storage.objects;
 DROP POLICY IF EXISTS "Admins can upload product images" ON storage.objects;
@@ -382,7 +369,6 @@ CREATE POLICY "Admins can delete product images" ON storage.objects
 -- الجزء 9: البيانات الافتراضية
 -- =============================================
 
--- إدراج إعدادات افتراضية (إذا لم تكن موجودة)
 INSERT INTO public.settings (store_name, location, theme)
 SELECT 'متجري', 'فلسطين', 'default'
 WHERE NOT EXISTS (SELECT 1 FROM public.settings);
