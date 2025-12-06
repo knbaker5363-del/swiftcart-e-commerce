@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Phone, Copy } from 'lucide-react';
+import { ArrowRight, Phone, Copy, MessageCircle } from 'lucide-react';
 import { z } from 'zod';
 
 const PALESTINIAN_CITIES = {
@@ -66,11 +66,14 @@ const Checkout = () => {
   const [orderMessage, setOrderMessage] = useState('');
   const [dialogStep, setDialogStep] = useState<'copy' | 'contact'>('copy');
 
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('970');
+
   useEffect(() => {
     const fetchSettings = async () => {
       const { data } = await supabase
         .from('settings')
-        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside')
+        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside, whatsapp_number, whatsapp_country_code')
         .single();
       
       if (data) {
@@ -82,6 +85,18 @@ const Checkout = () => {
           jerusalem: (data as any).delivery_jerusalem || 50,
           inside: (data as any).delivery_inside || 70,
         });
+        // WhatsApp settings
+        if ((data as any).whatsapp_number) {
+          let number = (data as any).whatsapp_number;
+          // Remove leading zero if present
+          if (number.startsWith('0')) {
+            number = number.substring(1);
+          }
+          setWhatsappNumber(number);
+        }
+        if ((data as any).whatsapp_country_code) {
+          setWhatsappCountryCode((data as any).whatsapp_country_code);
+        }
       }
     };
     fetchSettings();
@@ -241,6 +256,12 @@ const Checkout = () => {
   };
 
   const handleContactAndFinish = () => {
+    // Open WhatsApp with the message
+    if (whatsappNumber) {
+      const fullNumber = `${whatsappCountryCode}${whatsappNumber}`;
+      const encodedMessage = encodeURIComponent(orderMessage);
+      window.open(`https://wa.me/${fullNumber}?text=${encodedMessage}`, '_blank');
+    }
     clearCart();
     setShowOrderDialog(false);
     setDialogStep('copy');
@@ -284,15 +305,15 @@ const Checkout = () => {
           ) : (
             <>
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl">تواصل معنا</AlertDialogTitle>
+                <AlertDialogTitle className="text-2xl">تواصل معنا عبر واتساب</AlertDialogTitle>
                 <AlertDialogDescription asChild>
                   <div className="space-y-6 text-center py-4">
                     <div className="bg-muted p-6 rounded-lg">
-                      <p className="text-muted-foreground mb-2">رقم المتجر</p>
-                      <p className="text-3xl font-bold text-primary" dir="ltr">{storePhone}</p>
+                      <p className="text-muted-foreground mb-2">رقم واتساب المتجر</p>
+                      <p className="text-3xl font-bold text-primary" dir="ltr">+{whatsappCountryCode}{whatsappNumber}</p>
                     </div>
                     <p className="text-muted-foreground">
-                      تواصل معنا عبر الهاتف أو الواتساب وأرسل لنا تفاصيل الطلب التي تم نسخها
+                      سيتم فتح واتساب مع تفاصيل الطلب المنسوخة
                     </p>
                   </div>
                 </AlertDialogDescription>
@@ -301,10 +322,10 @@ const Checkout = () => {
                 <AlertDialogAction asChild>
                   <Button
                     onClick={handleContactAndFinish}
-                    className="gap-2"
+                    className="gap-2 bg-green-600 hover:bg-green-700"
                   >
-                    <Phone className="h-4 w-4" />
-                    تواصل معنا وأرسل لنا تفاصيل الطلب
+                    <MessageCircle className="h-4 w-4" />
+                    فتح واتساب وإرسال الطلب
                   </Button>
                 </AlertDialogAction>
               </AlertDialogFooter>
