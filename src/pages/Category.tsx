@@ -117,13 +117,13 @@ const Category = () => {
       <section className="py-16">
         <div className="container">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className="h-64 rounded-lg" />
+                <Skeleton key={i} className="h-80 rounded-lg" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {products.map((product: any) => {
                 const mainImage = product.image_url || '';
                 const additionalImages = Array.isArray(product.additional_images)
@@ -138,7 +138,7 @@ const Category = () => {
                 return (
                   <Card
                     key={product.id}
-                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col"
                   >
                     <div className="relative">
                       <div onClick={() => handleProductClick(product)} className="cursor-pointer">
@@ -150,14 +150,14 @@ const Category = () => {
                       </div>
                       
                       {hasDiscount && (
-                        <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground hover:bg-destructive text-xs px-1.5 py-0.5">
-                          خصم {product.discount_percentage}%
+                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs px-2">
+                          -{product.discount_percentage}%
                         </Badge>
                       )}
 
                       <button
                         onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 left-2 p-1.5 bg-background/80 hover:bg-background rounded-full transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-background rounded-full transition-colors"
                       >
                         <Heart
                           className={`h-4 w-4 ${
@@ -169,73 +169,59 @@ const Category = () => {
                       </button>
                     </div>
 
-                    <div className="p-3 flex flex-col flex-grow">
-                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-1">
-                        <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">
+                    <div className="p-3 flex flex-col flex-grow text-center">
+                      {/* Price */}
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        {hasDiscount ? (
+                          <>
+                            <span className="text-xs text-muted-foreground line-through">{product.price.toFixed(0)} ₪</span>
+                            <span className="text-base font-bold text-primary">{discountedPrice.toFixed(0)} ₪</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-bold text-primary">{product.price.toFixed(0)} ₪</span>
+                        )}
+                      </div>
+
+                      {/* Product Name */}
+                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-2">
+                        <h3 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors">
                           {product.name}
                         </h3>
                       </div>
 
-                      <div className="flex items-center gap-2 mb-2">
-                        {hasDiscount ? (
-                          <>
-                            <span className="text-base font-bold text-primary">
-                              {discountedPrice.toFixed(2)} ₪
+                      {/* Sizes */}
+                      {options?.sizes && options.sizes.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                          {options.sizes.map((size, idx) => (
+                            <span key={idx} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
+                              {size}
                             </span>
-                            <span className="text-xs text-muted-foreground line-through">
-                              {product.price.toFixed(2)} ₪
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-base font-bold text-primary">
-                            {product.price.toFixed(2)} ₪
-                          </span>
-                        )}
-                      </div>
-
-                      {options && (options.sizes || options.colors) && (
-                        <div className="mb-2 space-y-1">
-                          {options.sizes && options.sizes.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {options.sizes.slice(0, 2).map((size, idx) => (
-                                <span key={idx} className="text-xs px-1.5 py-0.5 bg-muted rounded">
-                                  {size}
-                                </span>
-                              ))}
-                              {options.sizes.length > 2 && (
-                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.sizes.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {options.colors && options.colors.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {options.colors.slice(0, 4).map((color, idx) => (
-                                <div
-                                  key={idx}
-                                  className="w-4 h-4 rounded-full border border-border"
-                                  style={{ backgroundColor: getColorValue(color) }}
-                                  title={color}
-                                />
-                              ))}
-                              {options.colors.length > 4 && (
-                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.colors.length - 4}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                          ))}
                         </div>
                       )}
 
+                      {/* Colors */}
+                      {options?.colors && options.colors.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                          {options.colors.map((color, idx) => (
+                            <div
+                              key={idx}
+                              className="w-5 h-5 rounded border border-border"
+                              style={{ backgroundColor: getColorValue(color) }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add to Cart Button */}
                       <Button 
                         onClick={() => handleProductClick(product)}
-                        className="w-full mt-auto text-xs py-2"
+                        className="w-auto px-6 mx-auto mt-auto"
                         size="sm"
+                        variant="secondary"
                       >
-                        <ShoppingCart className="ml-1 h-3.5 w-3.5" />
-                        أضف للسلة
+                        <ShoppingCart className="h-4 w-4" />
                       </Button>
                     </div>
                   </Card>

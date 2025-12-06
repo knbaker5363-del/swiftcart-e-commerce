@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
@@ -196,16 +197,15 @@ const Home = () => {
         <div className="container">
           <h2 className="text-2xl font-bold mb-6">كافة المنتجات</h2>
           {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-64 rounded-lg" />
+                <Skeleton key={i} className="h-80 rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {products?.data?.map((product) => {
                 const additionalImages = product.additional_images as string[] | null;
-                
                 const options = product.options as { sizes?: string[], colors?: string[] } | null;
                 const hasDiscount = (product.discount_percentage ?? 0) > 0;
                 const discountedPrice = hasDiscount 
@@ -214,6 +214,7 @@ const Home = () => {
 
                 return (
                   <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full">
+                    
                     <div className="relative flex-shrink-0">
                       <div onClick={() => handleProductClick(product)} className="cursor-pointer">
                         <ProductImageCarousel 
@@ -223,16 +224,16 @@ const Home = () => {
                         />
                       </div>
                       {hasDiscount && (
-                        <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-md text-sm font-bold">
-                          {product.discount_percentage}% خصم
-                        </div>
+                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs px-2">
+                          -{product.discount_percentage}%
+                        </Badge>
                       )}
                       <button
                         onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 right-2 p-2 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors"
                       >
                         <Heart
-                          className={`h-5 w-5 ${
+                          className={`h-4 w-4 ${
                             isFavorite(product.id)
                               ? 'fill-destructive text-destructive'
                               : 'text-foreground'
@@ -240,72 +241,63 @@ const Home = () => {
                         />
                       </button>
                     </div>
-                    <div className="p-3 flex flex-col flex-grow">
-                      <div onClick={() => handleProductClick(product)} className="block mb-1 cursor-pointer">
-                        <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">
+                    
+                    <div className="p-3 flex flex-col flex-grow text-center">
+                      {/* Price */}
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        {hasDiscount ? (
+                          <>
+                            <span className="text-xs text-muted-foreground line-through">{product.price.toFixed(0)} ₪</span>
+                            <span className="text-base font-bold text-primary">{discountedPrice.toFixed(0)} ₪</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-bold text-primary">{product.price.toFixed(0)} ₪</span>
+                        )}
+                      </div>
+
+                      {/* Product Name */}
+                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-2">
+                        <h3 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors">
                           {product.name}
                         </h3>
                       </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        {hasDiscount ? (
-                          <>
-                            <span className="text-base font-bold text-primary">
-                              {discountedPrice.toFixed(2)} ₪
-                            </span>
-                            <span className="text-xs text-muted-foreground line-through">
-                              {product.price.toFixed(2)} ₪
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-base font-bold text-primary">
-                            {product.price.toFixed(2)} ₪
-                          </span>
-                        )}
-                      </div>
                       
-                      {options && (options.sizes || options.colors) && (
-                        <div className="mb-2 space-y-1">
-                          {options.sizes && options.sizes.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {options.sizes.slice(0, 2).map((size, idx) => (
-                                <span key={idx} className="text-xs px-1.5 py-0.5 bg-muted rounded">
-                                  {size}
-                                </span>
-                              ))}
-                              {options.sizes.length > 2 && (
-                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.sizes.length - 2}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {options.colors && options.colors.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {options.colors.slice(0, 4).map((color, idx) => (
-                                <div
-                                  key={idx}
-                                  className="w-4 h-4 rounded-full border border-border"
-                                  style={{ backgroundColor: getColorValue(color) }}
-                                  title={color}
-                                />
-                              ))}
-                              {options.colors.length > 4 && (
-                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.colors.length - 4}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                      {/* Sizes */}
+                      {options?.sizes && options.sizes.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                          {options.sizes.map((size, idx) => (
+                            <span key={idx} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
+                              {size}
+                            </span>
+                          ))}
                         </div>
                       )}
                       
+                      {/* Colors */}
+                      {options?.colors && options.colors.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                          {options.colors.map((color, idx) => (
+                            <div
+                              key={idx}
+                              className="w-5 h-5 rounded border border-border"
+                              style={{ backgroundColor: getColorValue(color) }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Add to Cart Button */}
                       <Button 
-                        onClick={() => handleProductClick(product)}
-                        className="w-full mt-auto text-xs py-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductClick(product);
+                        }}
+                        className="w-auto px-6 mx-auto mt-auto"
                         size="sm"
+                        variant="secondary"
                       >
-                        <ShoppingCart className="ml-1 h-3.5 w-3.5" />
-                        أضف للسلة
+                        <ShoppingCart className="h-4 w-4" />
                       </Button>
                     </div>
                   </Card>
