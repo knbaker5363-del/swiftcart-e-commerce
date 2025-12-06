@@ -30,6 +30,7 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminBrands from "./pages/admin/AdminBrands";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminPromoCodes from "./pages/admin/AdminPromoCodes";
 import NotFound from "./pages/NotFound";
 
 const AnimatedEffectsWrapper = () => {
@@ -81,6 +82,7 @@ const App = () => (
                         <Route path="brands" element={<AdminBrands />} />
                         <Route path="orders" element={<AdminOrders />} />
                         <Route path="settings" element={<AdminSettings />} />
+                        <Route path="promo-codes" element={<AdminPromoCodes />} />
                       </Route>
 
                       {/* 404 */}
