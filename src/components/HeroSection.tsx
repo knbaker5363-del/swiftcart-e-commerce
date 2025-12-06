@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 
 // Snapchat icon component
@@ -143,6 +144,16 @@ const HeroSection = () => {
           <SocialIcons settings={settings} size="sm" />
         </div>
 
+        {/* زر طلباتي للجوال - بين معلومات المتجر والبانر */}
+        <Link to="/my-orders" className="block lg:hidden mb-4">
+          <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+            <div className="flex items-center justify-center gap-2">
+              <Package className="h-5 w-5 text-white" />
+              <span className="text-base font-bold text-white">طلباتي</span>
+            </div>
+          </div>
+        </Link>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
           <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
@@ -176,6 +187,16 @@ const HeroSection = () => {
 
             {/* أيقونات التواصل الاجتماعي */}
             <SocialIcons settings={settings} size="md" />
+
+            {/* زر طلباتي للديسكتوب */}
+            <Link to="/my-orders" className="block w-full mt-4">
+              <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+                <div className="flex items-center justify-center gap-2">
+                  <Package className="h-5 w-5 text-white" />
+                  <span className="text-base font-bold text-white">طلباتي</span>
+                </div>
+              </div>
+            </Link>
           </div>
 
           {/* البانر الرئيسي - يأخذ 3 أعمدة */}
