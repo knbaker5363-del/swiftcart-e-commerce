@@ -294,6 +294,7 @@ export type Database = {
           accent_color: string | null
           animation_effect: string | null
           banner_images: Json | null
+          category_display_style: string | null
           created_at: string
           delivery_inside: number | null
           delivery_jerusalem: number | null
@@ -302,6 +303,7 @@ export type Database = {
           id: string
           location: string | null
           logo_url: string | null
+          show_brands_button: boolean | null
           social_facebook: string | null
           social_instagram: string | null
           social_snapchat: string | null
@@ -320,6 +322,7 @@ export type Database = {
           accent_color?: string | null
           animation_effect?: string | null
           banner_images?: Json | null
+          category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
@@ -328,6 +331,7 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          show_brands_button?: boolean | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null
@@ -346,6 +350,7 @@ export type Database = {
           accent_color?: string | null
           animation_effect?: string | null
           banner_images?: Json | null
+          category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
@@ -354,6 +359,7 @@ export type Database = {
           id?: string
           location?: string | null
           logo_url?: string | null
+          show_brands_button?: boolean | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null

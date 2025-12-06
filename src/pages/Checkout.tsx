@@ -249,7 +249,7 @@ const Checkout = () => {
               <AlertDialogFooter className="flex-row gap-2 justify-end">
                 <Button
                   onClick={handleCopyAndContinue}
-                  className="gap-2 bg-gradient-primary"
+                  className="gap-2"
                 >
                   <Copy className="h-4 w-4" />
                   نسخ البيانات ثم تواصل معنا
@@ -276,7 +276,7 @@ const Checkout = () => {
                 <AlertDialogAction asChild>
                   <Button
                     onClick={handleContactAndFinish}
-                    className="gap-2 bg-gradient-primary"
+                    className="gap-2"
                   >
                     <Phone className="h-4 w-4" />
                     تواصل معنا وأرسل لنا تفاصيل الطلب
@@ -415,7 +415,7 @@ const Checkout = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-primary shadow-button"
+                className="w-full"
                 disabled={loading}
               >
                 <Phone className="ml-2 h-5 w-5" />

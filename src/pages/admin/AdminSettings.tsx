@@ -86,6 +86,8 @@ const AdminSettings = () => {
   const [storeNameBlack, setStoreNameBlack] = useState(false);
   const [animationEffect, setAnimationEffect] = useState('none');
   const [accentColor, setAccentColor] = useState('default');
+  const [categoryDisplayStyle, setCategoryDisplayStyle] = useState('grid');
+  const [showBrandsButton, setShowBrandsButton] = useState(true);
   // Social media
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
   const [socialInstagram, setSocialInstagram] = useState('');
@@ -110,6 +112,8 @@ const AdminSettings = () => {
       setStoreNameBlack((settings as any).store_name_black || false);
       setAnimationEffect((settings as any).animation_effect || 'none');
       setAccentColor((settings as any).accent_color || 'default');
+      setCategoryDisplayStyle((settings as any).category_display_style || 'grid');
+      setShowBrandsButton((settings as any).show_brands_button !== false);
       // Social media
       setSocialWhatsapp((settings as any).social_whatsapp || '');
       setSocialInstagram((settings as any).social_instagram || '');
@@ -325,6 +329,8 @@ const AdminSettings = () => {
           store_name_black: storeNameBlack,
           animation_effect: animationEffect === 'none' ? null : animationEffect,
           accent_color: accentColor === 'default' ? null : accentColor,
+          category_display_style: categoryDisplayStyle,
+          show_brands_button: showBrandsButton,
           social_whatsapp: socialWhatsapp || null,
           social_instagram: socialInstagram || null,
           social_facebook: socialFacebook || null,
@@ -505,6 +511,104 @@ const AdminSettings = () => {
                   </button>
                 ))}
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* إعدادات التصنيفات والبراندات */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              إعدادات التصنيفات والبراندات
+            </CardTitle>
+            <CardDescription>تخصيص طريقة عرض التصنيفات وإظهار البراندات</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* نوع عرض التصنيفات */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">طريقة عرض التصنيفات</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button
+                  onClick={() => setCategoryDisplayStyle('grid')}
+                  className={`p-4 rounded-lg border-2 text-right transition-all ${
+                    categoryDisplayStyle === 'grid'
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="grid grid-cols-2 gap-1 w-8 h-8">
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
+                    </div>
+                    <span className="font-semibold">مربعات مع صور</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">عرض التصنيفات كمربعات مع صور</p>
+                </button>
+                
+                <button
+                  onClick={() => setCategoryDisplayStyle('list')}
+                  className={`p-4 rounded-lg border-2 text-right transition-all ${
+                    categoryDisplayStyle === 'list'
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col gap-1 w-8 h-8 justify-center">
+                      <div className="bg-primary/30 rounded h-2 w-full"></div>
+                      <div className="bg-primary/30 rounded h-2 w-full"></div>
+                      <div className="bg-primary/30 rounded h-2 w-full"></div>
+                    </div>
+                    <span className="font-semibold">مستطيلات نصية</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">عرض أسماء التصنيفات فقط بدون صور</p>
+                </button>
+                
+                <button
+                  onClick={() => setCategoryDisplayStyle('icon-list')}
+                  className={`p-4 rounded-lg border-2 text-right transition-all ${
+                    categoryDisplayStyle === 'icon-list'
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col gap-1 w-8 h-8 justify-center">
+                      <div className="flex gap-1 items-center">
+                        <div className="bg-primary/30 rounded w-3 h-3"></div>
+                        <div className="bg-primary/30 rounded h-2 flex-1"></div>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <div className="bg-primary/30 rounded w-3 h-3"></div>
+                        <div className="bg-primary/30 rounded h-2 flex-1"></div>
+                      </div>
+                    </div>
+                    <span className="font-semibold">أيقونة مع اسم</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">أيقونة على اليمين مع اسم التصنيف</p>
+                </button>
+              </div>
+            </div>
+
+            {/* إظهار/إخفاء البراندات */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="showBrandsButton" className="text-base font-medium">
+                  إظهار زر البراندات
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  إظهار زر "البراندات الخاصة بنا" في الصفحة الرئيسية
+                </p>
+              </div>
+              <Switch
+                id="showBrandsButton"
+                checked={showBrandsButton}
+                onCheckedChange={setShowBrandsButton}
+              />
             </div>
           </CardContent>
         </Card>
