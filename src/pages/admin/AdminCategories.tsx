@@ -10,7 +10,7 @@ import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical } fr
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { categoryIcons, getIconByName } from '@/lib/categoryIcons';
+import { getIconByName, getAvailableIconNames } from '@/lib/categoryIcons';
 import { useSettings } from '@/contexts/SettingsContext';
 import {
   DndContext,
@@ -56,6 +56,7 @@ const RenderIcon = ({ iconName, className }: { iconName: string; className?: str
 };
 
 // Icon picker component
+// Icon picker component with search
 const IconPicker = ({ 
   selectedIcon, 
   onSelect 
@@ -63,10 +64,17 @@ const IconPicker = ({
   selectedIcon: string | null; 
   onSelect: (iconId: string | null) => void;
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const availableIcons = getAvailableIconNames();
+  
+  const filteredIcons = availableIcons.filter(iconName => 
+    iconName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label>اختر أيقونة</Label>
+        <Label>اختر أيقونة (اكتب اسم الأيقونة بالإنجليزية)</Label>
         {selectedIcon && (
           <Button 
             type="button" 
@@ -78,24 +86,48 @@ const IconPicker = ({
           </Button>
         )}
       </div>
-      <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-[300px] overflow-y-auto p-2 border rounded-lg bg-muted/30">
-        {categoryIcons.map((icon) => (
+      
+      {/* Search input */}
+      <Input
+        placeholder="ابحث عن أيقونة... مثل: Home, Star, Heart"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="mb-2"
+      />
+      
+      {/* Selected icon preview */}
+      {selectedIcon && (
+        <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg">
+          <RenderIcon iconName={selectedIcon} className="h-6 w-6 text-primary" />
+          <span className="text-sm font-medium">{selectedIcon}</span>
+        </div>
+      )}
+      
+      {/* Icons grid */}
+      <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-[250px] overflow-y-auto p-2 border rounded-lg bg-muted/30">
+        {filteredIcons.slice(0, 100).map((iconName) => (
           <button
-            key={icon.id}
+            key={iconName}
             type="button"
-            onClick={() => onSelect(icon.icon)}
-            title={icon.name}
+            onClick={() => onSelect(iconName)}
+            title={iconName}
             className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
-              selectedIcon === icon.icon
+              selectedIcon === iconName
                 ? 'bg-primary text-primary-foreground ring-2 ring-primary'
                 : 'bg-background hover:bg-muted border border-border hover:border-primary/50'
             }`}
           >
-            <RenderIcon iconName={icon.icon} className="h-5 w-5" />
-            <span className="text-[10px] mt-1 truncate w-full text-center">{icon.name}</span>
+            <RenderIcon iconName={iconName} className="h-5 w-5" />
+            <span className="text-[8px] mt-1 truncate w-full text-center">{iconName}</span>
           </button>
         ))}
       </div>
+      
+      {filteredIcons.length > 100 && (
+        <p className="text-xs text-muted-foreground text-center">
+          يظهر أول 100 نتيجة - استخدم البحث لإيجاد أيقونات أخرى
+        </p>
+      )}
     </div>
   );
 };
