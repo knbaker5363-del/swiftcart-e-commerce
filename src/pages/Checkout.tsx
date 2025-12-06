@@ -149,17 +149,42 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // 3. Format WhatsApp message
+      // 3. Send Telegram notification (don't block on failure)
+      const deliveryAreaNames: Record<string, string> = {
+        west_bank: 'الضفة الغربية',
+        jerusalem: 'القدس',
+        inside: 'الداخل (48)',
+      };
+      
+      supabase.functions.invoke('send-telegram-notification', {
+        body: {
+          orderId: order.id,
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          customerCity: formData.city,
+          customerAddress: formData.address,
+          items: items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            selectedOptions: item.selected_options,
+          })),
+          deliveryArea: deliveryAreaNames[selectedDelivery],
+          deliveryCost: deliveryCost,
+          totalAmount: totalWithDelivery,
+        },
+      }).then(result => {
+        console.log('Telegram notification result:', result);
+      }).catch(err => {
+        console.error('Telegram notification error:', err);
+      });
+
+      // 4. Format message for display
       let message = `🛍️ طلب جديد #${order.id.substring(0, 8)}\n\n`;
       message += `👤 الاسم: ${formData.name}\n`;
       message += `📱 الهاتف: ${formData.phone}\n`;
       message += `🏙️ المدينة: ${formData.city}\n`;
       message += `📍 العنوان: ${formData.address}\n\n`;
-      const deliveryAreaNames = {
-        west_bank: 'الضفة الغربية',
-        jerusalem: 'القدس',
-        inside: 'الداخل (48)',
-      };
       
       message += `📦 المنتجات:\n`;
       items.forEach((item) => {
