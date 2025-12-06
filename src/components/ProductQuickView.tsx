@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
+import { trackProductView } from '@/hooks/useAnalytics';
 
 interface ProductQuickViewProps {
   product: any;
@@ -25,6 +26,13 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+
+  // Track product view when dialog opens
+  useEffect(() => {
+    if (open && product?.id) {
+      trackProductView(product.id);
+    }
+  }, [open, product?.id]);
 
   // Return null if product is not provided
   if (!product) return null;
