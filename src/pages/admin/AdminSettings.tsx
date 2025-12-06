@@ -248,6 +248,8 @@ const AdminSettings = () => {
   // Telegram
   const [telegramBotToken, setTelegramBotToken] = useState('');
   const [telegramChatId, setTelegramChatId] = useState('');
+  const [telegramBotPassword, setTelegramBotPassword] = useState('');
+  const [settingUpWebhook, setSettingUpWebhook] = useState(false);
   useEffect(() => {
     if (settings) {
       setStoreName(settings.store_name);
@@ -274,6 +276,7 @@ const AdminSettings = () => {
       // Telegram
       setTelegramBotToken((settings as any).telegram_bot_token || '');
       setTelegramChatId((settings as any).telegram_chat_id || '');
+      setTelegramBotPassword((settings as any).telegram_bot_password || '');
     }
   }, [settings]);
 
@@ -470,6 +473,7 @@ const AdminSettings = () => {
         social_tiktok: socialTiktok || null,
         telegram_bot_token: telegramBotToken || null,
         telegram_chat_id: telegramChatId || null,
+        telegram_bot_password: telegramBotPassword || null,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -848,19 +852,56 @@ const AdminSettings = () => {
                 احصل على التوكين من @BotFather على تيليجرام
               </p>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="telegramBotPassword">كلمة سر البوت (اختياري)</Label>
+              <Input 
+                id="telegramBotPassword" 
+                type="password"
+                value={telegramBotPassword} 
+                onChange={e => setTelegramBotPassword(e.target.value)} 
+                placeholder="أدخل كلمة سر لحماية البوت" 
+                dir="ltr" 
+              />
+              <p className="text-xs text-muted-foreground">
+                عند فتح البوت لأول مرة سيُطلب من المستخدم إدخال كلمة السر
+              </p>
+            </div>
             
             <div className="space-y-2">
-              <Label htmlFor="telegramChatId">Chat ID</Label>
+              <Label htmlFor="telegramChatId">Chat ID (يُملأ تلقائياً)</Label>
               <Input 
                 id="telegramChatId" 
                 value={telegramChatId} 
                 onChange={e => setTelegramChatId(e.target.value)} 
-                placeholder="أدخل معرف المحادثة" 
-                dir="ltr" 
+                placeholder="سيُملأ تلقائياً عند إدخال كلمة السر الصحيحة" 
+                dir="ltr"
+                disabled
               />
               <p className="text-xs text-muted-foreground">
-                أرسل رسالة للبوت ثم استخدم الرابط: api.telegram.org/bot[TOKEN]/getUpdates
+                سيُحفظ تلقائياً عند إدخال كلمة السر الصحيحة في البوت
               </p>
+            </div>
+
+            <div className="p-4 bg-muted rounded-lg space-y-2">
+              <p className="font-medium text-sm">خطوات الإعداد:</p>
+              <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>أنشئ بوت جديد عبر @BotFather واحصل على التوكين</li>
+                <li>أدخل التوكين وكلمة السر أعلاه واحفظ</li>
+                <li>قم بإعداد الـ Webhook (رابط أدناه)</li>
+                <li>افتح البوت وأرسل /start ثم أدخل كلمة السر</li>
+              </ol>
+              {telegramBotToken && (
+                <div className="mt-3 p-2 bg-background rounded border">
+                  <p className="text-xs font-medium mb-1">رابط إعداد Webhook:</p>
+                  <code className="text-xs break-all text-primary">
+                    https://api.telegram.org/bot{telegramBotToken}/setWebhook?url=https://ghsiifbeszsrpqwbpopr.supabase.co/functions/v1/telegram-webhook
+                  </code>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    افتح هذا الرابط في المتصفح لتفعيل الـ Webhook
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
