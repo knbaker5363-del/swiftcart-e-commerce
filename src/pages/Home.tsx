@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart, ShoppingCart, Grid } from 'lucide-react';
+import { Heart, ShoppingCart, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
@@ -19,26 +19,15 @@ import BrandsButton from '@/components/BrandsButton';
 import ProductQuickView from '@/components/ProductQuickView';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
-import dynamicIconImports from 'lucide-react/dynamicIconImports';
-import type { LucideProps } from 'lucide-react';
+import { getIconByName } from '@/lib/categoryIcons';
 
-// Dynamic icon component for categories
-interface DynamicIconProps extends Omit<LucideProps, 'ref'> {
-  name: keyof typeof dynamicIconImports;
-}
-
-const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
-  const LucideIcon = lazy(dynamicIconImports[name]);
-  return (
-    <Suspense fallback={<div className="w-5 h-5 bg-muted rounded animate-pulse" />}>
-      <LucideIcon {...props} />
-    </Suspense>
-  );
-};
-
-// Helper to convert icon name to kebab-case
-const toKebabCase = (str: string): keyof typeof dynamicIconImports => {
-  return (str.charAt(0).toLowerCase() + str.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase()) as keyof typeof dynamicIconImports;
+// Render icon by name
+const RenderCategoryIcon = ({ iconName, className }: { iconName: string; className?: string }) => {
+  const IconComponent = getIconByName(iconName);
+  if (!IconComponent) {
+    return <Grid3X3 className={className} />;
+  }
+  return <IconComponent className={className} />;
 };
 const Home = () => {
   useDocumentTitle();
@@ -131,10 +120,9 @@ const Home = () => {
       const iconClass = size === 'large' ? 'h-12 w-12 text-primary' : 'h-5 w-5 text-primary';
       
       if (category.icon_name) {
-        const iconKey = toKebabCase(category.icon_name);
-        return <DynamicIcon name={iconKey} className={iconClass} />;
+        return <RenderCategoryIcon iconName={category.icon_name} className={iconClass} />;
       }
-      return <Grid className={iconClass} />;
+      return <Grid3X3 className={iconClass} />;
     };
     
     // Get background color style

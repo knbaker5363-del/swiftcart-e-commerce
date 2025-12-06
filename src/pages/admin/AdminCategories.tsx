@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,14 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image, Grid, Check, Settings2, GripVertical, Palette } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { categoryIcons } from '@/lib/categoryIcons';
+import { categoryIcons, getIconByName } from '@/lib/categoryIcons';
 import { useSettings } from '@/contexts/SettingsContext';
-import dynamicIconImports from 'lucide-react/dynamicIconImports';
-import type { LucideProps } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -32,20 +30,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-interface DynamicIconProps extends Omit<LucideProps, 'ref'> {
-  name: keyof typeof dynamicIconImports;
-}
-
-// Dynamic icon component
-const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
-  const LucideIcon = lazy(dynamicIconImports[name]);
-  return (
-    <Suspense fallback={<div className="w-5 h-5 bg-muted rounded animate-pulse" />}>
-      <LucideIcon {...props} />
-    </Suspense>
-  );
-};
-
 // Predefined background colors
 const bgColorOptions = [
   { id: 'default', name: 'افتراضي', color: null },
@@ -61,6 +45,15 @@ const bgColorOptions = [
   { id: 'rose', name: 'زهري', color: '#FFE4E6' },
   { id: 'gray', name: 'رمادي', color: '#F3F4F6' },
 ];
+
+// Render icon by name
+const RenderIcon = ({ iconName, className }: { iconName: string; className?: string }) => {
+  const IconComponent = getIconByName(iconName);
+  if (!IconComponent) {
+    return <Grid3X3 className={className} />;
+  }
+  return <IconComponent className={className} />;
+};
 
 // Icon picker component
 const IconPicker = ({ 
@@ -86,25 +79,22 @@ const IconPicker = ({
         )}
       </div>
       <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-[300px] overflow-y-auto p-2 border rounded-lg bg-muted/30">
-        {categoryIcons.map((icon) => {
-          const iconName = icon.icon.charAt(0).toLowerCase() + icon.icon.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase() as keyof typeof dynamicIconImports;
-          return (
-            <button
-              key={icon.id}
-              type="button"
-              onClick={() => onSelect(icon.icon)}
-              title={icon.name}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
-                selectedIcon === icon.icon
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-                  : 'bg-background hover:bg-muted border border-border hover:border-primary/50'
-              }`}
-            >
-              <DynamicIcon name={iconName} className="h-5 w-5" />
-              <span className="text-[10px] mt-1 truncate w-full text-center">{icon.name}</span>
-            </button>
-          );
-        })}
+        {categoryIcons.map((icon) => (
+          <button
+            key={icon.id}
+            type="button"
+            onClick={() => onSelect(icon.icon)}
+            title={icon.name}
+            className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
+              selectedIcon === icon.icon
+                ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+                : 'bg-background hover:bg-muted border border-border hover:border-primary/50'
+            }`}
+          >
+            <RenderIcon iconName={icon.icon} className="h-5 w-5" />
+            <span className="text-[10px] mt-1 truncate w-full text-center">{icon.name}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -147,13 +137,11 @@ const ColorPicker = ({
 const SortableCategoryItem = ({ 
   category, 
   onEdit, 
-  onDelete,
-  getCategoryIcon 
+  onDelete 
 }: { 
   category: any; 
   onEdit: (cat: any) => void; 
   onDelete: (id: string) => void;
-  getCategoryIcon: (iconName: string) => JSX.Element;
 }) => {
   const {
     attributes,
@@ -200,7 +188,7 @@ const SortableCategoryItem = ({
                 className="w-full h-full object-cover rounded-lg"
               />
             ) : category.icon_name ? (
-              getCategoryIcon(category.icon_name)
+              <RenderIcon iconName={category.icon_name} className="h-8 w-8 text-primary" />
             ) : (
               <Image className="h-8 w-8 text-muted-foreground" />
             )}
@@ -452,12 +440,6 @@ const AdminCategories = () => {
     }
   };
 
-  // Get icon component for display
-  const getCategoryIcon = (iconName: string) => {
-    const iconId = iconName.charAt(0).toLowerCase() + iconName.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase() as keyof typeof dynamicIconImports;
-    return <DynamicIcon name={iconId} className="h-8 w-8 text-primary" />;
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -611,7 +593,7 @@ const AdminCategories = () => {
                         صورة
                       </TabsTrigger>
                       <TabsTrigger value="icon" className="flex-1">
-                        <Grid className="h-4 w-4 ml-2" />
+                        <Grid3X3 className="h-4 w-4 ml-2" />
                         أيقونة
                       </TabsTrigger>
                     </TabsList>
@@ -686,7 +668,6 @@ const AdminCategories = () => {
                       category={category}
                       onEdit={handleEdit}
                       onDelete={(id) => deleteMutation.mutate(id)}
-                      getCategoryIcon={getCategoryIcon}
                     />
                   ))}
                 </div>
@@ -694,7 +675,7 @@ const AdminCategories = () => {
             </DndContext>
           ) : (
             <div className="text-center py-12">
-              <Grid className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <Grid3X3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">لا توجد تصنيفات بعد</p>
               <p className="text-sm text-muted-foreground">أضف تصنيفات لتنظيم منتجاتك</p>
             </div>

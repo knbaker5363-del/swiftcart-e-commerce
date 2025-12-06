@@ -1,5 +1,8 @@
+import * as LucideIcons from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
 // Category icons list for merchants to choose from
-export const categoryIcons = [
+export const categoryIcons: { id: string; name: string; icon: string }[] = [
   // Shopping & Products
   { id: 'shirt', name: 'ملابس', icon: 'Shirt' },
   { id: 'shopping-bag', name: 'حقائب', icon: 'ShoppingBag' },
@@ -41,12 +44,12 @@ export const categoryIcons = [
   
   // Kids & Baby
   { id: 'baby', name: 'أطفال', icon: 'Baby' },
-  { id: 'blocks', name: 'ألعاب أطفال', icon: 'Blocks' },
-  { id: 'teddy-bear', name: 'دمى', icon: 'Cake' },
+  { id: 'puzzle', name: 'ألعاب أطفال', icon: 'Puzzle' },
+  { id: 'cake', name: 'حلويات', icon: 'Cake' },
   
   // Food & Groceries
   { id: 'apple', name: 'فواكه', icon: 'Apple' },
-  { id: 'cookie', name: 'حلويات', icon: 'Cookie' },
+  { id: 'cookie', name: 'معجنات', icon: 'Cookie' },
   { id: 'pizza', name: 'طعام', icon: 'Pizza' },
   { id: 'beef', name: 'لحوم', icon: 'Beef' },
   { id: 'fish', name: 'أسماك', icon: 'Fish' },
@@ -68,9 +71,21 @@ export const categoryIcons = [
   { id: 'award', name: 'جوائز', icon: 'Award' },
   { id: 'gem', name: 'مجوهرات', icon: 'Gem' },
   { id: 'glasses', name: 'نظارات', icon: 'Glasses' },
-  { id: 'flower-2', name: 'زهور', icon: 'Flower2' },
+  { id: 'flower2', name: 'زهور', icon: 'Flower2' },
   { id: 'palette', name: 'فن', icon: 'Palette' },
   { id: 'music', name: 'موسيقى', icon: 'Music' },
+  { id: 'grid', name: 'عام', icon: 'Grid3X3' },
+  { id: 'box', name: 'صندوق', icon: 'Box' },
+  { id: 'store', name: 'متجر', icon: 'Store' },
 ];
+
+// Get icon component by name
+export const getIconByName = (iconName: string): LucideIcon | null => {
+  const IconComponent = (LucideIcons as any)[iconName];
+  if (IconComponent && typeof IconComponent === 'function') {
+    return IconComponent as LucideIcon;
+  }
+  return null;
+};
 
 export type CategoryIcon = typeof categoryIcons[number];
