@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart, ShoppingCart, Grid, List } from 'lucide-react';
+import { Heart, ShoppingCart, Grid, List, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
@@ -143,6 +143,20 @@ const Home = () => {
   return <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
+
+      {/* My Orders Button - Below Header */}
+      <section className="py-3">
+        <div className="container">
+          <Link to="/my-orders" className="block">
+            <div className="w-full p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-l from-primary/10 via-secondary/30 to-primary/10 hover:from-primary/20 hover:via-secondary/40 hover:to-primary/20 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] cursor-pointer">
+              <div className="flex items-center justify-center gap-3">
+                <Package className="h-6 w-6 text-primary" />
+                <span className="text-lg font-bold text-primary">طلباتي</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Hero Section */}
       <HeroSection />
