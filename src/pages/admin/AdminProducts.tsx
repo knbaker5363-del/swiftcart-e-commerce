@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { compressImageToFile, isImageFile } from '@/lib/imageCompression';
 
 const AdminProducts = () => {
   const { toast } = useToast();
@@ -99,23 +100,36 @@ const AdminProducts = () => {
     if (!file) return;
 
     setUploading(true);
-    const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file);
+    try {
+      // Compress image before upload
+      let fileToUpload: File | Blob = file;
+      if (isImageFile(file)) {
+        toast({ title: 'جاري ضغط الصورة...' });
+        fileToUpload = await compressImageToFile(file);
+      }
+      
+      const fileName = `${Date.now()}-${(fileToUpload as File).name || 'image.webp'}`;
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, fileToUpload);
 
-    if (uploadError) {
-      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+      if (uploadError) {
+        toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, image_url: publicUrl });
+      toast({ title: 'تم رفع الصورة بنجاح' });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({ title: 'خطأ في معالجة الصورة', variant: 'destructive' });
+    } finally {
       setUploading(false);
-      return;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(fileName);
-
-    setFormData({ ...formData, image_url: publicUrl });
-    setUploading(false);
   };
 
   const handleAdditionalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,27 +137,39 @@ const AdminProducts = () => {
     if (!file) return;
 
     setUploading(true);
-    const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file);
+    try {
+      // Compress image before upload
+      let fileToUpload: File | Blob = file;
+      if (isImageFile(file)) {
+        toast({ title: 'جاري ضغط الصورة...' });
+        fileToUpload = await compressImageToFile(file);
+      }
+      
+      const fileName = `${Date.now()}-${(fileToUpload as File).name || 'image.webp'}`;
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, fileToUpload);
 
-    if (uploadError) {
-      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+      if (uploadError) {
+        toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setFormData({ 
+        ...formData, 
+        additional_images: [...formData.additional_images, publicUrl] 
+      });
+      toast({ title: 'تم إضافة الصورة بنجاح' });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({ title: 'خطأ في معالجة الصورة', variant: 'destructive' });
+    } finally {
       setUploading(false);
-      return;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(fileName);
-
-    setFormData({ 
-      ...formData, 
-      additional_images: [...formData.additional_images, publicUrl] 
-    });
-    setUploading(false);
-    toast({ title: 'تم إضافة الصورة بنجاح' });
   };
 
   const removeAdditionalImage = (index: number) => {
