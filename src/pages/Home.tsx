@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart, ShoppingCart, Grid, List } from 'lucide-react';
+import { Heart, ShoppingCart, Grid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
@@ -19,6 +19,27 @@ import BrandsButton from '@/components/BrandsButton';
 import ProductQuickView from '@/components/ProductQuickView';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
+import dynamicIconImports from 'lucide-react/dynamicIconImports';
+import type { LucideProps } from 'lucide-react';
+
+// Dynamic icon component for categories
+interface DynamicIconProps extends Omit<LucideProps, 'ref'> {
+  name: keyof typeof dynamicIconImports;
+}
+
+const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
+  const LucideIcon = lazy(dynamicIconImports[name]);
+  return (
+    <Suspense fallback={<div className="w-5 h-5 bg-muted rounded animate-pulse" />}>
+      <LucideIcon {...props} />
+    </Suspense>
+  );
+};
+
+// Helper to convert icon name to kebab-case
+const toKebabCase = (str: string): keyof typeof dynamicIconImports => {
+  return (str.charAt(0).toLowerCase() + str.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase()) as keyof typeof dynamicIconImports;
+};
 const Home = () => {
   useDocumentTitle();
   const [cartOpen, setCartOpen] = useState(false);
@@ -105,6 +126,17 @@ const Home = () => {
     setQuickViewOpen(true);
   };
   const renderCategoryItem = (category: any) => {
+    // Helper function to render category icon or fallback
+    const renderCategoryVisual = (size: 'small' | 'large') => {
+      const iconClass = size === 'large' ? 'h-12 w-12 text-primary' : 'h-5 w-5 text-primary';
+      
+      if (category.icon_name) {
+        const iconKey = toKebabCase(category.icon_name);
+        return <DynamicIcon name={iconKey} className={iconClass} />;
+      }
+      return <Grid className={iconClass} />;
+    };
+
     if (categoryDisplayStyle === 'list') {
       return <Link key={category.id} to={`/category/${category.id}`} className="block">
           <div className="p-4 rounded-lg border bg-card hover:bg-secondary/50 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-md">
@@ -112,25 +144,35 @@ const Home = () => {
           </div>
         </Link>;
     }
+    
     if (categoryDisplayStyle === 'icon-list') {
       return <Link key={category.id} to={`/category/${category.id}`} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-secondary/50 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-md">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Grid className="h-5 w-5 text-primary" />
+            {renderCategoryVisual('small')}
           </div>
           <h3 className="font-medium">{category.name}</h3>
         </Link>;
     }
 
-    // Default: grid with images
+    // Default: grid with images or icons
     return <Link key={category.id} to={`/category/${category.id}`} className="group">
         <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-3">
           <div className="aspect-square mb-2">
-            {category.image_url ? <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300" /> : <div className="w-full h-full bg-muted rounded-md" />}
+            {category.image_url ? (
+              <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300" />
+            ) : category.icon_name ? (
+              <div className="w-full h-full bg-primary/5 rounded-md flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                {renderCategoryVisual('large')}
+              </div>
+            ) : (
+              <div className="w-full h-full bg-muted rounded-md" />
+            )}
           </div>
           <h3 className="font-medium text-sm text-center line-clamp-1">{category.name}</h3>
         </Card>
       </Link>;
   };
+  
   const getCategoryGridClass = () => {
     if (categoryDisplayStyle === 'list') {
       return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3";
