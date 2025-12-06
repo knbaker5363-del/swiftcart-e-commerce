@@ -148,10 +148,10 @@ const Home = () => {
       <section className="py-3">
         <div className="container">
           <Link to="/my-orders" className="block">
-            <div className="w-full p-4 rounded-xl border-2 border-primary/20 bg-gradient-to-l from-primary/10 via-secondary/30 to-primary/10 hover:from-primary/20 hover:via-secondary/40 hover:to-primary/20 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] cursor-pointer">
+            <div className="w-full p-4 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] cursor-pointer">
               <div className="flex items-center justify-center gap-3">
-                <Package className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold text-primary">طلباتي</span>
+                <Package className="h-6 w-6 text-white" />
+                <span className="text-lg font-bold text-white">طلباتي</span>
               </div>
             </div>
           </Link>
