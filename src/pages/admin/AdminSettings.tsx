@@ -10,63 +10,216 @@ import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Spa
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ThemePreview from '@/components/ThemePreview';
-
-const themes = [
-  { id: 'default', name: 'كلاسيكي (أبيض وأسود)', colors: 'أبيض وأسود', noGradient: true },
-  { id: 'night', name: 'ليلي', colors: 'أزرق داكن مع بنفسجي', noGradient: false },
-  { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع مع أصفر', noGradient: false },
-  { id: 'pink', name: 'زهري', colors: 'وردي مع فوشيا', noGradient: false },
-  { id: 'green', name: 'أخضر', colors: 'أخضر زمردي', noGradient: false },
-  { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ', noGradient: false },
-  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي', noGradient: true },
-  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح', noGradient: true },
-  { id: 'coral', name: 'مرجاني', colors: 'مرجاني مع وردي', noGradient: false },
-  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي', noGradient: true },
-  { id: 'sunset', name: 'غروب', colors: 'برتقالي مع أحمر', noGradient: false },
-  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق', noGradient: true },
-  { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي مع وردي', noGradient: false },
-  { id: 'forest', name: 'غابة', colors: 'أخضر غامق مع زيتي', noGradient: false },
-  { id: 'gold', name: 'ذهبي', colors: 'ذهبي مع برتقالي', noGradient: false },
-  { id: 'ruby', name: 'ياقوتي', colors: 'أحمر ياقوتي', noGradient: true },
-  { id: 'sky', name: 'سماوي', colors: 'أزرق سماوي فاتح', noGradient: true },
-  { id: 'plum', name: 'برقوقي', colors: 'بنفسجي غامق', noGradient: false },
-  { id: 'teal', name: 'فيروزي', colors: 'فيروزي داكن', noGradient: true },
-  { id: 'rose', name: 'وردي فاتح', colors: 'وردي فاتح مع زهري', noGradient: false },
-  { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ', noGradient: true },
-];
-
-const animationEffects = [
-  { id: 'none', name: 'بدون تأثير', icon: '✕' },
-  { id: 'snow', name: 'ثلج', icon: '❄️' },
-  { id: 'stars', name: 'نجوم', icon: '⭐' },
-  { id: 'hearts', name: 'قلوب', icon: '❤️' },
-  { id: 'confetti', name: 'احتفال', icon: '🎊' },
-  { id: 'bubbles', name: 'فقاعات', icon: '🫧' },
-  { id: 'leaves', name: 'أوراق', icon: '🍃' },
-];
-
-const accentColorOptions = [
-  { id: 'default', name: 'حسب الثيم', color: 'var(--gradient-primary)' },
-  { id: 'blue', name: 'أزرق', color: 'hsl(210, 100%, 50%)' },
-  { id: 'red', name: 'أحمر', color: 'hsl(0, 85%, 55%)' },
-  { id: 'green', name: 'أخضر', color: 'hsl(145, 80%, 42%)' },
-  { id: 'purple', name: 'بنفسجي', color: 'hsl(270, 70%, 55%)' },
-  { id: 'orange', name: 'برتقالي', color: 'hsl(25, 95%, 53%)' },
-  { id: 'pink', name: 'وردي', color: 'hsl(330, 85%, 60%)' },
-  { id: 'teal', name: 'فيروزي', color: 'hsl(175, 75%, 40%)' },
-  { id: 'yellow', name: 'أصفر', color: 'hsl(45, 95%, 50%)' },
-  { id: 'indigo', name: 'نيلي', color: 'hsl(245, 70%, 55%)' },
-  { id: 'rose', name: 'وردي غامق', color: 'hsl(350, 90%, 60%)' },
-  { id: 'cyan', name: 'سماوي', color: 'hsl(190, 90%, 45%)' },
-  { id: 'amber', name: 'كهرماني', color: 'hsl(38, 92%, 50%)' },
-  { id: 'lime', name: 'ليموني', color: 'hsl(84, 80%, 45%)' },
-  { id: 'emerald', name: 'زمردي', color: 'hsl(158, 64%, 42%)' },
-  { id: 'black', name: 'أسود', color: 'hsl(0, 0%, 15%)' },
-];
-
+const themes = [{
+  id: 'default',
+  name: 'كلاسيكي (أبيض وأسود)',
+  colors: 'أبيض وأسود',
+  noGradient: true
+}, {
+  id: 'night',
+  name: 'ليلي',
+  colors: 'أزرق داكن مع بنفسجي',
+  noGradient: false
+}, {
+  id: 'day',
+  name: 'نهاري',
+  colors: 'برتقالي ساطع مع أصفر',
+  noGradient: false
+}, {
+  id: 'pink',
+  name: 'زهري',
+  colors: 'وردي مع فوشيا',
+  noGradient: false
+}, {
+  id: 'green',
+  name: 'أخضر',
+  colors: 'أخضر زمردي',
+  noGradient: false
+}, {
+  id: 'orange',
+  name: 'برتقالي',
+  colors: 'برتقالي دافئ',
+  noGradient: false
+}, {
+  id: 'ocean',
+  name: 'محيطي',
+  colors: 'أزرق سماوي',
+  noGradient: true
+}, {
+  id: 'lavender',
+  name: 'لافندر',
+  colors: 'بنفسجي فاتح',
+  noGradient: true
+}, {
+  id: 'coral',
+  name: 'مرجاني',
+  colors: 'مرجاني مع وردي',
+  noGradient: false
+}, {
+  id: 'mint',
+  name: 'نعناعي',
+  colors: 'أخضر نعناعي',
+  noGradient: true
+}, {
+  id: 'sunset',
+  name: 'غروب',
+  colors: 'برتقالي مع أحمر',
+  noGradient: false
+}, {
+  id: 'slate',
+  name: 'رمادي',
+  colors: 'رمادي مزرق',
+  noGradient: true
+}, {
+  id: 'cherry',
+  name: 'كرزي',
+  colors: 'أحمر كرزي مع وردي',
+  noGradient: false
+}, {
+  id: 'forest',
+  name: 'غابة',
+  colors: 'أخضر غامق مع زيتي',
+  noGradient: false
+}, {
+  id: 'gold',
+  name: 'ذهبي',
+  colors: 'ذهبي مع برتقالي',
+  noGradient: false
+}, {
+  id: 'ruby',
+  name: 'ياقوتي',
+  colors: 'أحمر ياقوتي',
+  noGradient: true
+}, {
+  id: 'sky',
+  name: 'سماوي',
+  colors: 'أزرق سماوي فاتح',
+  noGradient: true
+}, {
+  id: 'plum',
+  name: 'برقوقي',
+  colors: 'بنفسجي غامق',
+  noGradient: false
+}, {
+  id: 'teal',
+  name: 'فيروزي',
+  colors: 'فيروزي داكن',
+  noGradient: true
+}, {
+  id: 'rose',
+  name: 'وردي فاتح',
+  colors: 'وردي فاتح مع زهري',
+  noGradient: false
+}, {
+  id: 'cocoa',
+  name: 'كاكاو',
+  colors: 'بني دافئ',
+  noGradient: true
+}];
+const animationEffects = [{
+  id: 'none',
+  name: 'بدون تأثير',
+  icon: '✕'
+}, {
+  id: 'snow',
+  name: 'ثلج',
+  icon: '❄️'
+}, {
+  id: 'stars',
+  name: 'نجوم',
+  icon: '⭐'
+}, {
+  id: 'hearts',
+  name: 'قلوب',
+  icon: '❤️'
+}, {
+  id: 'confetti',
+  name: 'احتفال',
+  icon: '🎊'
+}, {
+  id: 'bubbles',
+  name: 'فقاعات',
+  icon: '🫧'
+}, {
+  id: 'leaves',
+  name: 'أوراق',
+  icon: '🍃'
+}];
+const accentColorOptions = [{
+  id: 'default',
+  name: 'حسب الثيم',
+  color: 'var(--gradient-primary)'
+}, {
+  id: 'blue',
+  name: 'أزرق',
+  color: 'hsl(210, 100%, 50%)'
+}, {
+  id: 'red',
+  name: 'أحمر',
+  color: 'hsl(0, 85%, 55%)'
+}, {
+  id: 'green',
+  name: 'أخضر',
+  color: 'hsl(145, 80%, 42%)'
+}, {
+  id: 'purple',
+  name: 'بنفسجي',
+  color: 'hsl(270, 70%, 55%)'
+}, {
+  id: 'orange',
+  name: 'برتقالي',
+  color: 'hsl(25, 95%, 53%)'
+}, {
+  id: 'pink',
+  name: 'وردي',
+  color: 'hsl(330, 85%, 60%)'
+}, {
+  id: 'teal',
+  name: 'فيروزي',
+  color: 'hsl(175, 75%, 40%)'
+}, {
+  id: 'yellow',
+  name: 'أصفر',
+  color: 'hsl(45, 95%, 50%)'
+}, {
+  id: 'indigo',
+  name: 'نيلي',
+  color: 'hsl(245, 70%, 55%)'
+}, {
+  id: 'rose',
+  name: 'وردي غامق',
+  color: 'hsl(350, 90%, 60%)'
+}, {
+  id: 'cyan',
+  name: 'سماوي',
+  color: 'hsl(190, 90%, 45%)'
+}, {
+  id: 'amber',
+  name: 'كهرماني',
+  color: 'hsl(38, 92%, 50%)'
+}, {
+  id: 'lime',
+  name: 'ليموني',
+  color: 'hsl(84, 80%, 45%)'
+}, {
+  id: 'emerald',
+  name: 'زمردي',
+  color: 'hsl(158, 64%, 42%)'
+}, {
+  id: 'black',
+  name: 'أسود',
+  color: 'hsl(0, 0%, 15%)'
+}];
 const AdminSettings = () => {
-  const { settings, loading, applyTheme, applyAccentColor } = useSettings();
-  const { toast } = useToast();
+  const {
+    settings,
+    loading,
+    applyTheme,
+    applyAccentColor
+  } = useSettings();
+  const {
+    toast
+  } = useToast();
   const [storeName, setStoreName] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('default');
   const [previewTheme, setPreviewTheme] = useState<string | null>(null);
@@ -92,7 +245,6 @@ const AdminSettings = () => {
   const [socialFacebook, setSocialFacebook] = useState('');
   const [socialSnapchat, setSocialSnapchat] = useState('');
   const [socialTiktok, setSocialTiktok] = useState('');
-
   useEffect(() => {
     if (settings) {
       setStoreName(settings.store_name);
@@ -147,221 +299,192 @@ const AdminSettings = () => {
     setAccentColor(colorId);
     applyAccentColor(colorId === 'default' ? null : colorId);
   };
-
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'خطأ',
         description: 'يرجى اختيار صورة فقط',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `logo-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file);
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('product-images').upload(fileName, file);
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
+      const {
+        data: {
+          publicUrl
+        }
+      } = supabase.storage.from('product-images').getPublicUrl(fileName);
       setLogoUrl(publicUrl);
-      
       toast({
         title: 'تم الرفع',
-        description: 'تم رفع الشعار بنجاح',
+        description: 'تم رفع الشعار بنجاح'
       });
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast({
         title: 'خطأ',
         description: 'فشل رفع الشعار',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setUploading(false);
     }
   };
-
   const handleRemoveLogo = () => {
     setLogoUrl(null);
   };
-
   const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'خطأ',
         description: 'يرجى اختيار صورة فقط',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setUploadingFavicon(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `favicon-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file);
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('product-images').upload(fileName, file);
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
+      const {
+        data: {
+          publicUrl
+        }
+      } = supabase.storage.from('product-images').getPublicUrl(fileName);
       setFaviconUrl(publicUrl);
-      
       toast({
         title: 'تم الرفع',
-        description: 'تم رفع أيقونة المتجر بنجاح',
+        description: 'تم رفع أيقونة المتجر بنجاح'
       });
     } catch (error) {
       console.error('Error uploading favicon:', error);
       toast({
         title: 'خطأ',
         description: 'فشل رفع أيقونة المتجر',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setUploadingFavicon(false);
     }
   };
-
   const handleRemoveFavicon = () => {
     setFaviconUrl(null);
   };
-
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'خطأ',
         description: 'يرجى اختيار صورة فقط',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setUploadingBanner(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `banner-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file);
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('product-images').upload(fileName, file);
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
+      const {
+        data: {
+          publicUrl
+        }
+      } = supabase.storage.from('product-images').getPublicUrl(fileName);
       setBannerImages([...bannerImages, publicUrl]);
-      
       toast({
         title: 'تم الرفع',
-        description: 'تم رفع صورة البانر بنجاح',
+        description: 'تم رفع صورة البانر بنجاح'
       });
     } catch (error) {
       console.error('Error uploading banner:', error);
       toast({
         title: 'خطأ',
         description: 'فشل رفع صورة البانر',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setUploadingBanner(false);
       e.target.value = '';
     }
   };
-
   const handleRemoveBanner = (index: number) => {
     const newBanners = bannerImages.filter((_, i) => i !== index);
     setBannerImages(newBanners);
   };
-
   const handleClearAllBanners = () => {
     setBannerImages([]);
     toast({
       title: 'تم الحذف',
-      description: 'تم حذف جميع صور البانر',
+      description: 'تم حذف جميع صور البانر'
     });
   };
-
   const handleSave = async () => {
     try {
-      const { error } = await supabase
-        .from('settings')
-        .update({
-          store_name: storeName,
-          theme: selectedTheme,
-          logo_url: logoUrl,
-          favicon_url: faviconUrl,
-          location: location,
-          store_phone: storePhone,
-          whatsapp_country_code: whatsappCountryCode,
-          whatsapp_number: whatsappNumber,
-          delivery_west_bank: parseFloat(deliveryWestBank),
-          delivery_jerusalem: parseFloat(deliveryJerusalem),
-          delivery_inside: parseFloat(deliveryInside),
-          banner_images: bannerImages,
-          store_name_black: storeNameBlack,
-          animation_effect: animationEffect === 'none' ? null : animationEffect,
-          accent_color: accentColor === 'default' ? null : accentColor,
-          social_whatsapp: socialWhatsapp || null,
-          social_instagram: socialInstagram || null,
-          social_facebook: socialFacebook || null,
-          social_snapchat: socialSnapchat || null,
-          social_tiktok: socialTiktok || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', settings?.id);
-
+      const {
+        error
+      } = await supabase.from('settings').update({
+        store_name: storeName,
+        theme: selectedTheme,
+        logo_url: logoUrl,
+        favicon_url: faviconUrl,
+        location: location,
+        store_phone: storePhone,
+        whatsapp_country_code: whatsappCountryCode,
+        whatsapp_number: whatsappNumber,
+        delivery_west_bank: parseFloat(deliveryWestBank),
+        delivery_jerusalem: parseFloat(deliveryJerusalem),
+        delivery_inside: parseFloat(deliveryInside),
+        banner_images: bannerImages,
+        store_name_black: storeNameBlack,
+        animation_effect: animationEffect === 'none' ? null : animationEffect,
+        accent_color: accentColor === 'default' ? null : accentColor,
+        social_whatsapp: socialWhatsapp || null,
+        social_instagram: socialInstagram || null,
+        social_facebook: socialFacebook || null,
+        social_snapchat: socialSnapchat || null,
+        social_tiktok: socialTiktok || null,
+        updated_at: new Date().toISOString()
+      }).eq('id', settings?.id);
       if (error) throw error;
-
       toast({
         title: 'تم الحفظ',
-        description: 'تم حفظ الإعدادات بنجاح',
+        description: 'تم حفظ الإعدادات بنجاح'
       });
-      
       window.location.reload();
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
         title: 'خطأ',
         description: 'فشل حفظ الإعدادات',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
+    return <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">الإعدادات</h1>
         <p className="text-muted-foreground mt-2">إدارة إعدادات المتجر والمظهر</p>
@@ -381,36 +504,22 @@ const AdminSettings = () => {
             {/* معاينة الثيم */}
             <div className="mb-6">
               <Label className="text-base font-medium mb-3 block">معاينة الثيم المختار</Label>
-              <ThemePreview themeId={previewTheme || selectedTheme} />
+              
             </div>
 
             {/* اختيار الثيم */}
             <div>
               <Label className="text-base font-medium mb-3 block">اختر ثيم الخلفية</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {themes.map((theme) => (
-                  <button
-                    key={theme.id}
-                    onClick={() => handleThemeSelect(theme.id)}
-                    onMouseEnter={() => handleThemePreview(theme.id)}
-                    onMouseLeave={handleThemePreviewEnd}
-                    className={`p-3 rounded-lg border-2 text-right transition-all hover:scale-[1.02] ${
-                      selectedTheme === theme.id
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                    }`}
-                  >
+                {themes.map(theme => <button key={theme.id} onClick={() => handleThemeSelect(theme.id)} onMouseEnter={() => handleThemePreview(theme.id)} onMouseLeave={handleThemePreviewEnd} className={`p-3 rounded-lg border-2 text-right transition-all hover:scale-[1.02] ${selectedTheme === theme.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50 hover:bg-muted/50'}`}>
                     <div className="flex items-center justify-between">
                       <div className="font-semibold text-sm">{theme.name}</div>
-                      {selectedTheme === theme.id && (
-                        <div className="bg-primary text-primary-foreground rounded-full p-1">
+                      {selectedTheme === theme.id && <div className="bg-primary text-primary-foreground rounded-full p-1">
                           <Check className="h-3 w-3" />
-                        </div>
-                      )}
+                        </div>}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">{theme.colors}</div>
-                  </button>
-                ))}
+                  </button>)}
               </div>
             </div>
           </CardContent>
@@ -427,26 +536,13 @@ const AdminSettings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-              {accentColorOptions.map((color) => (
-                <button
-                  key={color.id}
-                  onClick={() => handleAccentColorChange(color.id)}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105 ${
-                    accentColor === color.id
-                      ? 'border-primary shadow-md'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-background shadow-sm"
-                    style={{ background: color.color }}
-                  />
+              {accentColorOptions.map(color => <button key={color.id} onClick={() => handleAccentColorChange(color.id)} className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105 ${accentColor === color.id ? 'border-primary shadow-md' : 'border-border hover:border-primary/50'}`}>
+                  <div className="w-8 h-8 rounded-full border-2 border-background shadow-sm" style={{
+                background: color.color
+              }} />
                   <span className="text-xs font-medium text-center">{color.name}</span>
-                  {accentColor === color.id && (
-                    <Check className="h-3 w-3 text-primary" />
-                  )}
-                </button>
-              ))}
+                  {accentColor === color.id && <Check className="h-3 w-3 text-primary" />}
+                </button>)}
             </div>
             <p className="text-sm text-muted-foreground">
               اختر "حسب الثيم" لاستخدام لون الأزرار الافتراضي للثيم المختار
@@ -474,11 +570,7 @@ const AdminSettings = () => {
                   عند التفعيل، سيظهر اسم المتجر باللون الأسود بدلاً من لون الثيم
                 </p>
               </div>
-              <Switch
-                id="storeNameBlack"
-                checked={storeNameBlack}
-                onCheckedChange={setStoreNameBlack}
-              />
+              <Switch id="storeNameBlack" checked={storeNameBlack} onCheckedChange={setStoreNameBlack} />
             </div>
 
             {/* التأثيرات المتحركة */}
@@ -490,20 +582,10 @@ const AdminSettings = () => {
                 أضف تأثيرات متحركة على خلفية الموقع (مثل ثلج، نجوم، قلوب...)
               </p>
               <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
-                {animationEffects.map((effect) => (
-                  <button
-                    key={effect.id}
-                    onClick={() => setAnimationEffect(effect.id)}
-                    className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
-                      animationEffect === effect.id
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
+                {animationEffects.map(effect => <button key={effect.id} onClick={() => setAnimationEffect(effect.id)} className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${animationEffect === effect.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}>
                     <div className="text-2xl mb-1">{effect.icon}</div>
                     <div className="text-xs font-medium">{effect.name}</div>
-                  </button>
-                ))}
+                  </button>)}
               </div>
             </div>
           </CardContent>
@@ -519,33 +601,16 @@ const AdminSettings = () => {
             <div className="space-y-2">
               <Label>شعار المتجر</Label>
               <div className="flex items-center gap-4">
-                {logoUrl ? (
-                  <div className="relative">
-                    <img
-                      src={logoUrl}
-                      alt="شعار المتجر"
-                      className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
-                    />
-                    <button
-                      onClick={handleRemoveLogo}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
-                    >
+                {logoUrl ? <div className="relative">
+                    <img src={logoUrl} alt="شعار المتجر" className="w-24 h-24 rounded-full object-cover border-4 border-primary/20" />
+                    <button onClick={handleRemoveLogo} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90">
                       <X className="h-4 w-4" />
                     </button>
-                  </div>
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
+                  </div> : <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
                     <Upload className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
+                  </div>}
                 <div className="flex-1">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    disabled={uploading}
-                    className="cursor-pointer"
-                  />
+                  <Input type="file" accept="image/*" onChange={handleLogoUpload} disabled={uploading} className="cursor-pointer" />
                   <p className="text-sm text-muted-foreground mt-1">
                     {uploading ? 'جاري الرفع...' : 'اختر صورة للشعار'}
                   </p>
@@ -560,33 +625,16 @@ const AdminSettings = () => {
                 هذه الأيقونة تظهر في شريط المتصفح بجانب عنوان الصفحة
               </p>
               <div className="flex items-center gap-4">
-                {faviconUrl ? (
-                  <div className="relative">
-                    <img
-                      src={faviconUrl}
-                      alt="أيقونة المتجر"
-                      className="w-16 h-16 rounded-lg object-cover border-2 border-primary/20"
-                    />
-                    <button
-                      onClick={handleRemoveFavicon}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
-                    >
+                {faviconUrl ? <div className="relative">
+                    <img src={faviconUrl} alt="أيقونة المتجر" className="w-16 h-16 rounded-lg object-cover border-2 border-primary/20" />
+                    <button onClick={handleRemoveFavicon} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90">
                       <X className="h-3 w-3" />
                     </button>
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                  </div> : <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
                     <Image className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                )}
+                  </div>}
                 <div className="flex-1">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFaviconUpload}
-                    disabled={uploadingFavicon}
-                    className="cursor-pointer"
-                  />
+                  <Input type="file" accept="image/*" onChange={handleFaviconUpload} disabled={uploadingFavicon} className="cursor-pointer" />
                   <p className="text-sm text-muted-foreground mt-1">
                     {uploadingFavicon ? 'جاري الرفع...' : 'اختر صورة للأيقونة (يفضل حجم 32x32 أو 64x64)'}
                   </p>
@@ -597,12 +645,7 @@ const AdminSettings = () => {
             {/* اسم المتجر */}
             <div className="space-y-2">
               <Label htmlFor="storeName">اسم المتجر</Label>
-              <Input
-                id="storeName"
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-                placeholder="اسم متجرك"
-              />
+              <Input id="storeName" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="اسم متجرك" />
               <p className="text-sm text-muted-foreground">
                 سيظهر هذا الاسم في عنوان التبويب وأيقونة الموقع
               </p>
@@ -611,25 +654,13 @@ const AdminSettings = () => {
             {/* الموقع */}
             <div className="space-y-2">
               <Label htmlFor="location">الموقع</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="مثال: الرياض، المملكة العربية السعودية"
-              />
+              <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="مثال: الرياض، المملكة العربية السعودية" />
             </div>
             
             {/* رقم هاتف المتجر */}
             <div className="space-y-2">
               <Label htmlFor="storePhone">رقم هاتف المتجر</Label>
-              <Input
-                id="storePhone"
-                type="tel"
-                value={storePhone}
-                onChange={(e) => setStorePhone(e.target.value)}
-                placeholder="مثال: 0591234567 أو +972591234567"
-                maxLength={20}
-              />
+              <Input id="storePhone" type="tel" value={storePhone} onChange={e => setStorePhone(e.target.value)} placeholder="مثال: 0591234567 أو +972591234567" maxLength={20} />
               <p className="text-sm text-muted-foreground">
                 الرقم الذي سيتصل به العملاء لإتمام الطلب
               </p>
@@ -665,14 +696,7 @@ const AdminSettings = () => {
             
             <div className="space-y-2">
               <Label htmlFor="whatsappNumber">رقم واتساب</Label>
-              <Input
-                id="whatsappNumber"
-                type="tel"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
-                placeholder="مثال: 123456789"
-                maxLength={15}
-              />
+              <Input id="whatsappNumber" type="tel" value={whatsappNumber} onChange={e => setWhatsappNumber(e.target.value.replace(/\D/g, ''))} placeholder="مثال: 123456789" maxLength={15} />
               <p className="text-sm text-muted-foreground">
                 الرقم الكامل: +{whatsappCountryCode}{whatsappNumber}
               </p>
@@ -689,41 +713,17 @@ const AdminSettings = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="deliveryWestBank">الضفة الغربية</Label>
-                <Input
-                  id="deliveryWestBank"
-                  type="number"
-                  value={deliveryWestBank}
-                  onChange={(e) => setDeliveryWestBank(e.target.value)}
-                  placeholder="20"
-                  min="0"
-                  step="0.01"
-                />
+                <Input id="deliveryWestBank" type="number" value={deliveryWestBank} onChange={e => setDeliveryWestBank(e.target.value)} placeholder="20" min="0" step="0.01" />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="deliveryJerusalem">القدس</Label>
-                <Input
-                  id="deliveryJerusalem"
-                  type="number"
-                  value={deliveryJerusalem}
-                  onChange={(e) => setDeliveryJerusalem(e.target.value)}
-                  placeholder="50"
-                  min="0"
-                  step="0.01"
-                />
+                <Input id="deliveryJerusalem" type="number" value={deliveryJerusalem} onChange={e => setDeliveryJerusalem(e.target.value)} placeholder="50" min="0" step="0.01" />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="deliveryInside">الداخل (48)</Label>
-                <Input
-                  id="deliveryInside"
-                  type="number"
-                  value={deliveryInside}
-                  onChange={(e) => setDeliveryInside(e.target.value)}
-                  placeholder="70"
-                  min="0"
-                  step="0.01"
-                />
+                <Input id="deliveryInside" type="number" value={deliveryInside} onChange={e => setDeliveryInside(e.target.value)} placeholder="70" min="0" step="0.01" />
               </div>
             </div>
           </CardContent>
@@ -739,66 +739,43 @@ const AdminSettings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* عرض الصور الحالية */}
-            {bannerImages.length > 0 && (
-              <>
+            {bannerImages.length > 0 && <>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
                     {bannerImages.length} صور مضافة
                   </span>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleClearAllBanners}
-                  >
+                  <Button variant="destructive" size="sm" onClick={handleClearAllBanners}>
                     <Trash2 className="h-4 w-4 ml-2" />
                     حذف الكل
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {bannerImages.map((img, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={img}
-                        alt={`بانر ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border"
-                      />
-                      <button
-                        onClick={() => handleRemoveBanner(index)}
-                        className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
+                  {bannerImages.map((img, index) => <div key={index} className="relative group">
+                      <img src={img} alt={`بانر ${index + 1}`} className="w-full h-32 object-cover rounded-lg border" />
+                      <button onClick={() => handleRemoveBanner(index)} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Trash2 className="h-4 w-4" />
                       </button>
                       <span className="absolute bottom-2 left-2 bg-background/80 text-foreground text-xs px-2 py-1 rounded">
                         {index + 1}
                       </span>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
-              </>
-            )}
+              </>}
             
             {/* زر إضافة صورة */}
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBannerUpload}
-                  disabled={uploadingBanner}
-                  className="cursor-pointer"
-                />
+                <Input type="file" accept="image/*" onChange={handleBannerUpload} disabled={uploadingBanner} className="cursor-pointer" />
                 <p className="text-sm text-muted-foreground mt-1">
                   {uploadingBanner ? 'جاري الرفع...' : 'أضف صورة للبانر (حجم مثالي: 1920x600)'}
                 </p>
               </div>
             </div>
             
-            {bannerImages.length === 0 && (
-              <div className="text-center py-8 border-2 border-dashed rounded-lg">
+            {bannerImages.length === 0 && <div className="text-center py-8 border-2 border-dashed rounded-lg">
                 <Image className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
                 <p className="text-muted-foreground">لم يتم إضافة صور للبانر بعد</p>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
 
@@ -814,57 +791,27 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="socialWhatsapp">واتساب (رابط أو رقم)</Label>
-              <Input
-                id="socialWhatsapp"
-                value={socialWhatsapp}
-                onChange={(e) => setSocialWhatsapp(e.target.value)}
-                placeholder="مثال: https://wa.me/972591234567"
-                dir="ltr"
-              />
+              <Input id="socialWhatsapp" value={socialWhatsapp} onChange={e => setSocialWhatsapp(e.target.value)} placeholder="مثال: https://wa.me/972591234567" dir="ltr" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="socialInstagram">انستغرام</Label>
-              <Input
-                id="socialInstagram"
-                value={socialInstagram}
-                onChange={(e) => setSocialInstagram(e.target.value)}
-                placeholder="مثال: https://instagram.com/yourstore"
-                dir="ltr"
-              />
+              <Input id="socialInstagram" value={socialInstagram} onChange={e => setSocialInstagram(e.target.value)} placeholder="مثال: https://instagram.com/yourstore" dir="ltr" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="socialFacebook">فيسبوك</Label>
-              <Input
-                id="socialFacebook"
-                value={socialFacebook}
-                onChange={(e) => setSocialFacebook(e.target.value)}
-                placeholder="مثال: https://facebook.com/yourstore"
-                dir="ltr"
-              />
+              <Input id="socialFacebook" value={socialFacebook} onChange={e => setSocialFacebook(e.target.value)} placeholder="مثال: https://facebook.com/yourstore" dir="ltr" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="socialSnapchat">سناب شات</Label>
-              <Input
-                id="socialSnapchat"
-                value={socialSnapchat}
-                onChange={(e) => setSocialSnapchat(e.target.value)}
-                placeholder="مثال: https://snapchat.com/add/yourstore"
-                dir="ltr"
-              />
+              <Input id="socialSnapchat" value={socialSnapchat} onChange={e => setSocialSnapchat(e.target.value)} placeholder="مثال: https://snapchat.com/add/yourstore" dir="ltr" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="socialTiktok">تيك توك</Label>
-              <Input
-                id="socialTiktok"
-                value={socialTiktok}
-                onChange={(e) => setSocialTiktok(e.target.value)}
-                placeholder="مثال: https://tiktok.com/@yourstore"
-                dir="ltr"
-              />
+              <Input id="socialTiktok" value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)} placeholder="مثال: https://tiktok.com/@yourstore" dir="ltr" />
             </div>
           </CardContent>
         </Card>
@@ -873,8 +820,6 @@ const AdminSettings = () => {
           حفظ التغييرات
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdminSettings;
