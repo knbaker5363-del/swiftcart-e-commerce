@@ -12,6 +12,8 @@ interface Settings {
   animation_effect: string | null;
   accent_color: string | null;
   store_name_black: boolean;
+  category_display_style: 'grid' | 'list' | 'icon-list';
+  show_brands_button: boolean;
 }
 
 interface SettingsContextType {
@@ -90,7 +92,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         banner_images: Array.isArray(data.banner_images) ? data.banner_images : [],
         animation_effect: data.animation_effect || null,
         accent_color: data.accent_color || null,
-        store_name_black: data.store_name_black || false
+        store_name_black: data.store_name_black || false,
+        category_display_style: data.category_display_style || 'grid',
+        show_brands_button: data.show_brands_button !== false
       };
       setSettings(parsedSettings as Settings);
       if (data?.theme) {

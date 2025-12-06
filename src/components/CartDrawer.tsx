@@ -105,7 +105,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ open, onOpenChange }) =>
                 <span className="text-primary">{total.toFixed(2)} ₪</span>
               </div>
               <Button
-                className="w-full bg-gradient-primary shadow-button"
+                className="w-full"
                 size="lg"
                 onClick={handleCheckout}
               >
