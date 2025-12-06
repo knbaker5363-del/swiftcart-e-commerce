@@ -22,6 +22,7 @@ interface SettingsContextType {
   updateSettings: (storeName: string, theme: string, logoUrl?: string | null, location?: string | null) => Promise<void>;
   applyTheme: (theme: string) => void;
   applyAccentColor: (accentColor: string | null) => void;
+  refreshSettings: () => Promise<void>;
 }
 
 // Accent color definitions
@@ -44,11 +45,36 @@ const accentColors: Record<string, { primary: string; accent: string; ring: stri
   'black': { primary: '0 0% 15%', accent: '0 0% 25%', ring: '0 0% 15%' },
 };
 
+const SETTINGS_CACHE_KEY = 'store_settings_cache';
+
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+// Get cached settings from localStorage
+const getCachedSettings = (): Settings | null => {
+  try {
+    const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (e) {
+    console.error('Error reading cached settings:', e);
+  }
+  return null;
+};
+
+// Save settings to localStorage cache
+const cacheSettings = (settings: Settings) => {
+  try {
+    localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(settings));
+  } catch (e) {
+    console.error('Error caching settings:', e);
+  }
+};
+
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Initialize with cached settings to avoid flash of default content
+  const [settings, setSettings] = useState<Settings | null>(() => getCachedSettings());
+  const [loading, setLoading] = useState(!getCachedSettings()); // Only show loading if no cache
   const { toast } = useToast();
 
   const applyTheme = (theme: string) => {
@@ -96,7 +122,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         category_display_style: data.category_display_style || 'grid',
         show_brands_button: data.show_brands_button !== false
       };
+      
       setSettings(parsedSettings as Settings);
+      cacheSettings(parsedSettings as Settings); // Cache the settings
+      
       if (data?.theme) {
         applyTheme(data.theme);
       }
@@ -113,7 +142,15 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Apply cached settings immediately on mount
   useEffect(() => {
+    const cached = getCachedSettings();
+    if (cached) {
+      if (cached.theme) applyTheme(cached.theme);
+      if (cached.accent_color) applyAccentColor(cached.accent_color);
+      if (cached.store_name) updateDocumentTitle(cached.store_name);
+    }
+    // Always fetch fresh settings from database
     fetchSettings();
   }, []);
 
@@ -165,8 +202,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshSettings = async () => {
+    await fetchSettings();
+  };
+
   return (
-    <SettingsContext.Provider value={{ settings, loading, updateSettings, applyTheme, applyAccentColor }}>
+    <SettingsContext.Provider value={{ settings, loading, updateSettings, applyTheme, applyAccentColor, refreshSettings }}>
       {children}
     </SettingsContext.Provider>
   );

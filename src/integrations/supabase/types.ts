@@ -44,18 +44,21 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          icon_name: string | null
           id: string
           image_url: string | null
           name: string
         }
         Insert: {
           created_at?: string
+          icon_name?: string | null
           id?: string
           image_url?: string | null
           name: string
         }
         Update: {
           created_at?: string
+          icon_name?: string | null
           id?: string
           image_url?: string | null
           name?: string
