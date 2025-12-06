@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
@@ -20,6 +20,7 @@ import ProductQuickView from '@/components/ProductQuickView';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getIconByName } from '@/lib/categoryIcons';
+import { usePageView } from '@/hooks/useAnalytics';
 
 // Render icon by name
 const RenderCategoryIcon = ({
@@ -37,6 +38,7 @@ const RenderCategoryIcon = ({
 };
 const Home = () => {
   useDocumentTitle();
+  usePageView('/'); // Track home page visits
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
