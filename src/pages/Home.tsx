@@ -196,13 +196,13 @@ const Home = () => {
         <div className="container">
           <h2 className="text-2xl font-bold mb-6">كافة المنتجات</h2>
           {productsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-lg" />
+                <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {products?.data?.map((product) => {
                 const additionalImages = product.additional_images as string[] | null;
                 
@@ -240,60 +240,58 @@ const Home = () => {
                         />
                       </button>
                     </div>
-                    <div className="p-4 flex flex-col flex-grow">
-                      <div onClick={() => handleProductClick(product)} className="block mb-auto cursor-pointer">
-                        <h3 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors min-h-[3rem]">
+                    <div className="p-3 flex flex-col flex-grow">
+                      <div onClick={() => handleProductClick(product)} className="block mb-1 cursor-pointer">
+                        <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">
                           {product.name}
                         </h3>
                       </div>
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         {hasDiscount ? (
                           <>
-                            <span className="text-lg font-bold text-primary">
+                            <span className="text-base font-bold text-primary">
                               {discountedPrice.toFixed(2)} ₪
                             </span>
-                            <span className="text-sm text-muted-foreground line-through">
+                            <span className="text-xs text-muted-foreground line-through">
                               {product.price.toFixed(2)} ₪
                             </span>
                           </>
                         ) : (
-                          <span className="text-lg font-bold text-primary">
+                          <span className="text-base font-bold text-primary">
                             {product.price.toFixed(2)} ₪
                           </span>
                         )}
                       </div>
                       
                       {options && (options.sizes || options.colors) && (
-                        <div className="mb-3 space-y-2 min-h-[3rem]">
+                        <div className="mb-2 space-y-1">
                           {options.sizes && options.sizes.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-xs text-muted-foreground">المقاسات:</span>
-                              {options.sizes.slice(0, 3).map((size, idx) => (
-                                <span key={idx} className="text-xs px-2 py-1 bg-muted rounded">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {options.sizes.slice(0, 2).map((size, idx) => (
+                                <span key={idx} className="text-xs px-1.5 py-0.5 bg-muted rounded">
                                   {size}
                                 </span>
                               ))}
-                              {options.sizes.length > 3 && (
-                                <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.sizes.length - 3}
+                              {options.sizes.length > 2 && (
+                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.sizes.length - 2}
                                 </span>
                               )}
                             </div>
                           )}
                           {options.colors && options.colors.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-xs text-muted-foreground">الألوان:</span>
-                              {options.colors.slice(0, 3).map((color, idx) => (
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {options.colors.slice(0, 4).map((color, idx) => (
                                 <div
                                   key={idx}
-                                  className="w-5 h-5 rounded-full border-2 border-border"
+                                  className="w-4 h-4 rounded-full border border-border"
                                   style={{ backgroundColor: getColorValue(color) }}
                                   title={color}
                                 />
                               ))}
-                              {options.colors.length > 3 && (
-                                <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded font-medium">
-                                  +{options.colors.length - 3}
+                              {options.colors.length > 4 && (
+                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.colors.length - 4}
                                 </span>
                               )}
                             </div>
@@ -303,9 +301,10 @@ const Home = () => {
                       
                       <Button 
                         onClick={() => handleProductClick(product)}
-                        className="w-full mt-auto text-xs md:text-sm py-3"
+                        className="w-full mt-auto text-xs py-2"
+                        size="sm"
                       >
-                        <ShoppingCart className="ml-1.5 h-4 w-4" />
+                        <ShoppingCart className="ml-1 h-3.5 w-3.5" />
                         أضف للسلة
                       </Button>
                     </div>
