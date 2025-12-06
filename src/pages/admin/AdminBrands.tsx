@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -246,61 +246,51 @@ const AdminBrands = () => {
               ))}
             </div>
           ) : brands && brands.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الشعار</TableHead>
-                  <TableHead>الاسم</TableHead>
-                  <TableHead>الوصف</TableHead>
-                  <TableHead className="text-left">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {brands.map((brand) => (
-                  <TableRow key={brand.id}>
-                    <TableCell>
-                      {brand.logo_url ? (
-                        <img
-                          src={brand.logo_url}
-                          alt={brand.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">لا صورة</span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{brand.name}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {brand.description || '-'}
-                    </TableCell>
-                    <TableCell className="text-left">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(brand)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('هل أنت متأكد من حذف هذه العلامة التجارية؟')) {
-                              deleteMutation.mutate(brand.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {brands.map((brand) => (
+                <div 
+                  key={brand.id} 
+                  className="border rounded-lg p-3 bg-card hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col items-center text-center">
+                    {brand.logo_url ? (
+                      <img
+                        src={brand.logo_url}
+                        alt={brand.name}
+                        className="w-16 h-16 object-contain rounded mb-2"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-muted rounded flex items-center justify-center mb-2">
+                        <span className="text-xs text-muted-foreground">لا صورة</span>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    )}
+                    <h3 className="font-medium text-sm truncate w-full">{brand.name}</h3>
+                    <div className="flex gap-1 mt-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleEdit(brand)}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (confirm('هل أنت متأكد من حذف هذه العلامة التجارية؟')) {
+                            deleteMutation.mutate(brand.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">لا توجد علامات تجارية</p>

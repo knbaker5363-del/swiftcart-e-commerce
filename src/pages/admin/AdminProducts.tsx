@@ -436,40 +436,40 @@ const AdminProducts = () => {
 
       <div className="grid gap-4">
         {products?.map((product) => (
-          <Card key={product.id} className="p-4 shadow-card">
-            <div className="flex gap-4">
+          <Card key={product.id} className="p-4 shadow-card overflow-hidden">
+            <div className="flex gap-4 flex-wrap sm:flex-nowrap">
               {product.image_url && (
                 <img
                   src={product.image_url}
                   alt={product.name}
-                  className="w-24 h-24 object-cover rounded"
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded flex-shrink-0"
                 />
               )}
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">{product.name}</h3>
-                <p className="text-sm text-muted-foreground">{product.categories?.name}</p>
-                <div className="flex items-center gap-2 mt-1">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base sm:text-lg truncate">{product.name}</h3>
+                <p className="text-sm text-muted-foreground truncate">{product.categories?.name}</p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
                   {product.discount_percentage > 0 ? (
                     <>
-                      <p className="text-primary font-semibold">
+                      <p className="text-primary font-semibold text-sm">
                         {(product.price * (1 - product.discount_percentage / 100)).toFixed(2)} ₪
                       </p>
-                      <p className="text-sm text-muted-foreground line-through">
+                      <p className="text-xs text-muted-foreground line-through">
                         {product.price.toFixed(2)} ₪
                       </p>
-                      <span className="text-xs bg-destructive text-destructive-foreground px-2 py-0.5 rounded">
+                      <span className="text-[10px] bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded">
                         خصم {product.discount_percentage}%
                       </span>
                     </>
                   ) : (
-                    <p className="text-primary font-semibold">{product.price.toFixed(2)} ₪</p>
+                    <p className="text-primary font-semibold text-sm">{product.price.toFixed(2)} ₪</p>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {product.is_active ? '✓ نشط' : '✗ غير نشط'}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0 self-start">
                 <Button variant="outline" size="icon" onClick={() => handleEdit(product)}>
                   <Edit className="h-4 w-4" />
                 </Button>

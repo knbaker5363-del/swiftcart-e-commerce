@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
@@ -8,19 +8,25 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ShoppingCart, FolderOpen } from 'lucide-react';
+import { Heart, ShoppingCart, FolderOpen, ArrowRight } from 'lucide-react';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/hooks/use-toast';
 import ProductQuickView from '@/components/ProductQuickView';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Category = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
+  const { settings } = useSettings();
+
+  // Check if dark theme
+  const isDarkTheme = settings?.theme === 'dark' || settings?.theme === 'night';
 
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -86,6 +92,9 @@ const Category = () => {
     setQuickViewOpen(true);
   };
 
+  // Text color based on theme
+  const textColorClass = isDarkTheme ? 'text-white' : 'text-black';
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
@@ -98,14 +107,26 @@ const Category = () => {
         onOpenChange={setQuickViewOpen} 
       />
 
+      {/* Back Button */}
+      <div className="container pt-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)} 
+          className={`gap-2 ${textColorClass}`}
+        >
+          <ArrowRight className="h-4 w-4" />
+          رجوع
+        </Button>
+      </div>
+
       {/* Header */}
-      <section className="bg-gradient-primary text-primary-foreground py-12">
+      <section className="py-8">
         <div className="container">
-          <div className="flex items-center justify-center gap-4 animate-fade-in">
-            <FolderOpen className="h-12 w-12" />
+          <div className={`flex items-center justify-center gap-4 animate-fade-in ${textColorClass}`}>
+            <FolderOpen className="h-10 w-10" />
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-2">{category?.name || 'التصنيف'}</h1>
-              <p className="text-lg opacity-90">
+              <h1 className="text-3xl font-bold mb-1">{category?.name || 'التصنيف'}</h1>
+              <p className="text-sm opacity-80">
                 تصفح جميع منتجات {category?.name}
               </p>
             </div>

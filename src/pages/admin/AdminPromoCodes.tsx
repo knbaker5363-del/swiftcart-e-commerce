@@ -14,15 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
 interface PromoCode {
   id: string;
   code: string;
@@ -195,60 +186,48 @@ const AdminPromoCodes = () => {
           <p className="text-muted-foreground">لا توجد أكواد خصم</p>
         </Card>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">الكود</TableHead>
-                <TableHead className="text-right">الخصم</TableHead>
-                <TableHead className="text-right">تاريخ الانتهاء</TableHead>
-                <TableHead className="text-right">الحالة</TableHead>
-                <TableHead className="text-right">مفعل</TableHead>
-                <TableHead className="text-right">إجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {promoCodes.map((promo) => (
-                <TableRow key={promo.id}>
-                  <TableCell className="font-mono font-bold">{promo.code}</TableCell>
-                  <TableCell>{promo.discount_percentage}%</TableCell>
-                  <TableCell dir="ltr" className="text-right">
-                    {new Date(promo.expires_at).toLocaleDateString('ar-EG', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    {isExpired(promo.expires_at) ? (
-                      <span className="text-red-500 text-sm">منتهي</span>
-                    ) : (
-                      <span className="text-green-500 text-sm">صالح</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={promo.is_active}
-                      onCheckedChange={() => toggleActive(promo.id, promo.is_active)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deletePromoCode(promo.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+        <div className="grid gap-3">
+          {promoCodes.map((promo) => (
+            <Card key={promo.id} className="p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="font-mono font-bold text-lg bg-muted px-3 py-1 rounded">
+                    {promo.code}
+                  </span>
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded text-sm font-medium">
+                    {promo.discount_percentage}%
+                  </span>
+                  {isExpired(promo.expires_at) ? (
+                    <span className="text-red-500 text-xs bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">منتهي</span>
+                  ) : (
+                    <span className="text-green-500 text-xs bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">صالح</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={promo.is_active}
+                    onCheckedChange={() => toggleActive(promo.id, promo.is_active)}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deletePromoCode(promo.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                ينتهي: {new Date(promo.expires_at).toLocaleDateString('ar-EG', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </p>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );

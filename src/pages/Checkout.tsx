@@ -552,15 +552,15 @@ const Checkout = () => {
               </Button>
               
               {/* Social Media Links */}
-              <div className="flex items-center justify-center gap-4 pt-4 border-t">
+              <div className="flex items-center justify-center gap-3 pt-4 border-t flex-wrap">
                 {whatsappNumber && (
                   <a
                     href={`https://wa.me/${whatsappCountryCode}${whatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors"
+                    className="p-3 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
                   >
-                    <MessageCircle className="h-5 w-5" />
+                    <MessageCircle className="h-6 w-6" />
                   </a>
                 )}
                 {socialMedia.instagram && (
@@ -568,9 +568,9 @@ const Checkout = () => {
                     href={`https://instagram.com/${socialMedia.instagram}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 text-white transition-opacity"
+                    className="p-3 rounded-lg bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 text-white transition-opacity"
                   >
-                    <Instagram className="h-5 w-5" />
+                    <Instagram className="h-6 w-6" />
                   </a>
                 )}
                 {socialMedia.facebook && (
@@ -578,9 +578,9 @@ const Checkout = () => {
                     href={`https://facebook.com/${socialMedia.facebook}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                   >
-                    <Facebook className="h-5 w-5" />
+                    <Facebook className="h-6 w-6" />
                   </a>
                 )}
                 {socialMedia.tiktok && (
@@ -588,9 +588,9 @@ const Checkout = () => {
                     href={`https://tiktok.com/@${socialMedia.tiktok}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-full bg-black hover:bg-gray-800 text-white transition-colors"
+                    className="p-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors"
                   >
-                    <SiTiktok className="h-5 w-5" />
+                    <SiTiktok className="h-6 w-6" />
                   </a>
                 )}
                 {socialMedia.snapchat && (
@@ -598,9 +598,9 @@ const Checkout = () => {
                     href={`https://snapchat.com/add/${socialMedia.snapchat}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
+                    className="p-3 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
                   >
-                    <SiSnapchat className="h-5 w-5" />
+                    <SiSnapchat className="h-6 w-6" />
                   </a>
                 )}
               </div>
