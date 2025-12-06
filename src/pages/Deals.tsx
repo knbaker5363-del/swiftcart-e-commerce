@@ -90,13 +90,13 @@ const Deals = () => {
       <section className="py-16">
         <div className="container">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[...Array(10)].map((_, i) => (
                 <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {products.map((product) => {
                 const mainImage = product.image_url || '';
                 const additionalImages = Array.isArray(product.additional_images)

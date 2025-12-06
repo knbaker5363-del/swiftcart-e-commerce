@@ -196,13 +196,13 @@ const Home = () => {
         <div className="container">
           <h2 className="text-2xl font-bold mb-6">كافة المنتجات</h2>
           {productsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[...Array(10)].map((_, i) => (
                 <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {products?.data?.map((product) => {
                 const additionalImages = product.additional_images as string[] | null;
                 
