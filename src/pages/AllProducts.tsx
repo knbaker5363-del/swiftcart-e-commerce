@@ -75,24 +75,48 @@ const AllProducts = () => {
       <section className="py-16">
         <div className="container">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {[...Array(12)].map((_, i) => (
-                <Skeleton key={i} className="h-96 rounded-lg" />
+                <Skeleton key={i} className="h-80 rounded-lg" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
               {products.map((product) => {
                 const mainImage = product.image_url || '';
                 const additionalImages = Array.isArray(product.additional_images)
                   ? (product.additional_images.filter((img): img is string => typeof img === 'string'))
                   : [];
 
+                // Parse options
+                let productSizes: string[] = [];
+                let productColors: string[] = [];
+                if (product.options && typeof product.options === 'object') {
+                  const opts = product.options as Record<string, unknown>;
+                  if (Array.isArray(opts.sizes)) {
+                    productSizes = opts.sizes.filter((s): s is string => typeof s === 'string');
+                  }
+                  if (Array.isArray(opts.colors)) {
+                    productColors = opts.colors.filter((c): c is string => typeof c === 'string');
+                  }
+                }
+
+                const discountedPrice = product.discount_percentage 
+                  ? product.price * (1 - product.discount_percentage / 100) 
+                  : null;
+
                 return (
                   <Card
                     key={product.id}
-                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer"
                   >
+                    {/* Category Header */}
+                    {product.categories && (
+                      <div className="bg-muted py-1.5 text-center">
+                        <span className="text-xs font-medium text-muted-foreground">{product.categories.name}</span>
+                      </div>
+                    )}
+
                     <div className="relative">
                       <Link to={`/product/${product.id}`}>
                         <ProductImageCarousel
@@ -102,18 +126,18 @@ const AllProducts = () => {
                         />
                       </Link>
                       
-                      {product.discount_percentage > 0 && (
-                        <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground hover:bg-destructive text-sm px-2 py-1">
-                          خصم {product.discount_percentage}%
+                      {product.discount_percentage && product.discount_percentage > 0 && (
+                        <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs px-2">
+                          -{product.discount_percentage}%
                         </Badge>
                       )}
 
                       <button
                         onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 left-2 p-2 bg-background/80 hover:bg-background rounded-full transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-background rounded-full transition-colors"
                       >
                         <Heart
-                          className={`h-5 w-5 ${
+                          className={`h-4 w-4 ${
                             isFavorite(product.id)
                               ? 'fill-red-500 text-red-500'
                               : 'text-foreground'
@@ -122,30 +146,57 @@ const AllProducts = () => {
                       </button>
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      <Link to={`/product/${product.id}`}>
-                        <h3 className="font-semibold text-lg line-clamp-2 hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
-                      </Link>
+                    <div className="p-3 space-y-2 text-center">
+                      {/* Price */}
+                      <div className="flex items-center justify-center gap-2">
+                        {discountedPrice ? (
+                          <>
+                            <span className="text-xs text-muted-foreground line-through">{product.price.toFixed(0)} ₪</span>
+                            <span className="text-base font-bold text-primary">{discountedPrice.toFixed(0)} ₪</span>
+                          </>
+                        ) : (
+                          <span className="text-base font-bold text-primary">{product.price.toFixed(0)} ₪</span>
+                        )}
+                      </div>
 
-                      {product.categories && (
-                        <Badge variant="secondary" className="text-xs">
-                          {product.categories.name}
-                        </Badge>
+                      {/* Product Name */}
+                      <h3 className="font-semibold text-sm line-clamp-2">
+                        {product.name}
+                      </h3>
+
+                      {/* Sizes */}
+                      {productSizes.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1">
+                          {productSizes.map((size) => (
+                            <span key={size} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
+                              {size}
+                            </span>
+                          ))}
+                        </div>
                       )}
 
-                      <p className="text-2xl font-bold text-primary">
-                        {product.price.toFixed(2)} ₪
-                      </p>
+                      {/* Colors */}
+                      {productColors.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1">
+                          {productColors.map((color) => (
+                            <div
+                              key={color}
+                              className="w-5 h-5 rounded border border-border"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      )}
 
+                      {/* Add to Cart Button */}
                       <Button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full"
+                        className="w-auto px-6"
                         size="sm"
+                        variant="secondary"
                       >
-                        <ShoppingCart className="ml-2 h-4 w-4" />
-                        أضف للسلة
+                        <ShoppingCart className="h-4 w-4" />
                       </Button>
                     </div>
                   </Card>
