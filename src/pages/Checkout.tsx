@@ -11,8 +11,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Phone, Copy, MessageCircle } from 'lucide-react';
+import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook } from 'lucide-react';
 import { z } from 'zod';
+import { SiTiktok, SiSnapchat } from 'react-icons/si';
 
 const PALESTINIAN_CITIES = {
   west_bank: [
@@ -68,12 +69,26 @@ const Checkout = () => {
 
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('970');
+  
+  // Social media
+  const [socialMedia, setSocialMedia] = useState({
+    whatsapp: '',
+    instagram: '',
+    facebook: '',
+    tiktok: '',
+    snapchat: '',
+  });
+  
+  // Promo code
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
       const { data } = await supabase
         .from('settings')
-        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside, whatsapp_number, whatsapp_country_code')
+        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside, whatsapp_number, whatsapp_country_code, social_whatsapp, social_instagram, social_facebook, social_tiktok, social_snapchat')
         .single();
       
       if (data) {
@@ -97,10 +112,63 @@ const Checkout = () => {
         if ((data as any).whatsapp_country_code) {
           setWhatsappCountryCode((data as any).whatsapp_country_code);
         }
+        // Social media
+        setSocialMedia({
+          whatsapp: (data as any).social_whatsapp || '',
+          instagram: (data as any).social_instagram || '',
+          facebook: (data as any).social_facebook || '',
+          tiktok: (data as any).social_tiktok || '',
+          snapchat: (data as any).social_snapchat || '',
+        });
       }
     };
     fetchSettings();
   }, []);
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    
+    setPromoLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('code', promoCode.trim().toUpperCase())
+        .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+      
+      if (error || !data) {
+        toast({
+          title: 'كود غير صالح',
+          description: 'الكود غير موجود أو منتهي الصلاحية',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setAppliedPromo({
+        code: data.code,
+        discount: data.discount_percentage,
+      });
+      toast({
+        title: 'تم تطبيق الكود',
+        description: `خصم ${data.discount_percentage}% على طلبك`,
+      });
+    } catch (error) {
+      console.error('Error applying promo code:', error);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const removePromoCode = () => {
+    setAppliedPromo(null);
+    setPromoCode('');
+  };
+
+  const discountAmount = appliedPromo ? (total * appliedPromo.discount) / 100 : 0;
+  const totalAfterDiscount = total - discountAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +200,9 @@ const Checkout = () => {
 
     try {
       const deliveryCost = deliveryPrices[selectedDelivery];
-      const totalWithDelivery = total + deliveryCost;
+      const discountAmt = appliedPromo ? (total * appliedPromo.discount) / 100 : 0;
+      const totalAfterDisc = total - discountAmt;
+      const totalWithDelivery = totalAfterDisc + deliveryCost;
       
       // 1. Create order
       const { data: order, error: orderError } = await supabase
@@ -208,6 +278,10 @@ const Checkout = () => {
         if (item.selected_options.color) message += ` (لون: ${item.selected_options.color})`;
         message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
       });
+      if (appliedPromo) {
+        message += `\n🏷️ كود الخصم: ${appliedPromo.code} (-${appliedPromo.discount}%)\n`;
+        message += `💵 الخصم: -${discountAmt.toFixed(2)} ₪\n`;
+      }
       message += `\n🚚 التوصيل (${deliveryAreaNames[selectedDelivery]}): ${deliveryCost.toFixed(2)} ₪\n`;
       message += `💰 المجموع الكلي: ${totalWithDelivery.toFixed(2)} ₪`;
 
@@ -277,60 +351,27 @@ const Checkout = () => {
         if (!open) setDialogStep('copy');
       }}>
         <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
-          {dialogStep === 'copy' ? (
-            <>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
-                <AlertDialogDescription asChild>
-                  <div className="space-y-4 text-right">
-                    <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
-                      {orderMessage}
-                    </div>
-                    <p className="text-muted-foreground">
-                      انسخ تفاصيل الطلب ثم تواصل معنا لإتمام الطلب
-                    </p>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex-row gap-2 justify-end">
-                <Button
-                  onClick={handleCopyAndContinue}
-                  className="gap-2"
-                >
-                  <Copy className="h-4 w-4" />
-                  نسخ البيانات ثم تواصل معنا
-                </Button>
-              </AlertDialogFooter>
-            </>
-          ) : (
-            <>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl">تواصل معنا عبر واتساب</AlertDialogTitle>
-                <AlertDialogDescription asChild>
-                  <div className="space-y-6 text-center py-4">
-                    <div className="bg-muted p-6 rounded-lg">
-                      <p className="text-muted-foreground mb-2">رقم واتساب المتجر</p>
-                      <p className="text-3xl font-bold text-primary" dir="ltr">+{whatsappCountryCode}{whatsappNumber}</p>
-                    </div>
-                    <p className="text-muted-foreground">
-                      سيتم فتح واتساب مع تفاصيل الطلب المنسوخة
-                    </p>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex-row gap-2 justify-center">
-                <AlertDialogAction asChild>
-                  <Button
-                    onClick={handleContactAndFinish}
-                    className="gap-2 bg-green-600 hover:bg-green-700"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    فتح واتساب وإرسال الطلب
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </>
-          )}
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 text-right">
+                <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
+                  {orderMessage}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 justify-center">
+            <AlertDialogAction asChild>
+              <Button
+                onClick={handleContactAndFinish}
+                className="gap-2 bg-green-600 hover:bg-green-700"
+              >
+                <MessageCircle className="h-4 w-4" />
+                تواصل معنا
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
@@ -458,6 +499,48 @@ const Checkout = () => {
                   </button>
                 </div>
               </div>
+              
+              {/* Promo Code */}
+              <div className="space-y-2">
+                <Label>كود الخصم</Label>
+                {appliedPromo ? (
+                  <div className="flex items-center justify-between p-3 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-green-700 dark:text-green-400">
+                        {appliedPromo.code} (-{appliedPromo.discount}%)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removePromoCode}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      إزالة
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="أدخل كود الخصم"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={applyPromoCode}
+                      disabled={promoLoading || !promoCode.trim()}
+                    >
+                      {promoLoading ? 'جاري...' : 'تطبيق'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
               <Button
                 type="submit"
                 size="lg"
@@ -465,8 +548,62 @@ const Checkout = () => {
                 disabled={loading}
               >
                 <Phone className="ml-2 h-5 w-5" />
-                {loading ? 'جاري الحفظ...' : 'حفظ الطلب والاتصال'}
+                {loading ? 'جاري الحفظ...' : 'إتمام الطلب'}
               </Button>
+              
+              {/* Social Media Links */}
+              <div className="flex items-center justify-center gap-4 pt-4 border-t">
+                {whatsappNumber && (
+                  <a
+                    href={`https://wa.me/${whatsappCountryCode}${whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                )}
+                {socialMedia.instagram && (
+                  <a
+                    href={`https://instagram.com/${socialMedia.instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 text-white transition-opacity"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {socialMedia.facebook && (
+                  <a
+                    href={`https://facebook.com/${socialMedia.facebook}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {socialMedia.tiktok && (
+                  <a
+                    href={`https://tiktok.com/@${socialMedia.tiktok}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-black hover:bg-gray-800 text-white transition-colors"
+                  >
+                    <SiTiktok className="h-5 w-5" />
+                  </a>
+                )}
+                {socialMedia.snapchat && (
+                  <a
+                    href={`https://snapchat.com/add/${socialMedia.snapchat}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
+                  >
+                    <SiSnapchat className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
             </form>
           </div>
 
@@ -495,6 +632,12 @@ const Checkout = () => {
                     <span>المجموع الفرعي:</span>
                     <span>{total.toFixed(2)} ₪</span>
                   </div>
+                  {appliedPromo && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>الخصم ({appliedPromo.discount}%):</span>
+                      <span>-{discountAmount.toFixed(2)} ₪</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>التوصيل:</span>
                     <span>{deliveryPrices[selectedDelivery].toFixed(2)} ₪</span>
@@ -502,7 +645,7 @@ const Checkout = () => {
                 </div>
                 <div className="flex justify-between text-xl font-bold pt-4 border-t-2">
                   <span>المجموع الكلي:</span>
-                  <span className="text-primary">{(total + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
+                  <span className="text-primary">{(totalAfterDiscount + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
                 </div>
               </div>
             </Card>

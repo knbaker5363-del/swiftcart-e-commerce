@@ -298,6 +298,33 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          discount_percentage: number
+          expires_at: string
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_percentage: number
+          expires_at: string
+          id?: string
+          is_active?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_percentage?: number
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           accent_color: string | null
