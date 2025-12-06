@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { PublicHeader } from '@/components/PublicHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook } from 'lucide-react';
+import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift } from 'lucide-react';
 import { z } from 'zod';
 import { SiTiktok, SiSnapchat } from 'react-icons/si';
+import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
+import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
 
 const PALESTINIAN_CITIES = {
   west_bank: [
@@ -83,6 +86,51 @@ const Checkout = () => {
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
+  
+  // Gift system state
+  const [showGiftDialog, setShowGiftDialog] = useState(false);
+  const [selectedGift, setSelectedGift] = useState<{ id: string; name: string; image_url: string | null; price: number } | null>(null);
+  const [giftSkipped, setGiftSkipped] = useState(false);
+
+  // Fetch active gift offers
+  const { data: activeGiftOffer } = useQuery({
+    queryKey: ['active-gift-offer'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('gift_offers')
+        .select('*')
+        .eq('is_active', true)
+        .order('minimum_amount', { ascending: false })
+        .limit(1)
+        .single();
+      if (error) return null;
+      return data;
+    },
+  });
+
+  // Fetch gift products for active offer
+  const { data: giftProducts } = useQuery({
+    queryKey: ['gift-products', activeGiftOffer?.id],
+    queryFn: async () => {
+      if (!activeGiftOffer) return [];
+      const { data, error } = await supabase
+        .from('gift_products')
+        .select(`
+          product_id,
+          products (id, name, image_url, price)
+        `)
+        .eq('gift_offer_id', activeGiftOffer.id);
+      if (error) return [];
+      return data
+        .map((gp: any) => gp.products)
+        .filter((p: any) => p !== null);
+    },
+    enabled: !!activeGiftOffer,
+  });
+
+  // Check if eligible for gift
+  const isEligibleForGift = activeGiftOffer && total >= activeGiftOffer.minimum_amount;
+  const remainingForGift = activeGiftOffer ? Math.max(0, activeGiftOffer.minimum_amount - total) : 0;
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -278,6 +326,9 @@ const Checkout = () => {
         if (item.selected_options.color) message += ` (لون: ${item.selected_options.color})`;
         message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
       });
+      if (selectedGift) {
+        message += `\n🎁 هدية مجانية: ${selectedGift.name}\n`;
+      }
       if (appliedPromo) {
         message += `\n🏷️ كود الخصم: ${appliedPromo.code} (-${appliedPromo.discount}%)\n`;
         message += `💵 الخصم: -${discountAmt.toFixed(2)} ₪\n`;
@@ -385,6 +436,63 @@ const Checkout = () => {
           {/* Checkout Form */}
           <div>
             <h1 className="text-3xl font-bold mb-6">إتمام الطلب</h1>
+            
+            {/* Gift Notification Banner */}
+            {activeGiftOffer && giftProducts && giftProducts.length > 0 && (
+              <GiftNotificationBanner
+                currentAmount={total}
+                minimumAmount={activeGiftOffer.minimum_amount}
+                remainingAmount={remainingForGift}
+              />
+            )}
+
+            {/* Gift Selection Dialog */}
+            <GiftSelectionDialog
+              open={showGiftDialog}
+              onOpenChange={setShowGiftDialog}
+              giftProducts={giftProducts || []}
+              minimumAmount={activeGiftOffer?.minimum_amount || 0}
+              onSelectGift={(gift) => {
+                setSelectedGift(gift);
+                setShowGiftDialog(false);
+              }}
+              onSkip={() => {
+                setGiftSkipped(true);
+                setShowGiftDialog(false);
+              }}
+            />
+
+            {/* Selected Gift Display */}
+            {selectedGift && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Gift className="h-5 w-5 text-green-600" />
+                <div className="flex-1">
+                  <p className="font-semibold text-green-700">هديتك: {selectedGift.name}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowGiftDialog(true)}
+                  className="text-green-600"
+                >
+                  تغيير
+                </Button>
+              </div>
+            )}
+
+            {/* Show gift button if eligible but not selected */}
+            {isEligibleForGift && !selectedGift && !giftSkipped && giftProducts && giftProducts.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full mb-4 gap-2 border-primary text-primary"
+                onClick={() => setShowGiftDialog(true)}
+              >
+                <Gift className="h-4 w-4" />
+                اختر هديتك المجانية
+              </Button>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="name">الاسم الكامل *</Label>

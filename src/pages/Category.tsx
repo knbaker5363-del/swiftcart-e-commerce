@@ -92,8 +92,9 @@ const Category = () => {
     setQuickViewOpen(true);
   };
 
-  // Text color based on theme
-  const textColorClass = isDarkTheme ? 'text-white' : 'text-black';
+  // Text color - always black except for dark themes
+  const textColorClass = isDarkTheme ? 'text-white' : 'text-foreground';
+  const headerTextClass = isDarkTheme ? 'text-white' : 'text-black';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">

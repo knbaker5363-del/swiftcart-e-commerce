@@ -3,7 +3,7 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { NavLink } from '@/components/NavLink';
-import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, X, Tag } from 'lucide-react';
+import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, X, Tag, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -44,6 +44,7 @@ const AdminLayout = () => {
     { to: '/admin/brands', icon: Award, label: 'العلامات التجارية' },
     { to: '/admin/orders', icon: ShoppingBag, label: 'الطلبات' },
     { to: '/admin/promo-codes', icon: Tag, label: 'أكواد الخصم' },
+    { to: '/admin/gifts', icon: Gift, label: 'الهدايا والعروض' },
     { to: '/admin/settings', icon: Settings, label: 'الإعدادات' },
   ];
 
