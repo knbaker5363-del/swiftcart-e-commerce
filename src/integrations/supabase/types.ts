@@ -100,6 +100,69 @@ export type Database = {
           },
         ]
       }
+      gift_offers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          minimum_amount: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          minimum_amount?: number
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          minimum_amount?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gift_products: {
+        Row: {
+          created_at: string
+          gift_offer_id: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          gift_offer_id: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          gift_offer_id?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_products_gift_offer_id_fkey"
+            columns: ["gift_offer_id"]
+            isOneToOne: false
+            referencedRelation: "gift_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
