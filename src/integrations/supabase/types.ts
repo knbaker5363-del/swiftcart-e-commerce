@@ -321,6 +321,8 @@ export type Database = {
           store_name: string
           store_name_black: boolean | null
           store_phone: string | null
+          telegram_bot_token: string | null
+          telegram_chat_id: string | null
           text_style: string | null
           theme: string
           updated_at: string
@@ -349,6 +351,8 @@ export type Database = {
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
           text_style?: string | null
           theme?: string
           updated_at?: string
@@ -377,6 +381,8 @@ export type Database = {
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
           text_style?: string | null
           theme?: string
           updated_at?: string

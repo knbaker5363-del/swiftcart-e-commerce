@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Sparkles, Paintbrush } from 'lucide-react';
+import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Sparkles, Paintbrush, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ThemePreview from '@/components/ThemePreview';
@@ -245,6 +245,9 @@ const AdminSettings = () => {
   const [socialFacebook, setSocialFacebook] = useState('');
   const [socialSnapchat, setSocialSnapchat] = useState('');
   const [socialTiktok, setSocialTiktok] = useState('');
+  // Telegram
+  const [telegramBotToken, setTelegramBotToken] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
   useEffect(() => {
     if (settings) {
       setStoreName(settings.store_name);
@@ -268,6 +271,9 @@ const AdminSettings = () => {
       setSocialFacebook((settings as any).social_facebook || '');
       setSocialSnapchat((settings as any).social_snapchat || '');
       setSocialTiktok((settings as any).social_tiktok || '');
+      // Telegram
+      setTelegramBotToken((settings as any).telegram_bot_token || '');
+      setTelegramChatId((settings as any).telegram_chat_id || '');
     }
   }, [settings]);
 
@@ -462,6 +468,8 @@ const AdminSettings = () => {
         social_facebook: socialFacebook || null,
         social_snapchat: socialSnapchat || null,
         social_tiktok: socialTiktok || null,
+        telegram_bot_token: telegramBotToken || null,
+        telegram_chat_id: telegramChatId || null,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -812,6 +820,47 @@ const AdminSettings = () => {
             <div className="space-y-2">
               <Label htmlFor="socialTiktok">تيك توك</Label>
               <Input id="socialTiktok" value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)} placeholder="مثال: https://tiktok.com/@yourstore" dir="ltr" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* إعدادات تيليجرام */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5" />
+              إشعارات تيليجرام
+            </CardTitle>
+            <CardDescription>اربط بوت تيليجرام لاستلام إشعارات الطلبات الجديدة</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="telegramBotToken">Bot Token</Label>
+              <Input 
+                id="telegramBotToken" 
+                type="password"
+                value={telegramBotToken} 
+                onChange={e => setTelegramBotToken(e.target.value)} 
+                placeholder="أدخل توكين البوت من @BotFather" 
+                dir="ltr" 
+              />
+              <p className="text-xs text-muted-foreground">
+                احصل على التوكين من @BotFather على تيليجرام
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="telegramChatId">Chat ID</Label>
+              <Input 
+                id="telegramChatId" 
+                value={telegramChatId} 
+                onChange={e => setTelegramChatId(e.target.value)} 
+                placeholder="أدخل معرف المحادثة" 
+                dir="ltr" 
+              />
+              <p className="text-xs text-muted-foreground">
+                أرسل رسالة للبوت ثم استخدم الرابط: api.telegram.org/bot[TOKEN]/getUpdates
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,14 +34,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-    const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID");
+    // Create Supabase client to fetch settings
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch Telegram credentials from settings
+    const { data: settings, error: settingsError } = await supabase
+      .from("settings")
+      .select("telegram_bot_token, telegram_chat_id")
+      .maybeSingle();
+
+    if (settingsError) {
+      console.error("Error fetching settings:", settingsError);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch settings" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const TELEGRAM_BOT_TOKEN = settings?.telegram_bot_token;
+    const TELEGRAM_CHAT_ID = settings?.telegram_chat_id;
 
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-      console.error("Missing Telegram credentials");
+      console.log("Telegram not configured, skipping notification");
       return new Response(
-        JSON.stringify({ error: "Telegram credentials not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: true, message: "Telegram not configured, skipping" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
