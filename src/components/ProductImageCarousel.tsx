@@ -30,7 +30,7 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
 
   if (allImages.length <= 1) {
     return (
-      <div className="relative overflow-hidden bg-background w-full aspect-square">
+      <div className="relative overflow-hidden bg-background w-full aspect-[4/3]">
         <img
           src={mainImage}
           alt={productName}
@@ -41,7 +41,7 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
   }
 
   return (
-    <div className="relative overflow-hidden bg-background w-full aspect-square group/carousel">
+    <div className="relative overflow-hidden bg-background w-full aspect-[4/3] group/carousel">
       <img
         src={allImages[currentIndex]}
         alt={`${productName} - صورة ${currentIndex + 1}`}

@@ -90,13 +90,13 @@ const Deals = () => {
       <section className="py-16">
         <div className="container">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-96 rounded-lg" />
+                <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {products.map((product) => {
                 const mainImage = product.image_url || '';
                 const additionalImages = Array.isArray(product.additional_images)
@@ -111,9 +111,9 @@ const Deals = () => {
                 return (
                   <Card
                     key={product.id}
-                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
+                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 flex flex-col"
                   >
-                    <div className="relative flex-shrink-0">
+                    <div className="relative">
                       <div onClick={() => handleProductClick(product)} className="cursor-pointer">
                         <ProductImageCarousel
                           mainImage={mainImage}
@@ -123,17 +123,17 @@ const Deals = () => {
                       </div>
                       
                       {/* Discount Badge */}
-                      <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground hover:bg-destructive text-sm px-2 py-1">
+                      <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground hover:bg-destructive text-xs px-1.5 py-0.5">
                         خصم {product.discount_percentage}%
                       </Badge>
 
                       {/* Favorite Button */}
                       <button
                         onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-full transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-background rounded-full transition-colors"
                       >
                         <Heart
-                          className={`h-5 w-5 ${
+                          className={`h-4 w-4 ${
                             isFavorite(product.id)
                               ? 'fill-red-500 text-red-500'
                               : 'text-foreground'
@@ -142,57 +142,59 @@ const Deals = () => {
                       </button>
                     </div>
 
-                    <div className="p-4 flex flex-col flex-grow">
-                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-auto">
-                        <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors min-h-[3rem]">
+                    <div className="p-3 flex flex-col flex-grow">
+                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-1">
+                        <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">
                           {product.name}
                         </h3>
                       </div>
 
                       {product.categories && (
-                        <Badge variant="secondary" className="text-xs w-fit mb-2">
+                        <Badge variant="secondary" className="text-xs w-fit mb-1">
                           {product.categories.name}
                         </Badge>
                       )}
 
-                      <div className="flex items-center gap-2 mb-3">
-                        <p className="text-lg font-bold text-primary">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-base font-bold text-primary">
                           {discountedPrice.toFixed(2)} ₪
                         </p>
-                        <p className="text-sm text-muted-foreground line-through">
+                        <p className="text-xs text-muted-foreground line-through">
                           {product.price.toFixed(2)} ₪
                         </p>
                       </div>
 
                       {/* Options: Sizes & Colors */}
                       {options && (options.sizes || options.colors) && (
-                        <div className="mb-3 space-y-2 min-h-[3rem]">
+                        <div className="mb-2 space-y-1">
                           {options.sizes && options.sizes.length > 0 && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground">المقاسات:</span>
-                              {options.sizes.slice(0, 3).map((size, idx) => (
-                                <span key={idx} className="text-xs px-2 py-1 bg-muted rounded">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {options.sizes.slice(0, 2).map((size, idx) => (
+                                <span key={idx} className="text-xs px-1.5 py-0.5 bg-muted rounded">
                                   {size}
                                 </span>
                               ))}
-                              {options.sizes.length > 3 && (
-                                <span className="text-xs text-muted-foreground">+{options.sizes.length - 3}</span>
+                              {options.sizes.length > 2 && (
+                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.sizes.length - 2}
+                                </span>
                               )}
                             </div>
                           )}
                           {options.colors && options.colors.length > 0 && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-muted-foreground">الألوان:</span>
+                            <div className="flex items-center gap-1 flex-wrap">
                               {options.colors.slice(0, 4).map((color, idx) => (
                                 <div
                                   key={idx}
-                                  className="w-5 h-5 rounded-full border-2 border-border"
+                                  className="w-4 h-4 rounded-full border border-border"
                                   style={{ backgroundColor: getColorValue(color) }}
                                   title={color}
                                 />
                               ))}
                               {options.colors.length > 4 && (
-                                <span className="text-xs text-muted-foreground">+{options.colors.length - 4}</span>
+                                <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded font-medium">
+                                  +{options.colors.length - 4}
+                                </span>
                               )}
                             </div>
                           )}
@@ -201,9 +203,10 @@ const Deals = () => {
 
                       <Button
                         onClick={() => handleProductClick(product)}
-                        className="w-full mt-auto text-xs md:text-sm py-3"
+                        className="w-full mt-auto text-xs py-2"
+                        size="sm"
                       >
-                        <ShoppingCart className="ml-2 h-4 w-4" />
+                        <ShoppingCart className="ml-1 h-3.5 w-3.5" />
                         أضف للسلة
                       </Button>
                     </div>
