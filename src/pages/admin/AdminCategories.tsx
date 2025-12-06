@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image, Grid, List, Check, Settings2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Grid, Check, Settings2, GripVertical, Palette } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +14,23 @@ import { categoryIcons } from '@/lib/categoryIcons';
 import { useSettings } from '@/contexts/SettingsContext';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import type { LucideProps } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DynamicIconProps extends Omit<LucideProps, 'ref'> {
   name: keyof typeof dynamicIconImports;
@@ -28,6 +45,22 @@ const DynamicIcon = ({ name, ...props }: DynamicIconProps) => {
     </Suspense>
   );
 };
+
+// Predefined background colors
+const bgColorOptions = [
+  { id: 'default', name: 'افتراضي', color: null },
+  { id: 'red', name: 'أحمر', color: '#FEE2E2' },
+  { id: 'orange', name: 'برتقالي', color: '#FFEDD5' },
+  { id: 'yellow', name: 'أصفر', color: '#FEF3C7' },
+  { id: 'green', name: 'أخضر', color: '#DCFCE7' },
+  { id: 'teal', name: 'فيروزي', color: '#CCFBF1' },
+  { id: 'blue', name: 'أزرق', color: '#DBEAFE' },
+  { id: 'indigo', name: 'نيلي', color: '#E0E7FF' },
+  { id: 'purple', name: 'بنفسجي', color: '#F3E8FF' },
+  { id: 'pink', name: 'وردي', color: '#FCE7F3' },
+  { id: 'rose', name: 'زهري', color: '#FFE4E6' },
+  { id: 'gray', name: 'رمادي', color: '#F3F4F6' },
+];
 
 // Icon picker component
 const IconPicker = ({ 
@@ -77,13 +110,147 @@ const IconPicker = ({
   );
 };
 
+// Color picker component
+const ColorPicker = ({
+  selectedColor,
+  onSelect
+}: {
+  selectedColor: string | null;
+  onSelect: (color: string | null) => void;
+}) => {
+  return (
+    <div className="space-y-3">
+      <Label>لون الخلفية</Label>
+      <div className="grid grid-cols-6 gap-2">
+        {bgColorOptions.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            onClick={() => onSelect(option.color)}
+            title={option.name}
+            className={`w-10 h-10 rounded-lg border-2 transition-all flex items-center justify-center ${
+              selectedColor === option.color
+                ? 'border-primary ring-2 ring-primary/50'
+                : 'border-border hover:border-primary/50'
+            }`}
+            style={{ backgroundColor: option.color || 'hsl(var(--primary) / 0.1)' }}
+          >
+            {selectedColor === option.color && <Check className="h-4 w-4 text-primary" />}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Sortable category item
+const SortableCategoryItem = ({ 
+  category, 
+  onEdit, 
+  onDelete,
+  getCategoryIcon 
+}: { 
+  category: any; 
+  onEdit: (cat: any) => void; 
+  onDelete: (id: string) => void;
+  getCategoryIcon: (iconName: string) => JSX.Element;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card 
+      ref={setNodeRef} 
+      style={style}
+      className={`overflow-hidden shadow-card ${isDragging ? 'ring-2 ring-primary' : ''}`}
+    >
+      <div className="flex items-stretch">
+        {/* Drag handle */}
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="flex items-center justify-center px-3 bg-muted/50 cursor-grab active:cursor-grabbing hover:bg-muted transition-colors"
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </div>
+        
+        {/* Category content */}
+        <div className="flex-1 flex items-center gap-4 p-4">
+          {/* Image/Icon preview */}
+          <div 
+            className="w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+          >
+            {category.image_url ? (
+              <img
+                src={category.image_url}
+                alt={category.name}
+                className="w-full h-full object-cover rounded-lg"
+              />
+            ) : category.icon_name ? (
+              getCategoryIcon(category.icon_name)
+            ) : (
+              <Image className="h-8 w-8 text-muted-foreground" />
+            )}
+          </div>
+          
+          {/* Name */}
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg">{category.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {category.image_url ? 'صورة' : category.icon_name ? 'أيقونة' : 'بدون صورة'}
+            </p>
+          </div>
+          
+          {/* Actions */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(category)}
+            >
+              <Edit className="ml-1 h-4 w-4" />
+              تعديل
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDelete(category.id)}
+            >
+              <Trash2 className="ml-1 h-4 w-4" />
+              حذف
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 const AdminCategories = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { settings, refreshSettings } = useSettings();
   const [open, setOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: '', image_url: '', icon_name: '' as string | null });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    image_url: '', 
+    icon_name: '' as string | null,
+    bg_color: null as string | null 
+  });
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'image' | 'icon'>('image');
   
@@ -95,13 +262,21 @@ const AdminCategories = () => {
     (settings as any)?.show_brands_button !== false
   );
 
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const { data: categories } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('sort_order', { ascending: true });
       if (error) throw error;
       return data;
     },
@@ -109,7 +284,12 @@ const AdminCategories = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('categories').insert(data);
+      // Get max sort order
+      const maxOrder = categories?.reduce((max, cat: any) => Math.max(max, cat.sort_order || 0), 0) || 0;
+      const { error } = await supabase.from('categories').insert({
+        ...data,
+        sort_order: maxOrder + 1
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -144,6 +324,41 @@ const AdminCategories = () => {
     },
   });
 
+  // Reorder mutation
+  const reorderMutation = useMutation({
+    mutationFn: async (orderedCategories: { id: string; sort_order: number }[]) => {
+      const updates = orderedCategories.map(cat => 
+        supabase.from('categories').update({ sort_order: cat.sort_order }).eq('id', cat.id)
+      );
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      toast({ title: 'تم حفظ الترتيب' });
+    },
+  });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && categories) {
+      const oldIndex = categories.findIndex((cat: any) => cat.id === active.id);
+      const newIndex = categories.findIndex((cat: any) => cat.id === over.id);
+      
+      const newOrder = arrayMove(categories, oldIndex, newIndex);
+      const orderedCategories = newOrder.map((cat: any, index: number) => ({
+        id: cat.id,
+        sort_order: index + 1
+      }));
+      
+      // Optimistically update UI
+      queryClient.setQueryData(['admin-categories'], newOrder);
+      
+      // Save to database
+      reorderMutation.mutate(orderedCategories);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -175,6 +390,7 @@ const AdminCategories = () => {
       name: formData.name,
       image_url: formData.image_url || null,
       icon_name: formData.icon_name || null,
+      bg_color: formData.bg_color || null,
     };
     
     if (editingCategory) {
@@ -185,7 +401,7 @@ const AdminCategories = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', image_url: '', icon_name: null });
+    setFormData({ name: '', image_url: '', icon_name: null, bg_color: null });
     setEditingCategory(null);
     setActiveTab('image');
   };
@@ -195,7 +411,8 @@ const AdminCategories = () => {
     setFormData({ 
       name: category.name, 
       image_url: category.image_url || '',
-      icon_name: category.icon_name || null
+      icon_name: category.icon_name || null,
+      bg_color: category.bg_color || null
     });
     setActiveTab(category.icon_name ? 'icon' : 'image');
     setOpen(true);
@@ -238,14 +455,14 @@ const AdminCategories = () => {
   // Get icon component for display
   const getCategoryIcon = (iconName: string) => {
     const iconId = iconName.charAt(0).toLowerCase() + iconName.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase() as keyof typeof dynamicIconImports;
-    return <DynamicIcon name={iconId} className="h-12 w-12 text-primary" />;
+    return <DynamicIcon name={iconId} className="h-8 w-8 text-primary" />;
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">إدارة التصنيفات</h1>
-        <p className="text-muted-foreground mt-2">إضافة وتعديل تصنيفات المنتجات وإعدادات العرض</p>
+        <p className="text-muted-foreground mt-2">إضافة وتعديل وترتيب تصنيفات المنتجات</p>
       </div>
 
       {/* إعدادات عرض التصنيفات */}
@@ -362,7 +579,7 @@ const AdminCategories = () => {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>التصنيفات</CardTitle>
-              <CardDescription>إدارة تصنيفات المنتجات</CardDescription>
+              <CardDescription>اسحب لإعادة ترتيب التصنيفات</CardDescription>
             </div>
             <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
               <DialogTrigger asChild>
@@ -371,7 +588,7 @@ const AdminCategories = () => {
                   إضافة تصنيف
                 </Button>
               </DialogTrigger>
-              <DialogContent dir="rtl" className="max-w-lg">
+              <DialogContent dir="rtl" className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingCategory ? 'تعديل التصنيف' : 'إضافة تصنيف جديد'}
@@ -429,10 +646,16 @@ const AdminCategories = () => {
                       </div>
                     </TabsContent>
                     
-                    <TabsContent value="icon">
+                    <TabsContent value="icon" className="space-y-4">
                       <IconPicker 
                         selectedIcon={formData.icon_name} 
                         onSelect={handleIconSelect}
+                      />
+                      
+                      {/* Color picker for icons */}
+                      <ColorPicker
+                        selectedColor={formData.bg_color}
+                        onSelect={(color) => setFormData({ ...formData, bg_color: color })}
                       />
                     </TabsContent>
                   </Tabs>
@@ -446,52 +669,30 @@ const AdminCategories = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories?.map((category: any) => (
-              <Card key={category.id} className="overflow-hidden shadow-card">
-                {category.image_url ? (
-                  <img
-                    src={category.image_url}
-                    alt={category.name}
-                    className="w-full h-40 object-cover"
-                  />
-                ) : category.icon_name ? (
-                  <div className="w-full h-40 bg-muted flex items-center justify-center">
-                    {getCategoryIcon(category.icon_name)}
-                  </div>
-                ) : (
-                  <div className="w-full h-40 bg-muted flex items-center justify-center">
-                    <Image className="h-12 w-12 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-3">{category.name}</h3>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleEdit(category)}
-                    >
-                      <Edit className="ml-1 h-4 w-4" />
-                      تعديل
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => deleteMutation.mutate(category.id)}
-                    >
-                      <Trash2 className="ml-1 h-4 w-4" />
-                      حذف
-                    </Button>
-                  </div>
+          {categories && categories.length > 0 ? (
+            <DndContext 
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext 
+                items={categories.map((cat: any) => cat.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {categories.map((category: any) => (
+                    <SortableCategoryItem
+                      key={category.id}
+                      category={category}
+                      onEdit={handleEdit}
+                      onDelete={(id) => deleteMutation.mutate(id)}
+                      getCategoryIcon={getCategoryIcon}
+                    />
+                  ))}
                 </div>
-              </Card>
-            ))}
-          </div>
-          
-          {categories?.length === 0 && (
+              </SortableContext>
+            </DndContext>
+          ) : (
             <div className="text-center py-12">
               <Grid className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">لا توجد تصنيفات بعد</p>

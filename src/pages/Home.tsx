@@ -136,6 +136,9 @@ const Home = () => {
       }
       return <Grid className={iconClass} />;
     };
+    
+    // Get background color style
+    const bgColorStyle = category.bg_color ? { backgroundColor: category.bg_color } : {};
 
     if (categoryDisplayStyle === 'list') {
       return <Link key={category.id} to={`/category/${category.id}`} className="block">
@@ -147,7 +150,10 @@ const Home = () => {
     
     if (categoryDisplayStyle === 'icon-list') {
       return <Link key={category.id} to={`/category/${category.id}`} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-secondary/50 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' }}
+          >
             {renderCategoryVisual('small')}
           </div>
           <h3 className="font-medium">{category.name}</h3>
@@ -161,7 +167,10 @@ const Home = () => {
             {category.image_url ? (
               <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300" />
             ) : category.icon_name ? (
-              <div className="w-full h-full bg-primary/5 rounded-md flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+              <div 
+                className="w-full h-full rounded-md flex items-center justify-center group-hover:opacity-80 transition-opacity"
+                style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.05)' }}
+              >
                 {renderCategoryVisual('large')}
               </div>
             ) : (
