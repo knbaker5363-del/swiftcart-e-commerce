@@ -10,6 +10,7 @@ import { Palette, Upload, X, MessageCircle, Image, Trash2, Instagram, Check, Spa
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ThemePreview from '@/components/ThemePreview';
+import { compressImageToFile, isImageFile } from '@/lib/imageCompression';
 const themes = [{
   id: 'default',
   name: 'كلاسيكي (أبيض وأسود)',
@@ -321,11 +322,13 @@ const AdminSettings = () => {
     }
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `logo-${Date.now()}.${fileExt}`;
+      // Compress image before upload
+      toast({ title: 'جاري ضغط الصورة...' });
+      const compressedFile = await compressImageToFile(file);
+      const fileName = `logo-${Date.now()}.webp`;
       const {
         error: uploadError
-      } = await supabase.storage.from('product-images').upload(fileName, file);
+      } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
       if (uploadError) throw uploadError;
       const {
         data: {
@@ -364,11 +367,13 @@ const AdminSettings = () => {
     }
     setUploadingFavicon(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `favicon-${Date.now()}.${fileExt}`;
+      // Compress favicon (smaller size for icons)
+      toast({ title: 'جاري ضغط الصورة...' });
+      const compressedFile = await compressImageToFile(file, 256, 256, 0.9);
+      const fileName = `favicon-${Date.now()}.webp`;
       const {
         error: uploadError
-      } = await supabase.storage.from('product-images').upload(fileName, file);
+      } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
       if (uploadError) throw uploadError;
       const {
         data: {
@@ -407,11 +412,13 @@ const AdminSettings = () => {
     }
     setUploadingBanner(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `banner-${Date.now()}.${fileExt}`;
+      // Compress banner (larger size for banners)
+      toast({ title: 'جاري ضغط الصورة...' });
+      const compressedFile = await compressImageToFile(file, 1920, 1080, 0.85);
+      const fileName = `banner-${Date.now()}.webp`;
       const {
         error: uploadError
-      } = await supabase.storage.from('product-images').upload(fileName, file);
+      } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
       if (uploadError) throw uploadError;
       const {
         data: {
