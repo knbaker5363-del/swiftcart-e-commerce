@@ -88,13 +88,13 @@ const AllProducts = () => {
                   ? (product.additional_images.filter((img): img is string => typeof img === 'string'))
                   : [];
 
-                // Parse options
+                // Parse options - handle both old format (string[]) and new format (SizeOption[])
                 let productSizes: string[] = [];
                 let productColors: string[] = [];
                 if (product.options && typeof product.options === 'object') {
                   const opts = product.options as Record<string, unknown>;
                   if (Array.isArray(opts.sizes)) {
-                    productSizes = opts.sizes.filter((s): s is string => typeof s === 'string');
+                    productSizes = opts.sizes.map((s: any) => typeof s === 'string' ? s : s.name).filter(Boolean);
                   }
                   if (Array.isArray(opts.colors)) {
                     productColors = opts.colors.filter((c): c is string => typeof c === 'string');

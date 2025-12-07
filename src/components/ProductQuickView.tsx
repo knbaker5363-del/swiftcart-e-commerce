@@ -37,8 +37,29 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   // Return null if product is not provided
   if (!product) return null;
 
-  const options = product.options as { sizes?: string[], colors?: string[] } | null;
-  const hasOptions = options && (options.sizes || options.colors);
+  // Size option type for new pricing structure
+  interface SizeOption {
+    name: string;
+    price_type: 'base' | 'fixed' | 'addition';
+    price_value: number | null;
+  }
+
+  const rawOptions = product.options as { sizes?: (string | SizeOption)[], colors?: string[] } | null;
+  
+  // Normalize sizes to always be SizeOption objects
+  const normalizedSizes: SizeOption[] = (rawOptions?.sizes || []).map((size) => {
+    if (typeof size === 'string') {
+      return { name: size, price_type: 'base' as const, price_value: null };
+    }
+    return size as SizeOption;
+  });
+  
+  const options = {
+    sizes: normalizedSizes,
+    colors: rawOptions?.colors || []
+  };
+  
+  const hasOptions = options.sizes.length > 0 || options.colors.length > 0;
 
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -59,17 +80,56 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
     return color.startsWith('#') ? color : (colorMap[color] || color);
   };
 
+  // Calculate price based on selected size
+  const calculatePrice = () => {
+    const basePrice = product.price;
+    const hasDiscount = (product.discount_percentage ?? 0) > 0;
+    
+    if (selectedSize && options.sizes.length > 0) {
+      const sizeOption = options.sizes.find(s => s.name === selectedSize);
+      if (sizeOption) {
+        let sizePrice = basePrice;
+        if (sizeOption.price_type === 'fixed' && sizeOption.price_value !== null) {
+          sizePrice = sizeOption.price_value;
+        } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
+          sizePrice = basePrice + sizeOption.price_value;
+        }
+        // Apply discount to the calculated size price
+        return hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+      }
+    }
+    
+    // Default to base price with discount
+    return hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+  };
+
   const hasDiscount = (product.discount_percentage ?? 0) > 0;
-  const discountedPrice = hasDiscount 
-    ? product.price * (1 - (product.discount_percentage ?? 0) / 100)
-    : product.price;
+  const currentPrice = calculatePrice();
+  
+  // Calculate original price (before discount) for display
+  const getOriginalPrice = () => {
+    const basePrice = product.price;
+    if (selectedSize && options.sizes.length > 0) {
+      const sizeOption = options.sizes.find(s => s.name === selectedSize);
+      if (sizeOption) {
+        if (sizeOption.price_type === 'fixed' && sizeOption.price_value !== null) {
+          return sizeOption.price_value;
+        } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
+          return basePrice + sizeOption.price_value;
+        }
+      }
+    }
+    return basePrice;
+  };
+  
+  const originalPrice = getOriginalPrice();
 
   const additionalImages = product.additional_images as string[] | null;
 
   const handleAddToCart = () => {
     // التحقق من اختيار الخيارات المطلوبة
     if (hasOptions) {
-      if (options?.sizes && options.sizes.length > 0 && !selectedSize) {
+      if (options.sizes.length > 0 && !selectedSize) {
         toast({
           title: "يرجى اختيار المقاس",
           description: "يجب اختيار المقاس قبل إضافة المنتج للسلة",
@@ -77,7 +137,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
         });
         return;
       }
-      if (options?.colors && options.colors.length > 0 && !selectedColor) {
+      if (options.colors.length > 0 && !selectedColor) {
         toast({
           title: "يرجى اختيار اللون",
           description: "يجب اختيار اللون قبل إضافة المنتج للسلة",
@@ -95,7 +155,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
       id: product.id,
       product_id: product.id,
       name: product.name,
-      price: discountedPrice,
+      price: currentPrice,
       image_url: product.image_url,
       quantity: 1,
       selected_options: selectedOptions,
@@ -146,19 +206,18 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
           {/* تفاصيل المنتج */}
           <div className="space-y-4">
             {/* السعر */}
-            <div className="flex items-center gap-3">
-              {hasDiscount ? (
-                <>
-                  <span className="text-3xl font-bold text-primary">
-                    {discountedPrice.toFixed(2)} ₪
-                  </span>
-                  <span className="text-xl text-muted-foreground line-through">
-                    {product.price.toFixed(2)} ₪
-                  </span>
-                </>
-              ) : (
-                <span className="text-3xl font-bold text-primary">
-                  {product.price.toFixed(2)} ₪
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-3xl font-bold text-primary">
+                {currentPrice.toFixed(2)} ₪
+              </span>
+              {(hasDiscount || (selectedSize && currentPrice !== originalPrice)) && originalPrice !== currentPrice && (
+                <span className="text-xl text-muted-foreground line-through">
+                  {originalPrice.toFixed(2)} ₪
+                </span>
+              )}
+              {selectedSize && options.sizes.length > 0 && (
+                <span className="text-sm bg-muted px-2 py-1 rounded">
+                  مقاس: {selectedSize}
                 </span>
               )}
             </div>
@@ -172,20 +231,29 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
             )}
 
             {/* المقاسات */}
-            {options?.sizes && options.sizes.length > 0 && (
+            {options.sizes.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-base font-semibold">المقاس *</Label>
                 <div className="flex flex-wrap gap-2">
-                  {options.sizes.map((size) => (
-                    <Button
-                      key={size}
-                      variant={selectedSize === size ? "default" : "outline"}
-                      onClick={() => setSelectedSize(size)}
-                      className="min-w-[60px]"
-                    >
-                      {size}
-                    </Button>
-                  ))}
+                  {options.sizes.map((size, index) => {
+                    const sizeName = size.name;
+                    const hasPricing = size.price_type !== 'base' && size.price_value !== null;
+                    return (
+                      <Button
+                        key={`${sizeName}-${index}`}
+                        variant={selectedSize === sizeName ? "default" : "outline"}
+                        onClick={() => setSelectedSize(sizeName)}
+                        className="min-w-[60px] flex flex-col h-auto py-2"
+                      >
+                        <span>{sizeName}</span>
+                        {hasPricing && (
+                          <span className="text-xs opacity-80">
+                            {size.price_type === 'fixed' ? `${size.price_value} ₪` : `+${size.price_value} ₪`}
+                          </span>
+                        )}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             )}

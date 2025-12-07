@@ -57,12 +57,74 @@ const ProductDetail = () => {
     },
   });
 
-  const options = product?.options as any;
+  // Size option type for new pricing structure
+  interface SizeOption {
+    name: string;
+    price_type: 'base' | 'fixed' | 'addition';
+    price_value: number | null;
+  }
+
+  const rawOptions = product?.options as { sizes?: (string | SizeOption)[], colors?: string[] } | null;
+  
+  // Normalize sizes to always be SizeOption objects
+  const normalizedSizes: SizeOption[] = (rawOptions?.sizes || []).map((size) => {
+    if (typeof size === 'string') {
+      return { name: size, price_type: 'base' as const, price_value: null };
+    }
+    return size as SizeOption;
+  });
+  
+  const options = {
+    sizes: normalizedSizes,
+    colors: rawOptions?.colors || []
+  };
+
+  // Calculate price based on selected size
+  const calculatePrice = () => {
+    if (!product) return 0;
+    const basePrice = product.price;
+    const hasDiscount = (product.discount_percentage ?? 0) > 0;
+    
+    if (selectedSize && options.sizes.length > 0) {
+      const sizeOption = options.sizes.find(s => s.name === selectedSize);
+      if (sizeOption) {
+        let sizePrice = basePrice;
+        if (sizeOption.price_type === 'fixed' && sizeOption.price_value !== null) {
+          sizePrice = sizeOption.price_value;
+        } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
+          sizePrice = basePrice + sizeOption.price_value;
+        }
+        return hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+      }
+    }
+    
+    return hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+  };
+
+  const getOriginalPrice = () => {
+    if (!product) return 0;
+    const basePrice = product.price;
+    if (selectedSize && options.sizes.length > 0) {
+      const sizeOption = options.sizes.find(s => s.name === selectedSize);
+      if (sizeOption) {
+        if (sizeOption.price_type === 'fixed' && sizeOption.price_value !== null) {
+          return sizeOption.price_value;
+        } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
+          return basePrice + sizeOption.price_value;
+        }
+      }
+    }
+    return basePrice;
+  };
+
+  const currentPrice = calculatePrice();
+  const originalPrice = getOriginalPrice();
+  const hasDiscount = product ? (product.discount_percentage ?? 0) > 0 : false;
 
   const handleAddToCart = () => {
     if (!product) return;
     
-    if (options?.sizes && !selectedSize) {
+    if (options.sizes.length > 0 && !selectedSize) {
       toast({
         title: 'يرجى اختيار المقاس',
         variant: 'destructive',
@@ -70,7 +132,7 @@ const ProductDetail = () => {
       return;
     }
     
-    if (options?.colors && !selectedColor) {
+    if (options.colors.length > 0 && !selectedColor) {
       toast({
         title: 'يرجى اختيار اللون',
         variant: 'destructive',
@@ -82,7 +144,7 @@ const ProductDetail = () => {
       id: '',
       product_id: product.id,
       name: product.name,
-      price: product.price,
+      price: currentPrice,
       image_url: product.image_url,
       quantity,
       selected_options: {
@@ -165,9 +227,16 @@ const ProductDetail = () => {
                   </Button>
                 </div>
                 <p className="text-muted-foreground">{product.categories?.name}</p>
-                <p className="text-3xl font-bold text-primary mt-4">
-                  {product.price.toFixed(2)} ₪
-                </p>
+                <div className="flex items-center gap-3 mt-4 flex-wrap">
+                  <span className="text-3xl font-bold text-primary">
+                    {currentPrice.toFixed(2)} ₪
+                  </span>
+                  {(hasDiscount || originalPrice !== currentPrice) && originalPrice !== currentPrice && (
+                    <span className="text-xl text-muted-foreground line-through">
+                      {originalPrice.toFixed(2)} ₪
+                    </span>
+                  )}
+                </div>
               </div>
 
               {product.description && (
@@ -180,31 +249,40 @@ const ProductDetail = () => {
               )}
 
               {/* Size Options */}
-              {options?.sizes && Array.isArray(options.sizes) && options.sizes.length > 0 && (
+              {options.sizes.length > 0 && (
                 <div>
                   <Label className="text-lg font-semibold mb-3 block">المقاس</Label>
                   <ToggleGroup 
                     type="single" 
                     value={selectedSize} 
                     onValueChange={setSelectedSize}
-                    className="justify-start"
+                    className="justify-start flex-wrap"
                   >
-                    {options.sizes.map((size: string) => (
-                      <ToggleGroupItem
-                        key={size}
-                        value={size}
-                        aria-label={`Select size ${size}`}
-                        className="px-6 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                      >
-                        {size}
-                      </ToggleGroupItem>
-                    ))}
+                    {options.sizes.map((size, index) => {
+                      const sizeName = size.name;
+                      const hasPricing = size.price_type !== 'base' && size.price_value !== null;
+                      return (
+                        <ToggleGroupItem
+                          key={`${sizeName}-${index}`}
+                          value={sizeName}
+                          aria-label={`Select size ${sizeName}`}
+                          className="px-6 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex flex-col h-auto"
+                        >
+                          <span>{sizeName}</span>
+                          {hasPricing && (
+                            <span className="text-xs opacity-80">
+                              {size.price_type === 'fixed' ? `${size.price_value} ₪` : `+${size.price_value} ₪`}
+                            </span>
+                          )}
+                        </ToggleGroupItem>
+                      );
+                    })}
                   </ToggleGroup>
                 </div>
               )}
 
               {/* Color Options */}
-              {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
+              {options.colors.length > 0 && (
                 <div>
                   <Label className="text-lg font-semibold mb-3 block">اللون</Label>
                   <ToggleGroup 

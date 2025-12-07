@@ -214,11 +214,14 @@ const Category = () => {
                       {/* Sizes */}
                       {options?.sizes && options.sizes.length > 0 && (
                         <div className="flex flex-wrap justify-center gap-1 mb-2">
-                          {options.sizes.map((size, idx) => (
-                            <span key={idx} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
-                              {size}
-                            </span>
-                          ))}
+                          {options.sizes.map((size: any, idx: number) => {
+                            const sizeName = typeof size === 'string' ? size : size.name;
+                            return (
+                              <span key={idx} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
+                                {sizeName}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
 

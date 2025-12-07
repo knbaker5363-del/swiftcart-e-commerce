@@ -156,11 +156,14 @@ export const CategoryProductsSection = ({ category }: CategoryProductsSectionPro
                       {product.options.sizes && product.options.sizes.length > 0 && (
                         <div className="flex flex-wrap gap-1 items-center">
                           <span className="text-xs text-muted-foreground">المقاسات:</span>
-                          {product.options.sizes.map((size: string, idx: number) => (
-                            <span key={idx} className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                              {size}
-                            </span>
-                          ))}
+                          {product.options.sizes.map((size: any, idx: number) => {
+                            const sizeName = typeof size === 'string' ? size : size.name;
+                            return (
+                              <span key={idx} className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                {sizeName}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                       
