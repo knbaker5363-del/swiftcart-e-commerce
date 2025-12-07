@@ -234,6 +234,45 @@ const AdminDisplay = () => {
         <p className="text-muted-foreground mt-2">تخصيص ثيم وألوان ومظهر الموقع</p>
       </div>
 
+      {/* Preview Panel - شاشة المعاينة */}
+      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-primary" />
+            معاينة التأثيرات
+          </CardTitle>
+          <CardDescription>شرح تأثير كل إعداد على الموقع</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">🎨 ثيم الخلفية</div>
+              <p className="text-muted-foreground text-xs">يغير ألوان الخلفية العامة للموقع</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">🔘 لون الأزرار</div>
+              <p className="text-muted-foreground text-xs">يغير لون جميع الأزرار والعناصر التفاعلية</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">✨ التأثيرات المتحركة</div>
+              <p className="text-muted-foreground text-xs">يضيف تأثيرات متحركة للخلفية (ثلج، نجوم، قلوب)</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">🔤 الخط</div>
+              <p className="text-muted-foreground text-xs">يغير نوع الخط في جميع النصوص</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">🛒 زر السلة</div>
+              <p className="text-muted-foreground text-xs">يغير شكل وأيقونة زر إضافة للسلة</p>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <div className="font-semibold text-primary mb-1">📍 موضع العناصر</div>
+              <p className="text-muted-foreground text-xs">يغير موضع اللوجو والسوشل ميديا</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Font Settings */}
       <Card>
         <CardHeader>

@@ -23,6 +23,7 @@ import { usePageView } from '@/hooks/useAnalytics';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import SocialFooter from '@/components/SocialFooter';
 import CategoriesSlider from '@/components/CategoriesSlider';
+import SearchBar from '@/components/SearchBar';
 
 const Home = () => {
   useDocumentTitle();
@@ -43,7 +44,7 @@ const Home = () => {
   const {
     toast
   } = useToast();
-  const categoryDisplayStyle = settings?.category_display_style || 'grid';
+  const categoryDisplayStyle = (settings?.category_display_style || 'grid') as string;
   const showBrandsButton = settings?.show_brands_button !== false;
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -111,7 +112,8 @@ const Home = () => {
     setQuickViewOpen(true);
   };
   // Map category display style to slider style
-  const getSliderDisplayStyle = (): 'square' | 'circle' | 'icon' => {
+  const getSliderDisplayStyle = (): 'square' | 'circle' | 'icon' | 'dropdown' => {
+    if (categoryDisplayStyle === 'dropdown') return 'dropdown';
     if (categoryDisplayStyle === 'icon-list') return 'icon';
     if (categoryDisplayStyle === 'list') return 'circle';
     return 'square';
@@ -123,10 +125,15 @@ const Home = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      
-
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Search Bar - تحت الهيدر فوق البنر */}
+      <section className="py-4 bg-muted/30">
+        <div className="container">
+          <SearchBar />
+        </div>
+      </section>
 
       {/* Categories Slider */}
       <section className="py-6 md:py-8">
