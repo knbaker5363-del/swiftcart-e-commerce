@@ -21,6 +21,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getIconByName } from '@/lib/categoryIcons';
 import { usePageView } from '@/hooks/useAnalytics';
+import BackgroundPattern from '@/components/BackgroundPattern';
 
 // Render icon by name
 const RenderCategoryIcon = ({
@@ -177,7 +178,8 @@ const Home = () => {
     }
     return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4";
   };
-  return <div className="min-h-screen bg-background" dir="rtl">
+  return <div className="min-h-screen bg-background relative" dir="rtl">
+      <BackgroundPattern />
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
