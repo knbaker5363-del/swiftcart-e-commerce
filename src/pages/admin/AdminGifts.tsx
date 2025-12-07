@@ -295,7 +295,7 @@ const AdminGifts = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2 justify-end">
+                <div className="flex flex-wrap gap-2 justify-start">
                   <Button
                     variant="outline"
                     size="sm"
