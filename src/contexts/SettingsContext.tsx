@@ -26,6 +26,10 @@ interface Settings {
   header_logo_position: 'right' | 'center';
   hide_header_store_info: boolean;
   social_media_position: 'hero' | 'footer';
+  // New display settings
+  cart_icon_style: string;
+  cart_button_text: string;
+  font_family: string;
 }
 
 interface SettingsContextType {
@@ -116,6 +120,17 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     document.title = `${storeName} - تسوق أفضل المنتجات`;
   };
 
+  const applyFontFamily = (fontFamily: string) => {
+    const fontMap: Record<string, string> = {
+      'tajawal': 'Tajawal, sans-serif',
+      'cairo': 'Cairo, sans-serif',
+      'almarai': 'Almarai, sans-serif',
+      'noto-kufi': '"Noto Kufi Arabic", sans-serif',
+      'ibm-plex': '"IBM Plex Sans Arabic", sans-serif',
+    };
+    document.body.style.fontFamily = fontMap[fontFamily] || fontMap['tajawal'];
+  };
+
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -144,11 +159,18 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         site_style: data.site_style || 'classic',
         header_logo_position: data.header_logo_position || 'right',
         hide_header_store_info: data.hide_header_store_info || false,
-        social_media_position: data.social_media_position || 'hero'
+        social_media_position: data.social_media_position || 'hero',
+        // New display settings
+        cart_icon_style: data.cart_icon_style || 'cart',
+        cart_button_text: data.cart_button_text || 'إضافة للسلة',
+        font_family: data.font_family || 'tajawal'
       };
       
       setSettings(parsedSettings as Settings);
       cacheSettings(parsedSettings as Settings); // Cache the settings
+      
+      // Apply font family to body
+      applyFontFamily(parsedSettings.font_family);
       
       if (data?.theme) {
         applyTheme(data.theme);
@@ -173,6 +195,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       if (cached.theme) applyTheme(cached.theme);
       if (cached.accent_color) applyAccentColor(cached.accent_color);
       if (cached.store_name) updateDocumentTitle(cached.store_name);
+      if (cached.font_family) applyFontFamily(cached.font_family);
     }
     // Always fetch fresh settings from database
     fetchSettings();

@@ -7,7 +7,17 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, Package, Briefcase, Gift, Heart } from 'lucide-react';
+import { useSettings } from '@/contexts/SettingsContext';
+
+// Cart icon mapping
+const cartIcons = {
+  cart: ShoppingCart,
+  bag: ShoppingBag,
+  package: Package,
+  briefcase: Briefcase,
+  gift: Gift,
+};
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/hooks/use-toast';
@@ -24,9 +34,15 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const { addItem } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { toast } = useToast();
+  const { settings } = useSettings();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+
+  // Get cart icon and text from settings
+  const cartIconStyle = (settings as any)?.cart_icon_style || 'cart';
+  const cartButtonText = (settings as any)?.cart_button_text || 'أضف للسلة';
+  const CartIcon = cartIcons[cartIconStyle as keyof typeof cartIcons] || ShoppingCart;
 
   // Track product view when dialog opens
   useEffect(() => {
@@ -394,11 +410,11 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
             {/* زر الإضافة للسلة */}
             <Button 
               onClick={handleAddToCart}
-              className="w-full py-6 text-lg"
+              className="w-full py-6 text-lg gap-2"
               size="lg"
             >
-              <ShoppingCart className="ml-2 h-5 w-5" />
-              أضف للسلة
+              <CartIcon className="h-5 w-5" />
+              {cartButtonText}
             </Button>
           </div>
         </div>
