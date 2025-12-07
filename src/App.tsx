@@ -12,6 +12,7 @@ import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { SetupGuard } from "@/components/SetupGuard";
 import AnimatedEffects from "@/components/AnimatedEffects";
 import FaviconManager from "@/components/FaviconManager";
+import LoadingScreen from "@/components/LoadingScreen";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -44,6 +45,10 @@ const FaviconWrapper = () => {
   return <FaviconManager />;
 };
 
+const LoadingWrapper = () => {
+  return <LoadingScreen />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,6 +61,7 @@ const App = () => (
               <CartProvider>
                 <FavoritesProvider>
                   <TooltipProvider>
+                    <LoadingWrapper />
                     <AnimatedEffectsWrapper />
                     <FaviconWrapper />
                     <Toaster />
