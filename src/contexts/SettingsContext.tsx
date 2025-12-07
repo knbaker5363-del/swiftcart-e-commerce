@@ -21,6 +21,8 @@ interface Settings {
   cart_button_style: 'default' | 'rounded' | 'pill' | 'square';
   header_layout: 'logo-right-social-below' | 'logo-center-social-below' | 'logo-right-social-left';
   show_image_border: boolean;
+  logo_shape: 'square' | 'circle';
+  site_style: 'classic' | 'modern' | 'minimal';
 }
 
 interface SettingsContextType {
@@ -134,7 +136,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         background_image_url: data.background_image_url || null,
         cart_button_style: data.cart_button_style || 'default',
         header_layout: data.header_layout || 'logo-right-social-below',
-        show_image_border: data.show_image_border !== false
+        show_image_border: data.show_image_border !== false,
+        logo_shape: data.logo_shape || 'circle',
+        site_style: data.site_style || 'classic'
       };
       
       setSettings(parsedSettings as Settings);

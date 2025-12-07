@@ -72,6 +72,26 @@ const HeroSection = () => {
   // Get header layout setting
   const headerLayout = (settings as any)?.header_layout || 'logo-right';
   const showImageBorder = (settings as any)?.show_image_border !== false;
+  const logoShape = (settings as any)?.logo_shape || 'circle';
+  const siteStyle = (settings as any)?.site_style || 'classic';
+
+  // Get logo shape class
+  const getLogoShapeClass = (size: 'sm' | 'lg') => {
+    const baseClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-xl';
+    return baseClass;
+  };
+
+  // Get site style classes
+  const getSiteStyleClasses = () => {
+    switch (siteStyle) {
+      case 'modern':
+        return 'bg-gradient-to-br from-card to-card/80 backdrop-blur-sm';
+      case 'minimal':
+        return 'bg-card/50 border-0';
+      default: // classic
+        return 'bg-card';
+    }
+  };
 
   // شرائح البانر من الإعدادات أو افتراضية
   const defaultImages = [
@@ -120,9 +140,10 @@ const HeroSection = () => {
     const sizeClass = size === 'lg' ? 'w-32 h-32' : 'w-14 h-14';
     const textSize = size === 'lg' ? 'text-4xl' : 'text-xl';
     const borderWidth = size === 'lg' ? 'border-4' : 'border-2';
+    const shapeClass = getLogoShapeClass(size);
     
     return (
-      <div className={`${sizeClass} rounded-full overflow-hidden shadow-hover ${borderWidth} border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+      <div className={`${sizeClass} ${shapeClass} overflow-hidden shadow-hover ${borderWidth} border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
         {settings?.logo_url ? (
           <img
             src={settings.logo_url}
@@ -130,7 +151,7 @@ const HeroSection = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-primary flex items-center justify-center">
+          <div className={`w-full h-full bg-primary flex items-center justify-center`}>
             <span className={`${textSize} font-bold text-primary-foreground`}>
               {settings?.store_name?.charAt(0) || 'م'}
             </span>
@@ -142,9 +163,11 @@ const HeroSection = () => {
 
   // Store info component for desktop based on layout
   const DesktopStoreInfo = () => {
+    const cardClass = `hidden lg:flex flex-col rounded-lg shadow-card p-6 ${getSiteStyleClasses()}`;
+    
     if (headerLayout === 'logo-center') {
       return (
-        <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
+        <div className={`${cardClass} items-center justify-center text-center`}>
           <LogoComponent size="lg" />
           <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
             {settings?.store_name || 'متجري'}
@@ -168,7 +191,7 @@ const HeroSection = () => {
 
     if (headerLayout === 'logo-left') {
       return (
-        <div className="hidden lg:flex flex-col bg-card rounded-lg shadow-card p-6">
+        <div className={cardClass}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <SocialIcons settings={settings} size="md" />
@@ -198,7 +221,7 @@ const HeroSection = () => {
 
     // Default: logo-right
     return (
-      <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
+      <div className={`${cardClass} items-center justify-center text-center`}>
         <LogoComponent size="lg" />
         <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
           {settings?.store_name || 'متجري'}
@@ -222,10 +245,13 @@ const HeroSection = () => {
 
   // Mobile store info based on layout
   const MobileStoreInfo = () => {
+    const mobileCardClass = `flex lg:hidden rounded-lg shadow-card p-3 ${getSiteStyleClasses()}`;
+    const mobileLogoShape = logoShape === 'circle' ? 'rounded-full' : 'rounded-xl';
+    
     if (headerLayout === 'logo-center') {
       return (
-        <div className="flex lg:hidden flex-col items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
-          <div className={`w-16 h-16 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+        <div className={`${mobileCardClass} flex-col items-center gap-3 mb-4`}>
+          <div className={`w-16 h-16 ${mobileLogoShape} overflow-hidden shadow-hover border-2 border-primary/20 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
             {settings?.logo_url ? (
               <img
                 src={settings.logo_url}
@@ -254,7 +280,7 @@ const HeroSection = () => {
 
     if (headerLayout === 'logo-left') {
       return (
-        <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
+        <div className={`${mobileCardClass} items-center gap-3 mb-4`}>
           <div className="flex-1">
             <SocialIcons settings={settings} size="sm" />
             <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
@@ -263,7 +289,7 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="flex flex-col items-center">
-            <div className={`w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+            <div className={`w-14 h-14 ${mobileLogoShape} overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
               {settings?.logo_url ? (
                 <img
                   src={settings.logo_url}
@@ -288,8 +314,8 @@ const HeroSection = () => {
 
     // Default: logo-right
     return (
-      <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
-        <div className={`w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+      <div className={`${mobileCardClass} items-center gap-3 mb-4`}>
+        <div className={`w-14 h-14 ${mobileLogoShape} overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
           {settings?.logo_url ? (
             <img
               src={settings.logo_url}
