@@ -93,7 +93,7 @@ const Favorites = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
             {isLoading ? (
               // Loading skeletons
               Array.from({ length: favorites.length }).map((_, i) => (
@@ -115,23 +115,23 @@ const Favorites = () => {
 
                 return (
                   <div key={product.id} onClick={() => handleProductClick(product)} className="cursor-pointer">
-                    <Card className="overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 group relative h-full">
+                    <Card className="overflow-hidden bg-card shadow-card hover:shadow-card-hover transition-all duration-300 group relative h-full flex flex-col text-xs">
                       {/* Discount Badge */}
                       {hasDiscount && (
-                        <Badge className="absolute top-3 right-3 z-10 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-3 py-1">
+                        <Badge className="absolute top-2 right-2 z-10 bg-destructive text-destructive-foreground text-[10px] px-1.5">
                           -{discount}%
                         </Badge>
                       )}
 
-                      {/* Favorite Icon - Active */}
+                      {/* Favorite Icon */}
                       <button
                         onClick={(e) => handleToggleFavorite(e, product.id)}
-                        className="absolute top-3 left-3 z-10 p-2 rounded-full bg-red-500 hover:bg-red-600 shadow-md transition-all hover:scale-110"
+                        className="absolute top-2 left-2 z-10 p-1.5 rounded-full bg-destructive hover:bg-destructive/90 shadow-md transition-all"
                       >
-                        <Heart className="w-5 h-5 text-white fill-white" />
+                        <Heart className="w-3.5 h-3.5 text-white fill-white" />
                       </button>
 
-                      {/* Product Image Carousel */}
+                      {/* Product Image */}
                       <ProductImageCarousel
                         mainImage={product.image_url || ''}
                         additionalImages={additionalImages}
@@ -139,21 +139,17 @@ const Favorites = () => {
                       />
 
                       {/* Product Info */}
-                      <div className="p-4 space-y-3">
-                        <p className="text-xs text-gray-500 uppercase tracking-wider">
-                          {product.categories?.name}
-                        </p>
-
-                        <h3 className="font-bold text-gray-900 text-lg line-clamp-2 min-h-[3.5rem] leading-tight">
+                      <div className="p-2 flex flex-col flex-grow text-center">
+                        <h3 className="font-semibold text-sm line-clamp-2 mb-1">
                           {product.name}
                         </h3>
 
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold text-green-600">
+                        <div className="flex items-center justify-center gap-1.5 mb-1">
+                          <span className="text-sm font-bold text-primary">
                             {product.price.toFixed(0)} ₪
                           </span>
                           {hasDiscount && (
-                            <span className="text-sm text-gray-400 line-through">
+                            <span className="text-[10px] text-muted-foreground line-through">
                               {originalPrice.toFixed(0)} ₪
                             </span>
                           )}
@@ -161,11 +157,11 @@ const Favorites = () => {
 
                         {/* Colors */}
                         {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {options.colors.slice(0, 6).map((color: string, idx: number) => (
+                          <div className="flex flex-wrap justify-center gap-1 mt-auto">
+                            {options.colors.slice(0, 4).map((color: string, idx: number) => (
                               <div
                                 key={idx}
-                                className="w-6 h-6 rounded-full border-2 border-gray-300"
+                                className="w-4 h-4 rounded-full border border-border"
                                 style={{ backgroundColor: getColorValue(color) }}
                                 title={color}
                               />

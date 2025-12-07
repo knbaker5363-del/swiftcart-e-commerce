@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart, ShoppingCart, Grid3X3 } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
@@ -19,25 +18,11 @@ import BrandsButton from '@/components/BrandsButton';
 import ProductQuickView from '@/components/ProductQuickView';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getIconByName } from '@/lib/categoryIcons';
 import { usePageView } from '@/hooks/useAnalytics';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import SocialFooter from '@/components/SocialFooter';
-
-// Render icon by name
-const RenderCategoryIcon = ({
-  iconName,
-  className
-}: {
-  iconName: string;
-  className?: string;
-}) => {
-  const IconComponent = getIconByName(iconName);
-  if (!IconComponent) {
-    return <Grid3X3 className={className} />;
-  }
-  return <IconComponent className={className} />;
-};
+import CategoriesSlider from '@/components/CategoriesSlider';
+import MyOrdersButton from '@/components/MyOrdersButton';
 const Home = () => {
   useDocumentTitle();
   usePageView('/'); // Track home page visits
@@ -124,82 +109,38 @@ const Home = () => {
     setSelectedProduct(product);
     setQuickViewOpen(true);
   };
-  const renderCategoryItem = (category: any) => {
-    // Helper function to render category icon or fallback
-    const renderCategoryVisual = (size: 'small' | 'large') => {
-      const iconClass = size === 'large' ? 'h-12 w-12 text-primary' : 'h-5 w-5 text-primary';
-      if (category.icon_name) {
-        return <RenderCategoryIcon iconName={category.icon_name} className={iconClass} />;
-      }
-      return <Grid3X3 className={iconClass} />;
-    };
-
-    // Get background color style
-    const bgColorStyle = category.bg_color ? {
-      backgroundColor: category.bg_color
-    } : {};
-    if (categoryDisplayStyle === 'list') {
-      return <Link key={category.id} to={`/category/${category.id}`} className="block">
-          <div className="p-4 rounded-lg border bg-card hover:bg-secondary/50 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-            <h3 className="font-medium text-center">{category.name}</h3>
-          </div>
-        </Link>;
-    }
-    if (categoryDisplayStyle === 'icon-list') {
-      return <Link key={category.id} to={`/category/${category.id}`} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-secondary/50 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={category.bg_color ? bgColorStyle : {
-          backgroundColor: 'hsl(var(--primary) / 0.1)'
-        }}>
-            {renderCategoryVisual('small')}
-          </div>
-          <h3 className="font-medium">{category.name}</h3>
-        </Link>;
-    }
-
-    // Default: grid with images or icons
-    return <Link key={category.id} to={`/category/${category.id}`} className="group">
-        <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 p-3">
-          <div className="aspect-square mb-2">
-            {category.image_url ? <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300" /> : category.icon_name ? <div className="w-full h-full rounded-md flex items-center justify-center group-hover:opacity-80 transition-opacity" style={category.bg_color ? bgColorStyle : {
-            backgroundColor: 'hsl(var(--primary) / 0.05)'
-          }}>
-                {renderCategoryVisual('large')}
-              </div> : <div className="w-full h-full bg-muted rounded-md" />}
-          </div>
-          <h3 className="font-medium text-sm text-center line-clamp-1">{category.name}</h3>
-        </Card>
-      </Link>;
+  // Map category display style to slider style
+  const getSliderDisplayStyle = (): 'square' | 'circle' | 'icon' => {
+    if (categoryDisplayStyle === 'icon-list') return 'icon';
+    if (categoryDisplayStyle === 'list') return 'circle';
+    return 'square';
   };
-  const getCategoryGridClass = () => {
-    if (categoryDisplayStyle === 'list') {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3";
-    }
-    if (categoryDisplayStyle === 'icon-list') {
-      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3";
-    }
-    return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4";
-  };
+
+  const hideHeaderStoreInfo = settings?.hide_header_store_info || false;
   return <div className="min-h-screen bg-background relative" dir="rtl">
       <BackgroundPattern />
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
+      {/* My Orders Button - shows when store info is hidden */}
+      {hideHeaderStoreInfo && <MyOrdersButton />}
+
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Categories */}
-      <section className="py-8 md:py-12">
+      {/* Categories Slider */}
+      <section className="py-6 md:py-8">
         <div className="container">
-          <h2 className="text-2xl font-bold mb-6">التصنيفات</h2>
-          {categoriesLoading ? <div className={getCategoryGridClass()}>
-              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32 md:h-40 rounded-lg" />)}
-            </div> : <div className={getCategoryGridClass()}>
-              {categories?.map(renderCategoryItem)}
-            </div>}
+          <h2 className="text-xl font-bold mb-4">التصنيفات</h2>
+          <CategoriesSlider 
+            categories={categories} 
+            isLoading={categoriesLoading} 
+            displayStyle={getSliderDisplayStyle()} 
+          />
         </div>
       </section>
 
-      {/* Deals Bar & Brands Button - After categories on mobile */}
+      {/* Deals Bar & Brands Button */}
       <section className="py-4 md:py-6">
         <div className="container space-y-3">
           <DealsBar />
@@ -211,9 +152,9 @@ const Home = () => {
       <section className="py-12 bg-muted/30">
         <div className="container px-[2px]">
           <h2 className="text-2xl font-bold mb-6">كافة المنتجات</h2>
-          {productsLoading ? <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
-              {[...Array(10)].map((_, i) => <Skeleton key={i} className="h-80 rounded-lg" />)}
-            </div> : <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+          {productsLoading ? <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+              {[...Array(12)].map((_, i) => <Skeleton key={i} className="h-64 rounded-lg" />)}
+            </div> : <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
               {products?.data?.map(product => {
             const additionalImages = product.additional_images as string[] | null;
             const options = product.options as {
@@ -222,7 +163,7 @@ const Home = () => {
             } | null;
             const hasDiscount = (product.discount_percentage ?? 0) > 0;
             const discountedPrice = hasDiscount ? product.price * (1 - (product.discount_percentage ?? 0) / 100) : product.price;
-            return <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full">
+            return <Card key={product.id} className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full text-xs">
                     
                     <div className="relative flex-shrink-0">
                       <div onClick={() => handleProductClick(product)} className="cursor-pointer">
