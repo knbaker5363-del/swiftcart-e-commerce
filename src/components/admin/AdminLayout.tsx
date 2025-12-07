@@ -131,7 +131,14 @@ const AdminLayout = () => {
           <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
             لوحة التحكم
           </h1>
-          <div className="w-10" /> {/* Spacer for centering */}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate('/')}
+            title="العودة للمتجر"
+          >
+            <Store className="h-5 w-5" />
+          </Button>
         </header>
 
         {/* Main Content */}
