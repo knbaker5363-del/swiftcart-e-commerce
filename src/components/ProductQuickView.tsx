@@ -257,6 +257,14 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
 
           {/* تفاصيل المنتج */}
           <div className="space-y-4">
+            {/* الوصف - أولاً في بوكس */}
+            {product.description && (
+              <div className="bg-muted/50 border border-border rounded-lg p-4">
+                <h3 className="font-semibold text-lg mb-2">الوصف</h3>
+                <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+              </div>
+            )}
+
             {/* السعر */}
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-3xl font-bold text-primary">
@@ -273,14 +281,6 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
                 </span>
               )}
             </div>
-
-            {/* الوصف */}
-            {product.description && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">الوصف</h3>
-                <p className="text-muted-foreground">{product.description}</p>
-              </div>
-            )}
 
             {/* المقاسات */}
             {options.sizes.length > 0 && (
