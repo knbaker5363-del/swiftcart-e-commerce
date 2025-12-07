@@ -32,20 +32,50 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
     navigate('/');
   };
 
+  const headerLogoPosition = (settings as any)?.header_logo_position || 'right';
+  const logoShape = (settings as any)?.logo_shape || 'circle';
+  const logoShapeClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-lg';
+
+  // Logo component for header
+  const HeaderLogo = () => (
+    <Link 
+      to="/" 
+      className={`flex items-center gap-2 ${headerLogoPosition === 'center' ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
+    >
+      {settings?.logo_url ? (
+        <div className={`w-10 h-10 ${logoShapeClass} overflow-hidden border-2 border-primary/20`}>
+          <img
+            src={settings.logo_url}
+            alt={settings.store_name || 'شعار المتجر'}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className={`w-10 h-10 ${logoShapeClass} bg-primary flex items-center justify-center`}>
+          <span className="text-lg font-bold text-primary-foreground">
+            {settings?.store_name?.charAt(0) || 'م'}
+          </span>
+        </div>
+      )}
+      <h1 
+        className={`text-xl font-bold ${
+          settings?.store_name_black 
+            ? 'text-foreground' 
+            : 'bg-gradient-primary bg-clip-text text-transparent'
+        }`}
+      >
+        {settings?.store_name || 'متجري'}
+      </h1>
+    </Link>
+  );
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-          <h1 
-            className={`text-2xl font-bold ${
-              settings?.store_name_black 
-                ? 'text-foreground' 
-                : 'bg-gradient-primary bg-clip-text text-transparent'
-            }`}
-          >
-            {settings?.store_name || 'متجري'}
-          </h1>
-        </Link>
+      <div className="container flex h-16 items-center justify-between relative">
+        {/* Logo - positioned based on settings */}
+        {headerLogoPosition === 'right' && <HeaderLogo />}
+        {headerLogoPosition === 'center' && <HeaderLogo />}
+        
         <div className="flex items-center gap-2">
           <Link to="/favorites">
             <Button
