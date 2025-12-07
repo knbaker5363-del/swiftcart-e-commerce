@@ -8,10 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { compressImageToFile, isImageFile } from '@/lib/imageCompression';
+import { Badge } from '@/components/ui/badge';
 
 const AdminProducts = () => {
   const { toast } = useToast();
@@ -68,6 +69,7 @@ const AdminProducts = () => {
   const [newVariantOptionPrice, setNewVariantOptionPrice] = useState('');
   const [currentVariantIndex, setCurrentVariantIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
@@ -289,9 +291,15 @@ const AdminProducts = () => {
     setOpen(true);
   };
 
+  // Filter products based on search
+  const filteredProducts = products?.filter(product => 
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.categories?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">إدارة المنتجات</h1>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
@@ -750,8 +758,34 @@ const AdminProducts = () => {
         </Dialog>
       </div>
 
+      {/* Search Input */}
+      <div className="relative mb-6">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="ابحث عن منتج بالاسم أو التصنيف..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-10 h-11"
+        />
+      </div>
+
+      {/* Products count */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-muted-foreground">
+          {filteredProducts?.length || 0} منتج
+          {searchQuery && ` (بحث: "${searchQuery}")`}
+        </p>
+        {searchQuery && (
+          <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>
+            <X className="h-4 w-4 ml-1" />
+            مسح البحث
+          </Button>
+        )}
+      </div>
+
       <div className="grid gap-4">
-        {products?.map((product) => (
+        {filteredProducts?.map((product) => (
           <Card key={product.id} className="p-4 shadow-card overflow-hidden">
             <div className="flex gap-4 flex-wrap sm:flex-nowrap">
               {product.image_url && (

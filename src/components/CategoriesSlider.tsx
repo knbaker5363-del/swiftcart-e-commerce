@@ -1,9 +1,15 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Grid3X3, ChevronDown, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getIconByName } from '@/lib/categoryIcons';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Category {
   id: string;
@@ -16,7 +22,7 @@ interface Category {
 interface CategoriesSliderProps {
   categories: Category[] | undefined;
   isLoading: boolean;
-  displayStyle?: 'square' | 'circle' | 'icon';
+  displayStyle?: 'square' | 'circle' | 'icon' | 'dropdown';
 }
 
 const RenderCategoryIcon = ({
@@ -150,8 +156,52 @@ const scroll = (direction: 'left' | 'right') => {
     );
   }
 
-  if (!categories || categories.length === 0) {
-    return null;
+  // Dropdown style rendering
+  if (displayStyle === 'dropdown') {
+    return (
+      <div className="flex items-center gap-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2 h-12 px-6 text-base">
+              <List className="h-5 w-5" />
+              <span>التصنيفات</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="start" 
+            className="w-56 max-h-[400px] overflow-y-auto bg-background z-50"
+          >
+            {categories.map((category) => (
+              <DropdownMenuItem key={category.id} asChild>
+                <Link 
+                  to={`/category/${category.id}`}
+                  className="flex items-center gap-3 py-3 cursor-pointer"
+                >
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+                  >
+                    {category.image_url ? (
+                      <img 
+                        src={category.image_url} 
+                        alt={category.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : category.icon_name ? (
+                      <RenderCategoryIcon iconName={category.icon_name} className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Grid3X3 className="h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                  <span className="font-medium">{category.name}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
   }
 
   return (

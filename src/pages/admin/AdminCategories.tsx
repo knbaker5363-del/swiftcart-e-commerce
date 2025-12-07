@@ -494,7 +494,7 @@ const AdminCategories = () => {
           {/* نوع عرض التصنيفات */}
           <div>
             <Label className="text-base font-medium mb-3 block">طريقة عرض التصنيفات</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               <button
                 type="button"
                 onClick={() => setCategoryDisplayStyle('grid')}
@@ -511,10 +511,10 @@ const AdminCategories = () => {
                     <div className="bg-primary/30 rounded"></div>
                     <div className="bg-primary/30 rounded"></div>
                   </div>
-                  <span className="font-semibold">مربعات مع صور/أيقونات</span>
+                  <span className="font-semibold text-sm">مربعات</span>
                   {categoryDisplayStyle === 'grid' && <Check className="h-4 w-4 text-primary mr-auto" />}
                 </div>
-                <p className="text-sm text-muted-foreground">عرض التصنيفات كمربعات مع صور أو أيقونات كبيرة</p>
+                <p className="text-xs text-muted-foreground">مربعات مع صور</p>
               </button>
               
               <button
@@ -527,15 +527,13 @@ const AdminCategories = () => {
                 }`}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex flex-col gap-1 w-8 h-8 justify-center">
-                    <div className="bg-primary/30 rounded h-2 w-full"></div>
-                    <div className="bg-primary/30 rounded h-2 w-full"></div>
-                    <div className="bg-primary/30 rounded h-2 w-full"></div>
+                  <div className="flex gap-1 w-8 h-8 justify-center items-center">
+                    <div className="bg-primary/30 rounded-full w-6 h-6"></div>
                   </div>
-                  <span className="font-semibold">مستطيلات نصية</span>
+                  <span className="font-semibold text-sm">دوائر</span>
                   {categoryDisplayStyle === 'list' && <Check className="h-4 w-4 text-primary mr-auto" />}
                 </div>
-                <p className="text-sm text-muted-foreground">عرض أسماء التصنيفات فقط بدون صور</p>
+                <p className="text-xs text-muted-foreground">دوائر مع صور</p>
               </button>
               
               <button
@@ -558,10 +556,31 @@ const AdminCategories = () => {
                       <div className="bg-primary/30 rounded h-2 flex-1"></div>
                     </div>
                   </div>
-                  <span className="font-semibold">أيقونة صغيرة مع اسم</span>
+                  <span className="font-semibold text-sm">أيقونات</span>
                   {categoryDisplayStyle === 'icon-list' && <Check className="h-4 w-4 text-primary mr-auto" />}
                 </div>
-                <p className="text-sm text-muted-foreground">أيقونة صغيرة على اليمين مع اسم التصنيف</p>
+                <p className="text-xs text-muted-foreground">أيقونة مع اسم</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCategoryDisplayStyle('dropdown')}
+                className={`p-4 rounded-lg border-2 text-right transition-all ${
+                  categoryDisplayStyle === 'dropdown'
+                    ? 'border-primary bg-primary/10 shadow-md'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex flex-col gap-0.5 w-8 h-8 justify-center border border-primary/30 rounded p-1">
+                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                  </div>
+                  <span className="font-semibold text-sm">قائمة منسدلة</span>
+                  {categoryDisplayStyle === 'dropdown' && <Check className="h-4 w-4 text-primary mr-auto" />}
+                </div>
+                <p className="text-xs text-muted-foreground">زر يفتح قائمة</p>
               </button>
             </div>
           </div>
