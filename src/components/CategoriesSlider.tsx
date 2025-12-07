@@ -36,7 +36,7 @@ const RenderCategoryIcon = ({
 const CategoriesSlider = ({ categories, isLoading, displayStyle = 'square' }: CategoriesSliderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const scroll = (direction: 'left' | 'right') => {
+const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const scrollAmount = 200;
       scrollRef.current.scrollBy({
@@ -44,6 +44,21 @@ const CategoriesSlider = ({ categories, isLoading, displayStyle = 'square' }: Ca
         behavior: 'smooth'
       });
     }
+  };
+
+  // Touch swipe support
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    scrollRef.current?.setAttribute('data-touch-start-x', touch.clientX.toString());
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!scrollRef.current) return;
+    const startX = parseFloat(scrollRef.current.getAttribute('data-touch-start-x') || '0');
+    const touch = e.touches[0];
+    const diff = startX - touch.clientX;
+    scrollRef.current.scrollLeft += diff;
+    scrollRef.current.setAttribute('data-touch-start-x', touch.clientX.toString());
   };
 
   const getShapeClass = () => {
@@ -164,8 +179,10 @@ const CategoriesSlider = ({ categories, isLoading, displayStyle = 'square' }: Ca
       {/* Categories Container */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1 scroll-smooth"
+        className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1 scroll-smooth touch-pan-x"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
       >
         {categories.map(renderCategory)}
       </div>

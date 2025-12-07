@@ -13,6 +13,13 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'tajawal': ['Tajawal', 'sans-serif'],
+        'cairo': ['Cairo', 'sans-serif'],
+        'almarai': ['Almarai', 'sans-serif'],
+        'noto-kufi': ['Noto Kufi Arabic', 'sans-serif'],
+        'ibm-plex': ['IBM Plex Sans Arabic', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

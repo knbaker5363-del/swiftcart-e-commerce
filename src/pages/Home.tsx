@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CartButton from '@/components/CartButton';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,7 @@ import { usePageView } from '@/hooks/useAnalytics';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import SocialFooter from '@/components/SocialFooter';
 import CategoriesSlider from '@/components/CategoriesSlider';
-import MyOrdersButton from '@/components/MyOrdersButton';
+
 const Home = () => {
   useDocumentTitle();
   usePageView('/'); // Track home page visits
@@ -122,8 +123,7 @@ const Home = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      {/* My Orders Button - shows when store info is hidden */}
-      {hideHeaderStoreInfo && <MyOrdersButton />}
+      
 
       {/* Hero Section */}
       <HeroSection />
@@ -213,12 +213,15 @@ const Home = () => {
                         </div>}
                       
                       {/* Add to Cart Button */}
-                      <Button onClick={e => {
-                  e.stopPropagation();
-                  handleProductClick(product);
-                }} className="w-auto px-6 mx-auto mt-auto" size="sm" variant="secondary">
-                        <ShoppingCart className="h-4 w-4" />
-                      </Button>
+                      <CartButton
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleProductClick(product);
+                        }}
+                        className="w-auto px-6 mx-auto mt-auto"
+                        size="sm"
+                        variant="secondary"
+                      />
                     </div>
                   </Card>;
           })}

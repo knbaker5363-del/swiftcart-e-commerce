@@ -450,12 +450,15 @@ export type Database = {
           background_style: string | null
           banner_images: Json | null
           cart_button_style: string | null
+          cart_button_text: string | null
+          cart_icon_style: string | null
           category_display_style: string | null
           created_at: string
           delivery_inside: number | null
           delivery_jerusalem: number | null
           delivery_west_bank: number | null
           favicon_url: string | null
+          font_family: string | null
           header_layout: string | null
           header_logo_position: string | null
           hide_header_store_info: boolean | null
@@ -492,12 +495,15 @@ export type Database = {
           background_style?: string | null
           banner_images?: Json | null
           cart_button_style?: string | null
+          cart_button_text?: string | null
+          cart_icon_style?: string | null
           category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
+          font_family?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hide_header_store_info?: boolean | null
@@ -534,12 +540,15 @@ export type Database = {
           background_style?: string | null
           banner_images?: Json | null
           cart_button_style?: string | null
+          cart_button_text?: string | null
+          cart_icon_style?: string | null
           category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
+          font_family?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hide_header_store_info?: boolean | null
