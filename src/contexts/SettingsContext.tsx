@@ -23,6 +23,7 @@ interface Settings {
   show_image_border: boolean;
   logo_shape: 'square' | 'circle';
   site_style: 'classic' | 'modern' | 'minimal';
+  header_logo_position: 'right' | 'center';
 }
 
 interface SettingsContextType {
@@ -138,7 +139,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         header_layout: data.header_layout || 'logo-right-social-below',
         show_image_border: data.show_image_border !== false,
         logo_shape: data.logo_shape || 'circle',
-        site_style: data.site_style || 'classic'
+        site_style: data.site_style || 'classic',
+        header_logo_position: data.header_logo_position || 'right'
       };
       
       setSettings(parsedSettings as Settings);

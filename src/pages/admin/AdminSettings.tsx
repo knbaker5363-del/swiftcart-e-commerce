@@ -261,6 +261,7 @@ const AdminSettings = () => {
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
   const [logoShape, setLogoShape] = useState('circle');
   const [siteStyle, setSiteStyle] = useState('classic');
+  const [headerLogoPosition, setHeaderLogoPosition] = useState('right');
 
   useEffect(() => {
     if (settings) {
@@ -298,6 +299,7 @@ const AdminSettings = () => {
       setShowImageBorder((settings as any).show_image_border !== false);
       setLogoShape((settings as any).logo_shape || 'circle');
       setSiteStyle((settings as any).site_style || 'classic');
+      setHeaderLogoPosition((settings as any).header_logo_position || 'right');
     }
   }, [settings]);
 
@@ -547,6 +549,7 @@ const AdminSettings = () => {
         show_image_border: showImageBorder,
         logo_shape: logoShape,
         site_style: siteStyle,
+        header_logo_position: headerLogoPosition,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -753,6 +756,30 @@ const AdminSettings = () => {
                     <div className="text-3xl mb-2">{shape.icon}</div>
                     <div className="font-medium text-sm">{shape.name}</div>
                     <div className="text-xs text-muted-foreground">{shape.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* موضع اللوجو في الهيدر */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر العلوي</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                تحكم في مكان ظهور اللوجو في شريط التنقل العلوي
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'right', name: 'على اليمين', icon: '➡️', desc: 'اللوجو في الجهة اليمنى' },
+                  { id: 'center', name: 'في المنتصف', icon: '⬛', desc: 'اللوجو في منتصف الهيدر' },
+                ].map(pos => (
+                  <button
+                    key={pos.id}
+                    onClick={() => setHeaderLogoPosition(pos.id)}
+                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="text-3xl mb-2">{pos.icon}</div>
+                    <div className="font-medium text-sm">{pos.name}</div>
+                    <div className="text-xs text-muted-foreground">{pos.desc}</div>
                   </button>
                 ))}
               </div>
