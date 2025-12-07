@@ -224,8 +224,26 @@ const AdminAnalytics = () => {
     setIsResetting(true);
     try {
       if (type === 'views' || type === 'all') {
-        await supabase.from('page_views').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        await supabase.from('product_views').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // Delete all records by using gt (greater than) with a very old date
+        const { error: pageViewsError } = await supabase
+          .from('page_views')
+          .delete()
+          .gte('created_at', '1970-01-01');
+        
+        if (pageViewsError) {
+          console.error('Error deleting page_views:', pageViewsError);
+          throw pageViewsError;
+        }
+        
+        const { error: productViewsError } = await supabase
+          .from('product_views')
+          .delete()
+          .gte('created_at', '1970-01-01');
+        
+        if (productViewsError) {
+          console.error('Error deleting product_views:', productViewsError);
+          throw productViewsError;
+        }
       }
       
       // Invalidate all analytics queries
