@@ -137,18 +137,22 @@ const MyOrders = () => {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id} className="p-6 shadow-card">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold">
+              <Card key={order.id} className="p-4 md:p-6 shadow-card">
+                {/* Header Row */}
+                <div className="flex flex-col gap-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base md:text-lg font-bold">
                         طلب #{order.id.substring(0, 8).toUpperCase()}
                       </h3>
-                      <Badge className={`${getStatusColor(order.status)} text-white flex items-center gap-1`}>
-                        {getStatusIcon(order.status)}
-                        {getStatusText(order.status)}
-                      </Badge>
                     </div>
+                    <Badge className={`${getStatusColor(order.status)} text-white flex items-center gap-1`}>
+                      {getStatusIcon(order.status)}
+                      {getStatusText(order.status)}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
                       {new Date(order.created_at).toLocaleDateString('ar-SA', {
                         year: 'numeric',
@@ -158,22 +162,21 @@ const MyOrders = () => {
                         minute: '2-digit',
                       })}
                     </p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-xl md:text-2xl font-bold text-primary">
                       {order.total_amount.toFixed(2)} ₪
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">الاسم:</span>
-                    <span className="font-medium">{order.customer_name}</span>
+                {/* Details */}
+                <div className="border-t pt-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground text-sm min-w-[60px]">الاسم:</span>
+                    <span className="font-medium text-sm">{order.customer_name}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">العنوان:</span>
-                    <span className="font-medium text-left max-w-[60%]">
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground text-sm min-w-[60px]">العنوان:</span>
+                    <span className="font-medium text-sm flex-1">
                       {order.customer_address}
                     </span>
                   </div>
