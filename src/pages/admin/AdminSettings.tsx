@@ -262,6 +262,7 @@ const AdminSettings = () => {
   const [logoShape, setLogoShape] = useState('circle');
   const [siteStyle, setSiteStyle] = useState('classic');
   const [headerLogoPosition, setHeaderLogoPosition] = useState('right');
+  const [hideHeaderStoreInfo, setHideHeaderStoreInfo] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -300,6 +301,7 @@ const AdminSettings = () => {
       setLogoShape((settings as any).logo_shape || 'circle');
       setSiteStyle((settings as any).site_style || 'classic');
       setHeaderLogoPosition((settings as any).header_logo_position || 'right');
+      setHideHeaderStoreInfo((settings as any).hide_header_store_info || false);
     }
   }, [settings]);
 
@@ -550,6 +552,7 @@ const AdminSettings = () => {
         logo_shape: logoShape,
         site_style: siteStyle,
         header_logo_position: headerLogoPosition,
+        hide_header_store_info: hideHeaderStoreInfo,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -855,6 +858,19 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Switch id="storeNameBlack" checked={storeNameBlack} onCheckedChange={setStoreNameBlack} />
+            </div>
+
+            {/* إخفاء بوكس معلومات المتجر */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="hideHeaderStoreInfo" className="text-base font-medium">
+                  إخفاء بوكس معلومات المتجر
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  عند التفعيل، سيختفي البوكس الذي يحتوي على اللوجو واسم المتجر من الصفحة الرئيسية
+                </p>
+              </div>
+              <Switch id="hideHeaderStoreInfo" checked={hideHeaderStoreInfo} onCheckedChange={setHideHeaderStoreInfo} />
             </div>
 
             {/* التأثيرات المتحركة */}

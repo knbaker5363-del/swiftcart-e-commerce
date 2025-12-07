@@ -74,6 +74,7 @@ const HeroSection = () => {
   const showImageBorder = (settings as any)?.show_image_border !== false;
   const logoShape = (settings as any)?.logo_shape || 'circle';
   const siteStyle = (settings as any)?.site_style || 'classic';
+  const hideHeaderStoreInfo = (settings as any)?.hide_header_store_info || false;
 
   // Get logo shape class
   const getLogoShapeClass = (size: 'sm' | 'lg') => {
@@ -348,7 +349,7 @@ const HeroSection = () => {
     <section className="bg-background py-6">
       <div className="container">
         {/* معلومات المتجر للجوال */}
-        <MobileStoreInfo />
+        {!hideHeaderStoreInfo && <MobileStoreInfo />}
 
         {/* زر طلباتي للجوال */}
         <Link to="/my-orders" className="block lg:hidden mb-4">
@@ -360,9 +361,9 @@ const HeroSection = () => {
           </div>
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-1 ${hideHeaderStoreInfo ? '' : 'lg:grid-cols-4'} gap-4`}>
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
-          <DesktopStoreInfo />
+          {!hideHeaderStoreInfo && <DesktopStoreInfo />}
 
           {/* البانر الرئيسي */}
           <div className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[180px] sm:h-[220px] lg:h-[400px] group">

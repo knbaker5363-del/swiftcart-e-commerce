@@ -458,6 +458,7 @@ export type Database = {
           favicon_url: string | null
           header_layout: string | null
           header_logo_position: string | null
+          hide_header_store_info: boolean | null
           id: string
           location: string | null
           logo_shape: string | null
@@ -498,6 +499,7 @@ export type Database = {
           favicon_url?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
+          hide_header_store_info?: boolean | null
           id?: string
           location?: string | null
           logo_shape?: string | null
@@ -538,6 +540,7 @@ export type Database = {
           favicon_url?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
+          hide_header_store_info?: boolean | null
           id?: string
           location?: string | null
           logo_shape?: string | null
