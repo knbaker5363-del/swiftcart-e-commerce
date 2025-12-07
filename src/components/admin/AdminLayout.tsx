@@ -51,11 +51,24 @@ const AdminLayout = () => {
 
   const SidebarContent = () => (
     <>
-      <div className="p-6">
-        <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          لوحة التحكم
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 truncate">{user.email}</p>
+      <div className="p-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            لوحة التحكم
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 truncate">{user.email}</p>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            navigate('/');
+            isMobile && setSidebarOpen(false);
+          }}
+          title="العودة للمتجر"
+        >
+          <Store className="h-5 w-5" />
+        </Button>
       </div>
 
       <nav className="px-4 space-y-2 flex-1">
