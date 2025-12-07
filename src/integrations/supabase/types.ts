@@ -459,9 +459,11 @@ export type Database = {
           header_layout: string | null
           id: string
           location: string | null
+          logo_shape: string | null
           logo_url: string | null
           show_brands_button: boolean | null
           show_image_border: boolean | null
+          site_style: string | null
           social_facebook: string | null
           social_instagram: string | null
           social_snapchat: string | null
@@ -496,9 +498,11 @@ export type Database = {
           header_layout?: string | null
           id?: string
           location?: string | null
+          logo_shape?: string | null
           logo_url?: string | null
           show_brands_button?: boolean | null
           show_image_border?: boolean | null
+          site_style?: string | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null
@@ -533,9 +537,11 @@ export type Database = {
           header_layout?: string | null
           id?: string
           location?: string | null
+          logo_shape?: string | null
           logo_url?: string | null
           show_brands_button?: boolean | null
           show_image_border?: boolean | null
+          site_style?: string | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null

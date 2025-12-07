@@ -259,6 +259,8 @@ const AdminSettings = () => {
   const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
   const [showImageBorder, setShowImageBorder] = useState(true);
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
+  const [logoShape, setLogoShape] = useState('circle');
+  const [siteStyle, setSiteStyle] = useState('classic');
 
   useEffect(() => {
     if (settings) {
@@ -294,6 +296,8 @@ const AdminSettings = () => {
       setCartButtonStyle((settings as any).cart_button_style || 'default');
       setHeaderLayout((settings as any).header_layout || 'logo-right-social-below');
       setShowImageBorder((settings as any).show_image_border !== false);
+      setLogoShape((settings as any).logo_shape || 'circle');
+      setSiteStyle((settings as any).site_style || 'classic');
     }
   }, [settings]);
 
@@ -541,6 +545,8 @@ const AdminSettings = () => {
         cart_button_style: cartButtonStyle,
         header_layout: headerLayout,
         show_image_border: showImageBorder,
+        logo_shape: logoShape,
+        site_style: siteStyle,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -726,6 +732,52 @@ const AdminSettings = () => {
                   >
                     <div className="font-medium text-sm">{layout.name}</div>
                     <div className="text-xs text-muted-foreground">{layout.desc}</div>
+                </button>
+                ))}
+              </div>
+            </div>
+
+            {/* شكل اللوجو */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">شكل اللوجو</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'circle', name: 'دائري', icon: '⭕', desc: 'شكل دائري للوجو' },
+                  { id: 'square', name: 'مربع', icon: '⬜', desc: 'شكل مربع مع حواف مدورة' },
+                ].map(shape => (
+                  <button
+                    key={shape.id}
+                    onClick={() => setLogoShape(shape.id)}
+                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${logoShape === shape.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="text-3xl mb-2">{shape.icon}</div>
+                    <div className="font-medium text-sm">{shape.name}</div>
+                    <div className="text-xs text-muted-foreground">{shape.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* نمط الموقع */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">نمط الموقع العام</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                اختر النمط العام لمظهر الموقع
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { id: 'classic', name: 'كلاسيكي', desc: 'تصميم تقليدي أنيق مع ظلال وحدود', icon: '🏛️' },
+                  { id: 'modern', name: 'عصري', desc: 'تصميم حديث مع تدرجات ورسوم متحركة', icon: '✨' },
+                  { id: 'minimal', name: 'بسيط', desc: 'تصميم نظيف وبسيط بدون تشتت', icon: '◻️' },
+                ].map(style => (
+                  <button
+                    key={style.id}
+                    onClick={() => setSiteStyle(style.id)}
+                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${siteStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="text-3xl mb-2">{style.icon}</div>
+                    <div className="font-medium">{style.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1">{style.desc}</div>
                   </button>
                 ))}
               </div>
