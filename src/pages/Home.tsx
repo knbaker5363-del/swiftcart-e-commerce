@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import HeroSection from '@/components/HeroSection';
 import DealsBar from '@/components/DealsBar';
-import { Heart } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import CartButton from '@/components/CartButton';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -125,15 +126,29 @@ const Home = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      {/* Hero Section */}
-      <HeroSection />
-
-      {/* Search Bar - تحت الهيدر فوق البنر */}
-      <section className="py-4 bg-muted/30">
+      {/* Search Bar - تحت الهيدر مباشرة */}
+      <section className="py-3 bg-muted/30">
         <div className="container">
           <SearchBar />
         </div>
       </section>
+
+      {/* My Orders Button - يظهر دائماً */}
+      <section className="py-2">
+        <div className="container">
+          <Link to="/my-orders" className="block">
+            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+              <div className="flex items-center justify-center gap-2">
+                <Package className="h-5 w-5 text-white" />
+                <span className="text-base font-bold text-white">طلباتي</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* Hero Section */}
+      <HeroSection />
 
       {/* Categories Slider */}
       <section className="py-6 md:py-8">

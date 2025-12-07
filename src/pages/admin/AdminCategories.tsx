@@ -280,9 +280,6 @@ const AdminCategories = () => {
   const [categoryDisplayStyle, setCategoryDisplayStyle] = useState(
     (settings as any)?.category_display_style || 'grid'
   );
-  const [showBrandsButton, setShowBrandsButton] = useState(
-    (settings as any)?.show_brands_button !== false
-  );
 
   // DnD sensors
   const sensors = useSensors(
@@ -451,7 +448,6 @@ const AdminCategories = () => {
         .from('settings')
         .update({
           category_display_style: categoryDisplayStyle,
-          show_brands_button: showBrandsButton,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -495,111 +491,130 @@ const AdminCategories = () => {
           <div>
             <Label className="text-base font-medium mb-3 block">طريقة عرض التصنيفات</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              <button
-                type="button"
-                onClick={() => setCategoryDisplayStyle('grid')}
-                className={`p-4 rounded-lg border-2 text-right transition-all ${
-                  categoryDisplayStyle === 'grid'
-                    ? 'border-primary bg-primary/10 shadow-md'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="grid grid-cols-2 gap-1 w-8 h-8">
-                    <div className="bg-primary/30 rounded"></div>
-                    <div className="bg-primary/30 rounded"></div>
-                    <div className="bg-primary/30 rounded"></div>
-                    <div className="bg-primary/30 rounded"></div>
-                  </div>
-                  <span className="font-semibold text-sm">مربعات</span>
-                  {categoryDisplayStyle === 'grid' && <Check className="h-4 w-4 text-primary mr-auto" />}
-                </div>
-                <p className="text-xs text-muted-foreground">مربعات مع صور</p>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setCategoryDisplayStyle('list')}
-                className={`p-4 rounded-lg border-2 text-right transition-all ${
-                  categoryDisplayStyle === 'list'
-                    ? 'border-primary bg-primary/10 shadow-md'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex gap-1 w-8 h-8 justify-center items-center">
-                    <div className="bg-primary/30 rounded-full w-6 h-6"></div>
-                  </div>
-                  <span className="font-semibold text-sm">دوائر</span>
-                  {categoryDisplayStyle === 'list' && <Check className="h-4 w-4 text-primary mr-auto" />}
-                </div>
-                <p className="text-xs text-muted-foreground">دوائر مع صور</p>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setCategoryDisplayStyle('icon-list')}
-                className={`p-4 rounded-lg border-2 text-right transition-all ${
-                  categoryDisplayStyle === 'icon-list'
-                    ? 'border-primary bg-primary/10 shadow-md'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex flex-col gap-1 w-8 h-8 justify-center">
-                    <div className="flex gap-1 items-center">
-                      <div className="bg-primary/30 rounded w-3 h-3"></div>
-                      <div className="bg-primary/30 rounded h-2 flex-1"></div>
+              {/* مربعات */}
+              <div className={`rounded-lg border-2 transition-all ${
+                categoryDisplayStyle === 'grid'
+                  ? 'border-primary bg-primary/10 shadow-md'
+                  : 'border-border hover:border-primary/50'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setCategoryDisplayStyle('grid')}
+                  className="p-4 w-full text-right"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="grid grid-cols-2 gap-1 w-8 h-8">
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
+                      <div className="bg-primary/30 rounded"></div>
                     </div>
-                    <div className="flex gap-1 items-center">
-                      <div className="bg-primary/30 rounded w-3 h-3"></div>
-                      <div className="bg-primary/30 rounded h-2 flex-1"></div>
+                    <span className="font-semibold text-sm">مربعات</span>
+                    {categoryDisplayStyle === 'grid' && <Check className="h-4 w-4 text-primary mr-auto" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">مربعات مع صور</p>
+                </button>
+                {categoryDisplayStyle === 'grid' && (
+                  <div className="px-4 pb-4 border-t border-primary/20 mt-2 pt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">✓ يعرض صور التصنيفات بشكل مربع</p>
+                    <p className="text-xs text-muted-foreground">✓ مناسب للصور الكبيرة والواضحة</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* دوائر */}
+              <div className={`rounded-lg border-2 transition-all ${
+                categoryDisplayStyle === 'list'
+                  ? 'border-primary bg-primary/10 shadow-md'
+                  : 'border-border hover:border-primary/50'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setCategoryDisplayStyle('list')}
+                  className="p-4 w-full text-right"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex gap-1 w-8 h-8 justify-center items-center">
+                      <div className="bg-primary/30 rounded-full w-6 h-6"></div>
                     </div>
+                    <span className="font-semibold text-sm">دوائر</span>
+                    {categoryDisplayStyle === 'list' && <Check className="h-4 w-4 text-primary mr-auto" />}
                   </div>
-                  <span className="font-semibold text-sm">أيقونات</span>
-                  {categoryDisplayStyle === 'icon-list' && <Check className="h-4 w-4 text-primary mr-auto" />}
-                </div>
-                <p className="text-xs text-muted-foreground">أيقونة مع اسم</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCategoryDisplayStyle('dropdown')}
-                className={`p-4 rounded-lg border-2 text-right transition-all ${
-                  categoryDisplayStyle === 'dropdown'
-                    ? 'border-primary bg-primary/10 shadow-md'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex flex-col gap-0.5 w-8 h-8 justify-center border border-primary/30 rounded p-1">
-                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
-                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
-                    <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                  <p className="text-xs text-muted-foreground">دوائر مع صور</p>
+                </button>
+                {categoryDisplayStyle === 'list' && (
+                  <div className="px-4 pb-4 border-t border-primary/20 mt-2 pt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">✓ يعرض صور التصنيفات بشكل دائري</p>
+                    <p className="text-xs text-muted-foreground">✓ تصميم عصري وأنيق</p>
                   </div>
-                  <span className="font-semibold text-sm">قائمة منسدلة</span>
-                  {categoryDisplayStyle === 'dropdown' && <Check className="h-4 w-4 text-primary mr-auto" />}
-                </div>
-                <p className="text-xs text-muted-foreground">زر يفتح قائمة</p>
-              </button>
-            </div>
-          </div>
+                )}
+              </div>
+              
+              {/* أيقونات */}
+              <div className={`rounded-lg border-2 transition-all ${
+                categoryDisplayStyle === 'icon-list'
+                  ? 'border-primary bg-primary/10 shadow-md'
+                  : 'border-border hover:border-primary/50'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setCategoryDisplayStyle('icon-list')}
+                  className="p-4 w-full text-right"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col gap-1 w-8 h-8 justify-center">
+                      <div className="flex gap-1 items-center">
+                        <div className="bg-primary/30 rounded w-3 h-3"></div>
+                        <div className="bg-primary/30 rounded h-2 flex-1"></div>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <div className="bg-primary/30 rounded w-3 h-3"></div>
+                        <div className="bg-primary/30 rounded h-2 flex-1"></div>
+                      </div>
+                    </div>
+                    <span className="font-semibold text-sm">أيقونات</span>
+                    {categoryDisplayStyle === 'icon-list' && <Check className="h-4 w-4 text-primary mr-auto" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">أيقونة مع اسم</p>
+                </button>
+                {categoryDisplayStyle === 'icon-list' && (
+                  <div className="px-4 pb-4 border-t border-primary/20 mt-2 pt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">✓ يعرض أيقونات صغيرة مع اسم التصنيف</p>
+                    <p className="text-xs text-muted-foreground">✓ موفر للمساحة</p>
+                  </div>
+                )}
+              </div>
 
-          {/* إظهار/إخفاء البراندات */}
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div className="space-y-0.5">
-              <Label htmlFor="showBrandsButton" className="text-base font-medium">
-                إظهار زر البراندات
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                إظهار زر "البراندات الخاصة بنا" في الصفحة الرئيسية
-              </p>
+              {/* قائمة منسدلة */}
+              <div className={`rounded-lg border-2 transition-all ${
+                categoryDisplayStyle === 'dropdown'
+                  ? 'border-primary bg-primary/10 shadow-md'
+                  : 'border-border hover:border-primary/50'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setCategoryDisplayStyle('dropdown')}
+                  className="p-4 w-full text-right"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col gap-0.5 w-8 h-8 justify-center border border-primary/30 rounded p-1">
+                      <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                      <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                      <div className="bg-primary/30 rounded h-1.5 w-full"></div>
+                    </div>
+                    <span className="font-semibold text-sm">قائمة منسدلة</span>
+                    {categoryDisplayStyle === 'dropdown' && <Check className="h-4 w-4 text-primary mr-auto" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">زر يفتح قائمة</p>
+                </button>
+                {categoryDisplayStyle === 'dropdown' && (
+                  <div className="px-4 pb-4 border-t border-primary/20 mt-2 pt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">✓ زر واحد يفتح قائمة بكل التصنيفات</p>
+                    <p className="text-xs text-muted-foreground">✓ مثالي للمتاجر ذات التصنيفات الكثيرة</p>
+                  </div>
+                )}
+              </div>
             </div>
-            <Switch
-              id="showBrandsButton"
-              checked={showBrandsButton}
-              onCheckedChange={setShowBrandsButton}
-            />
           </div>
 
           <Button onClick={handleSaveDisplaySettings}>

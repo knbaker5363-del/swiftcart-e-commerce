@@ -23,6 +23,7 @@ import {
   Upload
 } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
+import StorePreview from '@/components/admin/StorePreview';
 
 // Cart icon options
 const cartIconOptions = [
@@ -239,35 +240,56 @@ const AdminDisplay = () => {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="h-5 w-5 text-primary" />
-            معاينة التأثيرات
+            معاينة المتجر
           </CardTitle>
-          <CardDescription>شرح تأثير كل إعداد على الموقع</CardDescription>
+          <CardDescription>هكذا سيظهر متجرك بالإعدادات الحالية</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">🎨 ثيم الخلفية</div>
-              <p className="text-muted-foreground text-xs">يغير ألوان الخلفية العامة للموقع</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Live Preview */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-muted-foreground">معاينة مباشرة</h4>
+              <StorePreview 
+                theme={selectedTheme}
+                accentColor={accentColor}
+                fontFamily={fontFamily}
+                cartIcon={cartIconStyle}
+                cartButtonText={cartButtonText}
+                logoShape={logoShape}
+                headerLogoPosition={headerLogoPosition}
+                animationEffect={animationEffect}
+              />
             </div>
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">🔘 لون الأزرار</div>
-              <p className="text-muted-foreground text-xs">يغير لون جميع الأزرار والعناصر التفاعلية</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">✨ التأثيرات المتحركة</div>
-              <p className="text-muted-foreground text-xs">يضيف تأثيرات متحركة للخلفية (ثلج، نجوم، قلوب)</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">🔤 الخط</div>
-              <p className="text-muted-foreground text-xs">يغير نوع الخط في جميع النصوص</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">🛒 زر السلة</div>
-              <p className="text-muted-foreground text-xs">يغير شكل وأيقونة زر إضافة للسلة</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <div className="font-semibold text-primary mb-1">📍 موضع العناصر</div>
-              <p className="text-muted-foreground text-xs">يغير موضع اللوجو والسوشل ميديا</p>
+            
+            {/* Settings Impact Guide */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-muted-foreground">شرح تأثير كل إعداد</h4>
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">🎨 ثيم الخلفية</div>
+                  <p className="text-muted-foreground text-xs">يغير ألوان الخلفية العامة للموقع</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">🔘 لون الأزرار</div>
+                  <p className="text-muted-foreground text-xs">يغير لون جميع الأزرار والعناصر التفاعلية</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">✨ التأثيرات المتحركة</div>
+                  <p className="text-muted-foreground text-xs">يضيف تأثيرات متحركة للخلفية (ثلج، نجوم، قلوب)</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">🔤 الخط</div>
+                  <p className="text-muted-foreground text-xs">يغير نوع الخط في جميع النصوص</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">🛒 زر السلة</div>
+                  <p className="text-muted-foreground text-xs">يغير شكل وأيقونة زر إضافة للسلة</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <div className="font-semibold text-primary mb-1">📍 موضع العناصر</div>
+                  <p className="text-muted-foreground text-xs">يغير موضع اللوجو والسوشل ميديا</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

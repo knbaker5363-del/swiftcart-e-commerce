@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, X, Eye, EyeOff } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface Brand {
   id: string;
@@ -23,9 +24,18 @@ interface Brand {
 const AdminBrands = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { settings, refreshSettings } = useSettings();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showBrandsButton, setShowBrandsButton] = useState(true);
+
+  // Load settings
+  useEffect(() => {
+    if (settings) {
+      setShowBrandsButton((settings as any)?.show_brands_button !== false);
+    }
+  }, [settings]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -146,6 +156,30 @@ const AdminBrands = () => {
     }
   };
 
+  // Save brands visibility setting
+  const handleToggleBrandsVisibility = async (checked: boolean) => {
+    setShowBrandsButton(checked);
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .update({
+          show_brands_button: checked,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', settings?.id);
+
+      if (error) throw error;
+      await refreshSettings();
+      toast({ 
+        title: checked ? 'تم إظهار زر البراندات' : 'تم إخفاء زر البراندات',
+        description: checked ? 'سيظهر زر البراندات في الصفحة الرئيسية' : 'لن يظهر زر البراندات في الصفحة الرئيسية'
+      });
+    } catch (error) {
+      toast({ title: 'خطأ', description: 'فشل حفظ الإعداد', variant: 'destructive' });
+      setShowBrandsButton(!checked);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -233,6 +267,34 @@ const AdminBrands = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* إعدادات إظهار البراندات */}
+      <Card className="border-2 border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            {showBrandsButton ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
+            إظهار البراندات في الموقع
+          </CardTitle>
+          <CardDescription>تحكم في عرض زر "البراندات الخاصة بنا" في الصفحة الرئيسية</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="showBrandsButton" className="text-base font-medium">
+                إظهار زر البراندات
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                عند التفعيل سيظهر زر "البراندات الخاصة بنا" في الصفحة الرئيسية
+              </p>
+            </div>
+            <Switch
+              id="showBrandsButton"
+              checked={showBrandsButton}
+              onCheckedChange={handleToggleBrandsVisibility}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
