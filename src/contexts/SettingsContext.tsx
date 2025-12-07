@@ -25,6 +25,7 @@ interface Settings {
   site_style: 'classic' | 'modern' | 'minimal';
   header_logo_position: 'right' | 'center';
   hide_header_store_info: boolean;
+  social_media_position: 'hero' | 'footer';
 }
 
 interface SettingsContextType {
@@ -142,7 +143,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         logo_shape: data.logo_shape || 'circle',
         site_style: data.site_style || 'classic',
         header_logo_position: data.header_logo_position || 'right',
-        hide_header_store_info: data.hide_header_store_info || false
+        hide_header_store_info: data.hide_header_store_info || false,
+        social_media_position: data.social_media_position || 'hero'
       };
       
       setSettings(parsedSettings as Settings);
