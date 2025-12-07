@@ -1,12 +1,29 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Users, Eye, ShoppingCart, TrendingUp, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BarChart3, Users, Eye, ShoppingCart, TrendingUp, Package, Trash2, Calendar } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AdminAnalytics = () => {
+  const queryClient = useQueryClient();
+  const [isResetting, setIsResetting] = useState(false);
+
   // Get unique visitors count (today)
   const { data: todayVisitors } = useQuery({
     queryKey: ['analytics-today-visitors'],
@@ -128,7 +145,57 @@ const AdminAnalytics = () => {
     },
   });
 
-  // Get daily visitors for the last 7 days
+  // Get daily stats for the last 14 days with detailed info
+  const { data: dailyStats } = useQuery({
+    queryKey: ['analytics-daily-stats'],
+    queryFn: async () => {
+      const days = [];
+      for (let i = 13; i >= 0; i--) {
+        const date = subDays(new Date(), i);
+        const startDate = startOfDay(date).toISOString();
+        const endDate = endOfDay(date).toISOString();
+        
+        // Get visitors
+        const { data: visitorsData } = await supabase
+          .from('page_views')
+          .select('visitor_id')
+          .gte('created_at', startDate)
+          .lte('created_at', endDate);
+        
+        const uniqueVisitors = new Set(visitorsData?.map((v) => v.visitor_id));
+        
+        // Get orders for this day
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('total_amount')
+          .gte('created_at', startDate)
+          .lte('created_at', endDate);
+        
+        const ordersCount = ordersData?.length || 0;
+        const revenue = ordersData?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0;
+        
+        // Get product views
+        const { count: productViews } = await supabase
+          .from('product_views')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', startDate)
+          .lte('created_at', endDate);
+        
+        days.push({
+          date: date,
+          dayName: format(date, 'EEEE', { locale: ar }),
+          formattedDate: format(date, 'yyyy/MM/dd'),
+          visitors: uniqueVisitors.size,
+          orders: ordersCount,
+          revenue: revenue,
+          productViews: productViews || 0,
+        });
+      }
+      return days;
+    },
+  });
+
+  // Get daily visitors for the last 7 days (for chart)
   const { data: dailyVisitors } = useQuery({
     queryKey: ['analytics-daily-visitors'],
     queryFn: async () => {
@@ -152,71 +219,194 @@ const AdminAnalytics = () => {
     },
   });
 
+  // Reset analytics
+  const handleResetAnalytics = async (type: 'views' | 'all') => {
+    setIsResetting(true);
+    try {
+      if (type === 'views' || type === 'all') {
+        await supabase.from('page_views').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('product_views').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      }
+      
+      // Invalidate all analytics queries
+      queryClient.invalidateQueries({ queryKey: ['analytics-today-visitors'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-weekly-visitors'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-total-views'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-most-viewed'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-daily-visitors'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics-daily-stats'] });
+      
+      toast.success('تم تصفير الإحصائيات بنجاح');
+    } catch (error) {
+      console.error('Error resetting analytics:', error);
+      toast.error('حدث خطأ أثناء تصفير الإحصائيات');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
-      <div className="flex items-center gap-3">
-        <BarChart3 className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold">الإحصائيات</h1>
-          <p className="text-muted-foreground">تتبع أداء متجرك</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">الإحصائيات</h1>
+            <p className="text-muted-foreground text-sm">تتبع أداء متجرك</p>
+          </div>
         </div>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" className="gap-2">
+              <Trash2 className="h-4 w-4" />
+              تصفير الإحصائيات
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>تأكيد تصفير الإحصائيات</AlertDialogTitle>
+              <AlertDialogDescription>
+                هل أنت متأكد من تصفير جميع إحصائيات الزيارات؟ لن يتم حذف الطلبات أو المبيعات.
+                هذا الإجراء لا يمكن التراجع عنه.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row-reverse gap-2">
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleResetAnalytics('views')}
+                disabled={isResetting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isResetting ? 'جاري التصفير...' : 'تصفير'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+          <CardHeader className="pb-2 px-3 pt-3">
+            <CardDescription className="flex items-center gap-1 text-xs">
+              <Users className="h-3 w-3" />
               زوار اليوم
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">{todayVisitors || 0}</p>
+          <CardContent className="px-3 pb-3">
+            <p className="text-xl sm:text-2xl font-bold text-primary">{formatNumber(todayVisitors || 0)}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+          <CardHeader className="pb-2 px-3 pt-3">
+            <CardDescription className="flex items-center gap-1 text-xs">
+              <TrendingUp className="h-3 w-3" />
               زوار الأسبوع
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">{weeklyVisitors || 0}</p>
+          <CardContent className="px-3 pb-3">
+            <p className="text-xl sm:text-2xl font-bold text-primary">{formatNumber(weeklyVisitors || 0)}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
+          <CardHeader className="pb-2 px-3 pt-3">
+            <CardDescription className="flex items-center gap-1 text-xs">
+              <ShoppingCart className="h-3 w-3" />
               إجمالي الطلبات
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">{totalOrders || 0}</p>
+          <CardContent className="px-3 pb-3">
+            <p className="text-xl sm:text-2xl font-bold text-primary">{formatNumber(totalOrders || 0)}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
+          <CardHeader className="pb-2 px-3 pt-3">
+            <CardDescription className="flex items-center gap-1 text-xs">
+              <Package className="h-3 w-3" />
               إجمالي المبيعات
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">{(totalRevenue || 0).toFixed(0)} ₪</p>
+          <CardContent className="px-3 pb-3">
+            <p className="text-xl sm:text-2xl font-bold text-primary truncate">
+              {formatNumber(Math.round(totalRevenue || 0))} ₪
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Daily Stats Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Calendar className="h-5 w-5" />
+            إحصائيات كل يوم
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-right p-3 font-medium">اليوم</th>
+                  <th className="text-center p-3 font-medium">التاريخ</th>
+                  <th className="text-center p-3 font-medium">الزوار</th>
+                  <th className="text-center p-3 font-medium">المشاهدات</th>
+                  <th className="text-center p-3 font-medium">الطلبات</th>
+                  <th className="text-center p-3 font-medium">المبيعات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyStats?.map((day, index) => (
+                  <tr key={index} className="border-t border-border hover:bg-muted/30">
+                    <td className="p-3 font-medium">{day.dayName}</td>
+                    <td className="p-3 text-center text-muted-foreground text-xs">{day.formattedDate}</td>
+                    <td className="p-3 text-center">
+                      <span className="inline-flex items-center gap-1 text-primary font-bold">
+                        <Users className="h-3 w-3" />
+                        {day.visitors}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center">
+                      <span className="inline-flex items-center gap-1">
+                        <Eye className="h-3 w-3 text-muted-foreground" />
+                        {day.productViews}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center">
+                      <span className="inline-flex items-center gap-1">
+                        <ShoppingCart className="h-3 w-3 text-muted-foreground" />
+                        {day.orders}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center font-bold text-green-600">
+                      {day.revenue > 0 ? `${formatNumber(day.revenue)} ₪` : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Daily Visitors Chart (Simple Bar) */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Eye className="h-5 w-5" />
             الزوار خلال الأسبوع
           </CardTitle>
@@ -228,12 +418,12 @@ const AdminAnalytics = () => {
               const height = (day.count / maxCount) * 100;
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-sm font-bold text-primary">{day.count}</span>
+                  <span className="text-xs sm:text-sm font-bold text-primary">{day.count}</span>
                   <div
                     className="w-full bg-primary rounded-t-md transition-all duration-300"
                     style={{ height: `${Math.max(height, 5)}%` }}
                   />
-                  <span className="text-xs text-muted-foreground">{day.date}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground text-center">{day.date}</span>
                 </div>
               );
             })}
@@ -251,7 +441,7 @@ const AdminAnalytics = () => {
         <TabsContent value="viewed">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Eye className="h-5 w-5" />
                 المنتجات الأكثر زيارة
               </CardTitle>
@@ -262,25 +452,25 @@ const AdminAnalytics = () => {
                   {mostViewedProducts.map((item, index) => (
                     <div
                       key={item.product.id}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                     >
-                      <span className="text-lg font-bold text-muted-foreground w-8">
+                      <span className="text-sm font-bold text-muted-foreground w-6">
                         #{index + 1}
                       </span>
                       {item.product.image_url && (
                         <img
                           src={item.product.image_url}
                           alt={item.product.name}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-10 h-10 object-cover rounded"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{item.product.name}</p>
-                        <p className="text-sm text-muted-foreground">{item.product.price} ₪</p>
+                        <p className="font-medium truncate text-sm">{item.product.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.product.price} ₪</p>
                       </div>
                       <div className="text-left">
                         <p className="text-lg font-bold text-primary">{item.count}</p>
-                        <p className="text-xs text-muted-foreground">زيارة</p>
+                        <p className="text-[10px] text-muted-foreground">زيارة</p>
                       </div>
                     </div>
                   ))}
@@ -297,7 +487,7 @@ const AdminAnalytics = () => {
         <TabsContent value="sold">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <ShoppingCart className="h-5 w-5" />
                 المنتجات الأكثر مبيعاً
               </CardTitle>
@@ -308,25 +498,25 @@ const AdminAnalytics = () => {
                   {mostSoldProducts.map((item, index) => (
                     <div
                       key={item.product.id}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                     >
-                      <span className="text-lg font-bold text-muted-foreground w-8">
+                      <span className="text-sm font-bold text-muted-foreground w-6">
                         #{index + 1}
                       </span>
                       {item.product.image_url && (
                         <img
                           src={item.product.image_url}
                           alt={item.product.name}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-10 h-10 object-cover rounded"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{item.product.name}</p>
-                        <p className="text-sm text-muted-foreground">{item.product.price} ₪</p>
+                        <p className="font-medium truncate text-sm">{item.product.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.product.price} ₪</p>
                       </div>
                       <div className="text-left">
                         <p className="text-lg font-bold text-primary">{item.count}</p>
-                        <p className="text-xs text-muted-foreground">مبيع</p>
+                        <p className="text-[10px] text-muted-foreground">مبيع</p>
                       </div>
                     </div>
                   ))}
@@ -344,19 +534,19 @@ const AdminAnalytics = () => {
       {/* Additional Stats */}
       <Card>
         <CardHeader>
-          <CardTitle>إحصائيات إضافية</CardTitle>
+          <CardTitle className="text-lg">إحصائيات إضافية</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-muted/50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-primary">{totalPageViews || 0}</p>
-              <p className="text-sm text-muted-foreground">إجمالي مشاهدات الصفحات</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary">{formatNumber(totalPageViews || 0)}</p>
+              <p className="text-xs text-muted-foreground">إجمالي مشاهدات الصفحات</p>
             </div>
             <div className="p-4 bg-muted/50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-primary">
-                {mostViewedProducts?.reduce((sum, item) => sum + item.count, 0) || 0}
+              <p className="text-xl sm:text-2xl font-bold text-primary">
+                {formatNumber(mostViewedProducts?.reduce((sum, item) => sum + item.count, 0) || 0)}
               </p>
-              <p className="text-sm text-muted-foreground">إجمالي مشاهدات المنتجات</p>
+              <p className="text-xs text-muted-foreground">إجمالي مشاهدات المنتجات</p>
             </div>
           </div>
         </CardContent>
