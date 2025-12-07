@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PublicHeader } from '@/components/PublicHeader';
+import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +20,7 @@ interface Order {
 const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cartOpen, setCartOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -109,7 +111,8 @@ const MyOrders = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <PublicHeader onCartOpen={() => {}} />
+      <PublicHeader onCartOpen={() => setCartOpen(true)} />
+      <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <div className="container py-8 max-w-4xl">
         <div className="mb-8">
