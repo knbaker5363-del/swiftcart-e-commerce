@@ -75,6 +75,7 @@ const HeroSection = () => {
   const logoShape = (settings as any)?.logo_shape || 'circle';
   const siteStyle = (settings as any)?.site_style || 'classic';
   const hideHeaderStoreInfo = (settings as any)?.hide_header_store_info || false;
+  const socialMediaPosition = (settings as any)?.social_media_position || 'hero';
 
   // Get logo shape class
   const getLogoShapeClass = (size: 'sm' | 'lg') => {
@@ -165,6 +166,7 @@ const HeroSection = () => {
   // Store info component for desktop based on layout
   const DesktopStoreInfo = () => {
     const cardClass = `hidden lg:flex flex-col rounded-lg shadow-card p-6 ${getSiteStyleClasses()}`;
+    const showSocialHere = socialMediaPosition === 'hero';
     
     if (headerLayout === 'logo-center') {
       return (
@@ -177,7 +179,7 @@ const HeroSection = () => {
             <MapPin className="h-4 w-4 text-primary" />
             <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
           </div>
-          <SocialIcons settings={settings} size="md" />
+          {showSocialHere && <SocialIcons settings={settings} size="md" />}
           <Link to="/my-orders" className="block w-full mt-4">
             <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
               <div className="flex items-center justify-center gap-2">
@@ -195,8 +197,8 @@ const HeroSection = () => {
         <div className={cardClass}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <SocialIcons settings={settings} size="md" />
-              <div className="flex items-center gap-2 text-muted-foreground text-sm mt-4">
+              {showSocialHere && <SocialIcons settings={settings} size="md" />}
+              <div className={`flex items-center gap-2 text-muted-foreground text-sm ${showSocialHere ? 'mt-4' : ''}`}>
                 <MapPin className="h-4 w-4 text-primary" />
                 <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
               </div>
@@ -231,7 +233,7 @@ const HeroSection = () => {
           <MapPin className="h-4 w-4 text-primary" />
           <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
         </div>
-        <SocialIcons settings={settings} size="md" />
+        {showSocialHere && <SocialIcons settings={settings} size="md" />}
         <Link to="/my-orders" className="block w-full mt-4">
           <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
             <div className="flex items-center justify-center gap-2">
@@ -248,6 +250,7 @@ const HeroSection = () => {
   const MobileStoreInfo = () => {
     const mobileCardClass = `flex lg:hidden rounded-lg shadow-card p-3 ${getSiteStyleClasses()}`;
     const mobileLogoShape = logoShape === 'circle' ? 'rounded-full' : 'rounded-xl';
+    const showSocialHere = socialMediaPosition === 'hero';
     
     if (headerLayout === 'logo-center') {
       return (
@@ -274,7 +277,7 @@ const HeroSection = () => {
             <MapPin className="h-3 w-3 text-primary" />
             <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
           </div>
-          <SocialIcons settings={settings} size="sm" />
+          {showSocialHere && <SocialIcons settings={settings} size="sm" />}
         </div>
       );
     }
@@ -283,8 +286,8 @@ const HeroSection = () => {
       return (
         <div className={`${mobileCardClass} items-center gap-3 mb-4`}>
           <div className="flex-1">
-            <SocialIcons settings={settings} size="sm" />
-            <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
+            {showSocialHere && <SocialIcons settings={settings} size="sm" />}
+            <div className={`flex items-center gap-1 text-muted-foreground text-xs ${showSocialHere ? 'mt-2' : ''}`}>
               <MapPin className="h-3 w-3 text-primary" />
               <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
             </div>
@@ -340,7 +343,7 @@ const HeroSection = () => {
             <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
           </div>
         </div>
-        <SocialIcons settings={settings} size="sm" />
+        {showSocialHere && <SocialIcons settings={settings} size="sm" />}
       </div>
     );
   };

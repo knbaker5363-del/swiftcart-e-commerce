@@ -468,6 +468,7 @@ export type Database = {
           site_style: string | null
           social_facebook: string | null
           social_instagram: string | null
+          social_media_position: string | null
           social_snapchat: string | null
           social_tiktok: string | null
           social_whatsapp: string | null
@@ -509,6 +510,7 @@ export type Database = {
           site_style?: string | null
           social_facebook?: string | null
           social_instagram?: string | null
+          social_media_position?: string | null
           social_snapchat?: string | null
           social_tiktok?: string | null
           social_whatsapp?: string | null
@@ -550,6 +552,7 @@ export type Database = {
           site_style?: string | null
           social_facebook?: string | null
           social_instagram?: string | null
+          social_media_position?: string | null
           social_snapchat?: string | null
           social_tiktok?: string | null
           social_whatsapp?: string | null

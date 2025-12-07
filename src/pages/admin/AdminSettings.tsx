@@ -263,6 +263,7 @@ const AdminSettings = () => {
   const [siteStyle, setSiteStyle] = useState('classic');
   const [headerLogoPosition, setHeaderLogoPosition] = useState('right');
   const [hideHeaderStoreInfo, setHideHeaderStoreInfo] = useState(false);
+  const [socialMediaPosition, setSocialMediaPosition] = useState('hero');
 
   useEffect(() => {
     if (settings) {
@@ -302,6 +303,7 @@ const AdminSettings = () => {
       setSiteStyle((settings as any).site_style || 'classic');
       setHeaderLogoPosition((settings as any).header_logo_position || 'right');
       setHideHeaderStoreInfo((settings as any).hide_header_store_info || false);
+      setSocialMediaPosition((settings as any).social_media_position || 'hero');
     }
   }, [settings]);
 
@@ -553,6 +555,7 @@ const AdminSettings = () => {
         site_style: siteStyle,
         header_logo_position: headerLogoPosition,
         hide_header_store_info: hideHeaderStoreInfo,
+        social_media_position: socialMediaPosition,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -872,6 +875,32 @@ const AdminSettings = () => {
               </div>
               <Switch id="hideHeaderStoreInfo" checked={hideHeaderStoreInfo} onCheckedChange={setHideHeaderStoreInfo} />
             </div>
+
+            {/* مكان روابط السوشل ميديا */}
+            {!hideHeaderStoreInfo && (
+              <div>
+                <Label className="text-base font-medium mb-3 block">مكان روابط السوشل ميديا</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  اختر مكان ظهور روابط التواصل الاجتماعي
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { id: 'hero', name: 'في البوكس', icon: '📍', desc: 'تظهر في بوكس معلومات المتجر' },
+                    { id: 'footer', name: 'نهاية الموقع', icon: '⬇️', desc: 'تظهر في أسفل الصفحة' },
+                  ].map(pos => (
+                    <button
+                      key={pos.id}
+                      onClick={() => setSocialMediaPosition(pos.id)}
+                      className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${socialMediaPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                    >
+                      <div className="text-3xl mb-2">{pos.icon}</div>
+                      <div className="font-medium text-sm">{pos.name}</div>
+                      <div className="text-xs text-muted-foreground">{pos.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* التأثيرات المتحركة */}
             <div>

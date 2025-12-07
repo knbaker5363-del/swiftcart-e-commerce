@@ -22,6 +22,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { getIconByName } from '@/lib/categoryIcons';
 import { usePageView } from '@/hooks/useAnalytics';
 import BackgroundPattern from '@/components/BackgroundPattern';
+import SocialFooter from '@/components/SocialFooter';
 
 // Render icon by name
 const RenderCategoryIcon = ({
@@ -305,6 +306,9 @@ const Home = () => {
 
       {/* Quick View Dialog */}
       {selectedProduct && <ProductQuickView product={selectedProduct} open={quickViewOpen} onOpenChange={setQuickViewOpen} />}
+
+      {/* Social Media Footer */}
+      <SocialFooter />
     </div>;
 };
 export default Home;
