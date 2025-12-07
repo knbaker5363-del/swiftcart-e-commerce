@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook, Package } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 
@@ -180,14 +180,6 @@ const HeroSection = () => {
             <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
           </div>
           {showSocialHere && <SocialIcons settings={settings} size="md" />}
-          <Link to="/my-orders" className="block w-full mt-4">
-            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-              <div className="flex items-center justify-center gap-2">
-                <Package className="h-5 w-5 text-white" />
-                <span className="text-base font-bold text-white">طلباتي</span>
-              </div>
-            </div>
-          </Link>
         </div>
       );
     }
@@ -210,14 +202,6 @@ const HeroSection = () => {
               </h2>
             </div>
           </div>
-          <Link to="/my-orders" className="block w-full mt-4">
-            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-              <div className="flex items-center justify-center gap-2">
-                <Package className="h-5 w-5 text-white" />
-                <span className="text-base font-bold text-white">طلباتي</span>
-              </div>
-            </div>
-          </Link>
         </div>
       );
     }
@@ -234,14 +218,6 @@ const HeroSection = () => {
           <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
         </div>
         {showSocialHere && <SocialIcons settings={settings} size="md" />}
-        <Link to="/my-orders" className="block w-full mt-4">
-          <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-            <div className="flex items-center justify-center gap-2">
-              <Package className="h-5 w-5 text-white" />
-              <span className="text-base font-bold text-white">طلباتي</span>
-            </div>
-          </div>
-        </Link>
       </div>
     );
   };
@@ -351,20 +327,7 @@ const HeroSection = () => {
   return (
     <section className="bg-background py-6">
       <div className="container">
-        {/* معلومات المتجر للجوال */}
         {!hideHeaderStoreInfo && <MobileStoreInfo />}
-
-        {/* زر طلباتي للجوال - يظهر فقط عندما يكون بوكس المتجر مخفي */}
-        {hideHeaderStoreInfo && (
-          <Link to="/my-orders" className="block lg:hidden mb-4">
-            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-              <div className="flex items-center justify-center gap-2">
-                <Package className="h-5 w-5 text-white" />
-                <span className="text-base font-bold text-white">طلباتي</span>
-              </div>
-            </div>
-          </Link>
-        )}
 
         <div className={`grid grid-cols-1 ${hideHeaderStoreInfo ? '' : 'lg:grid-cols-4'} gap-4`}>
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
