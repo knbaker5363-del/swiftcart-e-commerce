@@ -40,10 +40,10 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
   const HeaderLogo = () => (
     <Link 
       to="/" 
-      className={`flex items-center gap-2 ${headerLogoPosition === 'center' ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
+      className={`flex items-center gap-2 shrink-0 ${headerLogoPosition === 'center' ? 'absolute left-1/2 -translate-x-1/2' : 'me-auto'}`}
     >
       {settings?.logo_url ? (
-        <div className={`w-10 h-10 ${logoShapeClass} overflow-hidden border-2 border-primary/20`}>
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
           <img
             src={settings.logo_url}
             alt={settings.store_name || 'شعار المتجر'}
@@ -51,14 +51,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
           />
         </div>
       ) : (
-        <div className={`w-10 h-10 ${logoShapeClass} bg-primary flex items-center justify-center`}>
-          <span className="text-lg font-bold text-primary-foreground">
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
+          <span className="text-sm sm:text-lg font-bold text-primary-foreground">
             {settings?.store_name?.charAt(0) || 'م'}
           </span>
         </div>
       )}
       <h1 
-        className={`text-xl font-bold ${
+        className={`text-base sm:text-xl font-bold truncate max-w-[120px] sm:max-w-none ${
           settings?.store_name_black 
             ? 'text-foreground' 
             : 'bg-gradient-primary bg-clip-text text-transparent'
@@ -76,7 +76,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
         {headerLogoPosition === 'right' && <HeaderLogo />}
         {headerLogoPosition === 'center' && <HeaderLogo />}
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Link to="/favorites">
             <Button
               variant="ghost"
