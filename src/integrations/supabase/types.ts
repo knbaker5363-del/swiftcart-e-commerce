@@ -445,17 +445,23 @@ export type Database = {
         Row: {
           accent_color: string | null
           animation_effect: string | null
+          background_image_url: string | null
+          background_pattern: string | null
+          background_style: string | null
           banner_images: Json | null
+          cart_button_style: string | null
           category_display_style: string | null
           created_at: string
           delivery_inside: number | null
           delivery_jerusalem: number | null
           delivery_west_bank: number | null
           favicon_url: string | null
+          header_layout: string | null
           id: string
           location: string | null
           logo_url: string | null
           show_brands_button: boolean | null
+          show_image_border: boolean | null
           social_facebook: string | null
           social_instagram: string | null
           social_snapchat: string | null
@@ -476,17 +482,23 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           animation_effect?: string | null
+          background_image_url?: string | null
+          background_pattern?: string | null
+          background_style?: string | null
           banner_images?: Json | null
+          cart_button_style?: string | null
           category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
+          header_layout?: string | null
           id?: string
           location?: string | null
           logo_url?: string | null
           show_brands_button?: boolean | null
+          show_image_border?: boolean | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null
@@ -507,17 +519,23 @@ export type Database = {
         Update: {
           accent_color?: string | null
           animation_effect?: string | null
+          background_image_url?: string | null
+          background_pattern?: string | null
+          background_style?: string | null
           banner_images?: Json | null
+          cart_button_style?: string | null
           category_display_style?: string | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
+          header_layout?: string | null
           id?: string
           location?: string | null
           logo_url?: string | null
           show_brands_button?: boolean | null
+          show_image_border?: boolean | null
           social_facebook?: string | null
           social_instagram?: string | null
           social_snapchat?: string | null

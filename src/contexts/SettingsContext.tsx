@@ -14,6 +14,13 @@ interface Settings {
   store_name_black: boolean;
   category_display_style: 'grid' | 'list' | 'icon-list';
   show_brands_button: boolean;
+  // New appearance options
+  background_style: 'solid' | 'gradient' | 'pattern' | 'image';
+  background_pattern: 'dots' | 'lines' | 'bubbles' | null;
+  background_image_url: string | null;
+  cart_button_style: 'default' | 'rounded' | 'pill' | 'square';
+  header_layout: 'logo-right-social-below' | 'logo-center-social-below' | 'logo-right-social-left';
+  show_image_border: boolean;
 }
 
 interface SettingsContextType {
@@ -120,7 +127,14 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         accent_color: data.accent_color || null,
         store_name_black: data.store_name_black || false,
         category_display_style: data.category_display_style || 'grid',
-        show_brands_button: data.show_brands_button !== false
+        show_brands_button: data.show_brands_button !== false,
+        // New appearance options
+        background_style: data.background_style || 'solid',
+        background_pattern: data.background_pattern || null,
+        background_image_url: data.background_image_url || null,
+        cart_button_style: data.cart_button_style || 'default',
+        header_layout: data.header_layout || 'logo-right-social-below',
+        show_image_border: data.show_image_border !== false
       };
       
       setSettings(parsedSettings as Settings);

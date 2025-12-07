@@ -251,6 +251,15 @@ const AdminSettings = () => {
   const [telegramChatId, setTelegramChatId] = useState('');
   const [telegramBotPassword, setTelegramBotPassword] = useState('');
   const [settingUpWebhook, setSettingUpWebhook] = useState(false);
+  // New appearance options
+  const [backgroundStyle, setBackgroundStyle] = useState('solid');
+  const [backgroundPattern, setBackgroundPattern] = useState<string | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [cartButtonStyle, setCartButtonStyle] = useState('default');
+  const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
+  const [showImageBorder, setShowImageBorder] = useState(true);
+  const [uploadingBgImage, setUploadingBgImage] = useState(false);
+
   useEffect(() => {
     if (settings) {
       setStoreName(settings.store_name);
@@ -278,6 +287,13 @@ const AdminSettings = () => {
       setTelegramBotToken((settings as any).telegram_bot_token || '');
       setTelegramChatId((settings as any).telegram_chat_id || '');
       setTelegramBotPassword((settings as any).telegram_bot_password || '');
+      // New appearance options
+      setBackgroundStyle((settings as any).background_style || 'solid');
+      setBackgroundPattern((settings as any).background_pattern || null);
+      setBackgroundImageUrl((settings as any).background_image_url || null);
+      setCartButtonStyle((settings as any).cart_button_style || 'default');
+      setHeaderLayout((settings as any).header_layout || 'logo-right-social-below');
+      setShowImageBorder((settings as any).show_image_border !== false);
     }
   }, [settings]);
 
@@ -453,6 +469,43 @@ const AdminSettings = () => {
       description: 'تم حذف جميع صور البانر'
     });
   };
+  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى اختيار صورة فقط',
+        variant: 'destructive'
+      });
+      return;
+    }
+    setUploadingBgImage(true);
+    try {
+      toast({ title: 'جاري ضغط الصورة...' });
+      const compressedFile = await compressImageToFile(file, 1920, 1080, 0.85);
+      const fileName = `bg-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setBackgroundImageUrl(publicUrl);
+      toast({
+        title: 'تم الرفع',
+        description: 'تم رفع صورة الخلفية بنجاح'
+      });
+    } catch (error) {
+      console.error('Error uploading background image:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل رفع صورة الخلفية',
+        variant: 'destructive'
+      });
+    } finally {
+      setUploadingBgImage(false);
+      e.target.value = '';
+    }
+  };
+
   const handleSave = async () => {
     try {
       const {
@@ -481,6 +534,13 @@ const AdminSettings = () => {
         telegram_bot_token: telegramBotToken || null,
         telegram_chat_id: telegramChatId || null,
         telegram_bot_password: telegramBotPassword || null,
+        // New appearance options
+        background_style: backgroundStyle,
+        background_pattern: backgroundPattern,
+        background_image_url: backgroundImageUrl,
+        cart_button_style: cartButtonStyle,
+        header_layout: headerLayout,
+        show_image_border: showImageBorder,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       if (error) throw error;
@@ -579,6 +639,132 @@ const AdminSettings = () => {
             <CardDescription>تخصيصات إضافية للمظهر</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* نمط الخلفية */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">نمط الخلفية</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { id: 'solid', name: 'لون سادة', icon: '🎨' },
+                  { id: 'pattern', name: 'نمط/باترن', icon: '🔵' },
+                  { id: 'image', name: 'صورة مخصصة', icon: '🖼️' },
+                ].map(style => (
+                  <button
+                    key={style.id}
+                    onClick={() => setBackgroundStyle(style.id)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${backgroundStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="text-2xl mb-1">{style.icon}</div>
+                    <div className="text-xs font-medium">{style.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* أنماط الباترن */}
+            {backgroundStyle === 'pattern' && (
+              <div>
+                <Label className="text-base font-medium mb-3 block">نوع النمط</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'dots', name: 'نقاط', icon: '•••' },
+                    { id: 'lines', name: 'خطوط', icon: '|||' },
+                    { id: 'bubbles', name: 'فقاعات', icon: '○○○' },
+                  ].map(pattern => (
+                    <button
+                      key={pattern.id}
+                      onClick={() => setBackgroundPattern(pattern.id)}
+                      className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${backgroundPattern === pattern.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                    >
+                      <div className="text-xl mb-1 font-mono">{pattern.icon}</div>
+                      <div className="text-xs font-medium">{pattern.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* صورة الخلفية */}
+            {backgroundStyle === 'image' && (
+              <div className="space-y-2">
+                <Label>صورة الخلفية</Label>
+                <div className="flex items-center gap-4">
+                  {backgroundImageUrl ? (
+                    <div className="relative">
+                      <img src={backgroundImageUrl} alt="خلفية" className="w-32 h-20 rounded-lg object-cover border-2 border-primary/20" />
+                      <button onClick={() => setBackgroundImageUrl(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center">
+                      <Image className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <Input type="file" accept="image/*" onChange={handleBackgroundImageUpload} disabled={uploadingBgImage} className="cursor-pointer" />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {uploadingBgImage ? 'جاري الرفع...' : 'اختر صورة للخلفية'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ترتيب الهيدر */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">ترتيب اللوجو والسوشل ميديا</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { id: 'logo-right-social-below', name: 'اللوجو يمين + سوشل تحته', desc: 'التصميم الكلاسيكي' },
+                  { id: 'logo-center-social-below', name: 'اللوجو بالمنتصف + سوشل تحته', desc: 'تصميم متمركز' },
+                  { id: 'logo-right-social-left', name: 'اللوجو يمين + سوشل يسار', desc: 'تصميم متوازن' },
+                ].map(layout => (
+                  <button
+                    key={layout.id}
+                    onClick={() => setHeaderLayout(layout.id)}
+                    className={`p-3 rounded-lg border-2 text-right transition-all hover:scale-[1.02] ${headerLayout === layout.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="font-medium text-sm">{layout.name}</div>
+                    <div className="text-xs text-muted-foreground">{layout.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* شكل زر السلة */}
+            <div>
+              <Label className="text-base font-medium mb-3 block">شكل زر السلة</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { id: 'default', name: 'افتراضي', style: 'rounded-md' },
+                  { id: 'rounded', name: 'دائري', style: 'rounded-xl' },
+                  { id: 'pill', name: 'كبسولة', style: 'rounded-full' },
+                  { id: 'square', name: 'مربع', style: 'rounded-none' },
+                ].map(btn => (
+                  <button
+                    key={btn.id}
+                    onClick={() => setCartButtonStyle(btn.id)}
+                    className={`p-3 border-2 text-center transition-all hover:scale-105 ${btn.style} ${cartButtonStyle === btn.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <div className="text-sm font-medium">{btn.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* إظهار حدود الصور */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="showImageBorder" className="text-base font-medium">
+                  إظهار إطار حول الصور
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  عند التفعيل، ستظهر الصور داخل إطار/بوكس
+                </p>
+              </div>
+              <Switch id="showImageBorder" checked={showImageBorder} onCheckedChange={setShowImageBorder} />
+            </div>
+
             {/* خيار إبقاء اسم المتجر أسود */}
             <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
               <div className="space-y-0.5">
