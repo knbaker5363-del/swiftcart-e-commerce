@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { 
   ShoppingCart, 
@@ -17,8 +16,13 @@ import {
   Check,
   Type,
   Palette,
-  Layout
+  Sparkles,
+  Paintbrush,
+  Image,
+  X,
+  Upload
 } from 'lucide-react';
+import { compressImageToFile } from '@/lib/imageCompression';
 
 // Cart icon options
 const cartIconOptions = [
@@ -38,24 +42,88 @@ const fontOptions = [
   { id: 'ibm-plex', name: 'IBM Plex Sans Arabic', className: 'font-ibm-plex' },
 ];
 
-// Category display options
-const categoryDisplayOptions = [
-  { id: 'grid', name: 'مربعات مع صور/أيقونات', description: 'عرض التصنيفات كمربعات مع صور أو أيقونات كبيرة' },
-  { id: 'list', name: 'دوائر مع أسماء', description: 'عرض التصنيفات كدوائر مع الأسماء' },
-  { id: 'icon-list', name: 'أيقونة صغيرة مع اسم', description: 'أيقونة صغيرة مع اسم التصنيف' },
+// Themes
+const themes = [
+  { id: 'default', name: 'كلاسيكي', colors: 'أبيض وأسود' },
+  { id: 'night', name: 'ليلي', colors: 'أزرق داكن' },
+  { id: 'day', name: 'نهاري', colors: 'برتقالي ساطع' },
+  { id: 'pink', name: 'زهري', colors: 'وردي' },
+  { id: 'green', name: 'أخضر', colors: 'أخضر زمردي' },
+  { id: 'orange', name: 'برتقالي', colors: 'برتقالي دافئ' },
+  { id: 'ocean', name: 'محيطي', colors: 'أزرق سماوي' },
+  { id: 'lavender', name: 'لافندر', colors: 'بنفسجي فاتح' },
+  { id: 'coral', name: 'مرجاني', colors: 'مرجاني' },
+  { id: 'mint', name: 'نعناعي', colors: 'أخضر نعناعي' },
+  { id: 'sunset', name: 'غروب', colors: 'برتقالي وأحمر' },
+  { id: 'slate', name: 'رمادي', colors: 'رمادي مزرق' },
+  { id: 'cherry', name: 'كرزي', colors: 'أحمر كرزي' },
+  { id: 'forest', name: 'غابة', colors: 'أخضر غامق' },
+  { id: 'gold', name: 'ذهبي', colors: 'ذهبي' },
+  { id: 'ruby', name: 'ياقوتي', colors: 'أحمر ياقوتي' },
+  { id: 'sky', name: 'سماوي', colors: 'أزرق سماوي فاتح' },
+  { id: 'plum', name: 'برقوقي', colors: 'بنفسجي غامق' },
+  { id: 'teal', name: 'فيروزي', colors: 'فيروزي داكن' },
+  { id: 'rose', name: 'وردي فاتح', colors: 'وردي فاتح' },
+  { id: 'cocoa', name: 'كاكاو', colors: 'بني دافئ' },
+];
+
+// Accent colors
+const accentColorOptions = [
+  { id: 'default', name: 'حسب الثيم', color: 'var(--gradient-primary)' },
+  { id: 'blue', name: 'أزرق', color: 'hsl(210, 100%, 50%)' },
+  { id: 'red', name: 'أحمر', color: 'hsl(0, 85%, 55%)' },
+  { id: 'green', name: 'أخضر', color: 'hsl(145, 80%, 42%)' },
+  { id: 'purple', name: 'بنفسجي', color: 'hsl(270, 70%, 55%)' },
+  { id: 'orange', name: 'برتقالي', color: 'hsl(25, 95%, 53%)' },
+  { id: 'pink', name: 'وردي', color: 'hsl(330, 85%, 60%)' },
+  { id: 'teal', name: 'فيروزي', color: 'hsl(175, 75%, 40%)' },
+  { id: 'yellow', name: 'أصفر', color: 'hsl(45, 95%, 50%)' },
+  { id: 'indigo', name: 'نيلي', color: 'hsl(245, 70%, 55%)' },
+  { id: 'black', name: 'أسود', color: 'hsl(0, 0%, 15%)' },
+];
+
+// Animation effects
+const animationEffects = [
+  { id: 'none', name: 'بدون', icon: '✕' },
+  { id: 'snow', name: 'ثلج', icon: '❄️' },
+  { id: 'stars', name: 'نجوم', icon: '⭐' },
+  { id: 'hearts', name: 'قلوب', icon: '❤️' },
+  { id: 'confetti', name: 'احتفال', icon: '🎊' },
+  { id: 'bubbles', name: 'فقاعات', icon: '🫧' },
+  { id: 'leaves', name: 'أوراق', icon: '🍃' },
 ];
 
 const AdminDisplay = () => {
-  const { settings, refreshSettings } = useSettings();
+  const { settings, refreshSettings, applyTheme, applyAccentColor } = useSettings();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
-  // State for display settings
+  // Cart and font settings
   const [cartIconStyle, setCartIconStyle] = useState('cart');
   const [cartButtonText, setCartButtonText] = useState('إضافة للسلة');
   const [fontFamily, setFontFamily] = useState('tajawal');
-  const [categoryDisplayStyle, setCategoryDisplayStyle] = useState('grid');
-  const [showBrandsButton, setShowBrandsButton] = useState(true);
+
+  // Theme and appearance
+  const [selectedTheme, setSelectedTheme] = useState('default');
+  const [accentColor, setAccentColor] = useState('default');
+  const [animationEffect, setAnimationEffect] = useState('none');
+
+  // Background settings
+  const [backgroundStyle, setBackgroundStyle] = useState('solid');
+  const [backgroundPattern, setBackgroundPattern] = useState<string | null>(null);
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [uploadingBgImage, setUploadingBgImage] = useState(false);
+
+  // Layout settings
+  const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
+  const [logoShape, setLogoShape] = useState('circle');
+  const [siteStyle, setSiteStyle] = useState('classic');
+  const [headerLogoPosition, setHeaderLogoPosition] = useState('right');
+  const [hideHeaderStoreInfo, setHideHeaderStoreInfo] = useState(false);
+  const [socialMediaPosition, setSocialMediaPosition] = useState('hero');
+  const [cartButtonStyle, setCartButtonStyle] = useState('default');
+  const [showImageBorder, setShowImageBorder] = useState(true);
+  const [storeNameBlack, setStoreNameBlack] = useState(false);
 
   // Load settings
   useEffect(() => {
@@ -63,10 +131,53 @@ const AdminDisplay = () => {
       setCartIconStyle((settings as any)?.cart_icon_style || 'cart');
       setCartButtonText((settings as any)?.cart_button_text || 'إضافة للسلة');
       setFontFamily((settings as any)?.font_family || 'tajawal');
-      setCategoryDisplayStyle((settings as any)?.category_display_style || 'grid');
-      setShowBrandsButton((settings as any)?.show_brands_button !== false);
+      setSelectedTheme(settings.theme || 'default');
+      setAccentColor((settings as any)?.accent_color || 'default');
+      setAnimationEffect((settings as any)?.animation_effect || 'none');
+      setBackgroundStyle((settings as any)?.background_style || 'solid');
+      setBackgroundPattern((settings as any)?.background_pattern || null);
+      setBackgroundImageUrl((settings as any)?.background_image_url || null);
+      setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
+      setLogoShape((settings as any)?.logo_shape || 'circle');
+      setSiteStyle((settings as any)?.site_style || 'classic');
+      setHeaderLogoPosition((settings as any)?.header_logo_position || 'right');
+      setHideHeaderStoreInfo((settings as any)?.hide_header_store_info || false);
+      setSocialMediaPosition((settings as any)?.social_media_position || 'hero');
+      setCartButtonStyle((settings as any)?.cart_button_style || 'default');
+      setShowImageBorder((settings as any)?.show_image_border !== false);
+      setStoreNameBlack((settings as any)?.store_name_black || false);
     }
   }, [settings]);
+
+  const handleThemeSelect = (themeId: string) => {
+    setSelectedTheme(themeId);
+    applyTheme(themeId);
+  };
+
+  const handleAccentColorChange = (colorId: string) => {
+    setAccentColor(colorId);
+    applyAccentColor(colorId === 'default' ? null : colorId);
+  };
+
+  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingBgImage(true);
+    try {
+      const compressedFile = await compressImageToFile(file, 1920, 1080, 0.85);
+      const fileName = `bg-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setBackgroundImageUrl(publicUrl);
+      toast({ title: 'تم رفع صورة الخلفية بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+    } finally {
+      setUploadingBgImage(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -77,8 +188,21 @@ const AdminDisplay = () => {
           cart_icon_style: cartIconStyle,
           cart_button_text: cartButtonText,
           font_family: fontFamily,
-          category_display_style: categoryDisplayStyle,
-          show_brands_button: showBrandsButton,
+          theme: selectedTheme,
+          accent_color: accentColor === 'default' ? null : accentColor,
+          animation_effect: animationEffect === 'none' ? null : animationEffect,
+          background_style: backgroundStyle,
+          background_pattern: backgroundPattern,
+          background_image_url: backgroundImageUrl,
+          header_layout: headerLayout,
+          logo_shape: logoShape,
+          site_style: siteStyle,
+          header_logo_position: headerLogoPosition,
+          hide_header_store_info: hideHeaderStoreInfo,
+          social_media_position: socialMediaPosition,
+          cart_button_style: cartButtonStyle,
+          show_image_border: showImageBorder,
+          store_name_black: storeNameBlack,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -89,7 +213,7 @@ const AdminDisplay = () => {
       
       toast({
         title: 'تم الحفظ',
-        description: 'تم حفظ إعدادات العرض بنجاح',
+        description: 'تم حفظ إعدادات المظهر بنجاح',
       });
     } catch (error) {
       console.error('Error saving display settings:', error);
@@ -106,8 +230,8 @@ const AdminDisplay = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">إعدادات العرض</h1>
-        <p className="text-muted-foreground mt-2">تخصيص طريقة عرض الموقع والأزرار والخطوط</p>
+        <h1 className="text-3xl font-bold">إعدادات المظهر</h1>
+        <p className="text-muted-foreground mt-2">تخصيص ثيم وألوان ومظهر الموقع</p>
       </div>
 
       {/* Font Settings */}
@@ -139,10 +263,295 @@ const AdminDisplay = () => {
                   {fontFamily === font.id && <Check className="h-4 w-4 text-primary" />}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1" style={{ fontFamily: font.name }}>
-                  هذا النص مكتوب بخط {font.name}
+                  هذا النص بخط {font.name}
                 </p>
               </button>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            ثيم الخلفية
+          </CardTitle>
+          <CardDescription>اختر ألوان الخلفية للموقع</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            {themes.map(theme => (
+              <button
+                key={theme.id}
+                onClick={() => handleThemeSelect(theme.id)}
+                className={`p-2 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                  selectedTheme === theme.id 
+                    ? 'border-primary bg-primary/10 shadow-md' 
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="font-semibold text-xs">{theme.name}</div>
+                <div className="text-[10px] text-muted-foreground">{theme.colors}</div>
+                {selectedTheme === theme.id && <Check className="h-3 w-3 text-primary mx-auto mt-1" />}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Accent Color */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Paintbrush className="h-5 w-5" />
+            لون الأزرار
+          </CardTitle>
+          <CardDescription>اختر لون الأزرار والعناصر التفاعلية</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+            {accentColorOptions.map(color => (
+              <button
+                key={color.id}
+                onClick={() => handleAccentColorChange(color.id)}
+                className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:scale-105 ${
+                  accentColor === color.id ? 'border-primary shadow-md' : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div 
+                  className="w-8 h-8 rounded-full border-2 border-background shadow-sm" 
+                  style={{ background: color.color }} 
+                />
+                <span className="text-xs font-medium text-center">{color.name}</span>
+                {accentColor === color.id && <Check className="h-3 w-3 text-primary" />}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Background Style */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            خيارات المظهر
+          </CardTitle>
+          <CardDescription>تخصيصات إضافية للخلفية والتأثيرات</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Background style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">نمط الخلفية</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'solid', name: 'لون سادة', icon: '🎨' },
+                { id: 'pattern', name: 'نمط/باترن', icon: '🔵' },
+                { id: 'image', name: 'صورة', icon: '🖼️' },
+              ].map(style => (
+                <button
+                  key={style.id}
+                  onClick={() => setBackgroundStyle(style.id)}
+                  className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                    backgroundStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{style.icon}</div>
+                  <div className="text-xs font-medium">{style.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Pattern options */}
+          {backgroundStyle === 'pattern' && (
+            <div>
+              <Label className="text-base font-medium mb-3 block">نوع النمط</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { id: 'dots', name: 'نقاط', icon: '•••' },
+                  { id: 'lines', name: 'خطوط', icon: '|||' },
+                  { id: 'bubbles', name: 'فقاعات', icon: '○○○' },
+                ].map(pattern => (
+                  <button
+                    key={pattern.id}
+                    onClick={() => setBackgroundPattern(pattern.id)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                      backgroundPattern === pattern.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-xl mb-1 font-mono">{pattern.icon}</div>
+                    <div className="text-xs font-medium">{pattern.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Background image upload */}
+          {backgroundStyle === 'image' && (
+            <div className="space-y-2">
+              <Label>صورة الخلفية</Label>
+              <div className="flex items-center gap-4">
+                {backgroundImageUrl ? (
+                  <div className="relative">
+                    <img src={backgroundImageUrl} alt="خلفية" className="w-32 h-20 rounded-lg object-cover border-2 border-primary/20" />
+                    <button onClick={() => setBackgroundImageUrl(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-20 rounded-lg bg-muted flex items-center justify-center">
+                    <Image className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input type="file" accept="image/*" onChange={handleBackgroundImageUpload} disabled={uploadingBgImage} />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {uploadingBgImage ? 'جاري الرفع...' : 'اختر صورة للخلفية'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Animation effects */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">التأثيرات المتحركة</Label>
+            <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+              {animationEffects.map(effect => (
+                <button
+                  key={effect.id}
+                  onClick={() => setAnimationEffect(effect.id)}
+                  className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                    animationEffect === effect.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{effect.icon}</div>
+                  <div className="text-xs font-medium">{effect.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Site style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">نمط الموقع</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'classic', name: 'كلاسيكي', icon: '🏛️' },
+                { id: 'modern', name: 'عصري', icon: '✨' },
+                { id: 'minimal', name: 'بسيط', icon: '◻️' },
+              ].map(style => (
+                <button
+                  key={style.id}
+                  onClick={() => setSiteStyle(style.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    siteStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{style.icon}</div>
+                  <div className="font-medium">{style.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Logo and header layout */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">شكل اللوجو</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: 'circle', name: 'دائري', icon: '⭕' },
+                { id: 'square', name: 'مربع', icon: '⬜' },
+              ].map(shape => (
+                <button
+                  key={shape.id}
+                  onClick={() => setLogoShape(shape.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    logoShape === shape.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{shape.icon}</div>
+                  <div className="font-medium text-sm">{shape.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Header logo position */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: 'right', name: 'على اليمين', icon: '➡️' },
+                { id: 'center', name: 'في المنتصف', icon: '⬛' },
+              ].map(pos => (
+                <button
+                  key={pos.id}
+                  onClick={() => setHeaderLogoPosition(pos.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{pos.icon}</div>
+                  <div className="font-medium text-sm">{pos.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Social media position */}
+          {!hideHeaderStoreInfo && (
+            <div>
+              <Label className="text-base font-medium mb-3 block">مكان السوشل ميديا</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'hero', name: 'في البوكس', icon: '📍' },
+                  { id: 'footer', name: 'نهاية الموقع', icon: '⬇️' },
+                ].map(pos => (
+                  <button
+                    key={pos.id}
+                    onClick={() => setSocialMediaPosition(pos.id)}
+                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                      socialMediaPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">{pos.icon}</div>
+                    <div className="font-medium text-sm">{pos.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Toggles */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div>
+                <Label className="text-base font-medium">إظهار إطار حول الصور</Label>
+                <p className="text-sm text-muted-foreground">عند التفعيل، ستظهر الصور داخل إطار</p>
+              </div>
+              <Switch checked={showImageBorder} onCheckedChange={setShowImageBorder} />
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div>
+                <Label className="text-base font-medium">إبقاء اسم المتجر أسود</Label>
+                <p className="text-sm text-muted-foreground">عند التفعيل، سيظهر اسم المتجر باللون الأسود</p>
+              </div>
+              <Switch checked={storeNameBlack} onCheckedChange={setStoreNameBlack} />
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div>
+                <Label className="text-base font-medium">إخفاء بوكس معلومات المتجر</Label>
+                <p className="text-sm text-muted-foreground">إخفاء اللوجو واسم المتجر من الصفحة الرئيسية</p>
+              </div>
+              <Switch checked={hideHeaderStoreInfo} onCheckedChange={setHideHeaderStoreInfo} />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -154,7 +563,7 @@ const AdminDisplay = () => {
             <ShoppingCart className="h-5 w-5" />
             زر السلة
           </CardTitle>
-          <CardDescription>تخصيص شكل وكتابة زر إضافة للسلة</CardDescription>
+          <CardDescription>تخصيص شكل وأيقونة زر إضافة للسلة</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Cart Icon Style */}
@@ -176,12 +585,33 @@ const AdminDisplay = () => {
                   >
                     <Icon className="h-6 w-6" />
                     <span className="text-sm font-medium">{option.name}</span>
-                    {cartIconStyle === option.id && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
+                    {cartIconStyle === option.id && <Check className="h-4 w-4 text-primary" />}
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Cart button shape */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">شكل زر السلة</Label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { id: 'default', name: 'افتراضي', style: 'rounded-md' },
+                { id: 'rounded', name: 'دائري', style: 'rounded-xl' },
+                { id: 'pill', name: 'كبسولة', style: 'rounded-full' },
+                { id: 'square', name: 'مربع', style: 'rounded-none' },
+              ].map(btn => (
+                <button
+                  key={btn.id}
+                  onClick={() => setCartButtonStyle(btn.id)}
+                  className={`p-3 border-2 text-center transition-all hover:scale-105 ${btn.style} ${
+                    cartButtonStyle === btn.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-sm font-medium">{btn.name}</div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -194,9 +624,6 @@ const AdminDisplay = () => {
               placeholder="إضافة للسلة"
               className="max-w-sm"
             />
-            <p className="text-sm text-muted-foreground mt-2">
-              اترك الحقل فارغ لإظهار الأيقونة فقط بدون نص
-            </p>
           </div>
 
           {/* Preview */}
@@ -210,61 +637,8 @@ const AdminDisplay = () => {
                 })()}
                 {cartButtonText || ''}
               </Button>
-              <span className="text-muted-foreground">← هكذا سيظهر زر إضافة للسلة</span>
+              <span className="text-muted-foreground">← هكذا سيظهر زر السلة</span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Category Display Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layout className="h-5 w-5" />
-            عرض التصنيفات
-          </CardTitle>
-          <CardDescription>تخصيص طريقة عرض التصنيفات (سلايدر)</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label className="text-base font-medium mb-3 block">شكل التصنيفات</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {categoryDisplayOptions.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setCategoryDisplayStyle(option.id)}
-                  className={`p-4 rounded-lg border-2 text-right transition-all ${
-                    categoryDisplayStyle === option.id
-                      ? 'border-primary bg-primary/10 shadow-md'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">{option.name}</span>
-                    {categoryDisplayStyle === option.id && <Check className="h-4 w-4 text-primary" />}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{option.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Show Brands Button */}
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div className="space-y-0.5">
-              <Label htmlFor="showBrandsButton" className="text-base font-medium">
-                إظهار زر البراندات
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                إظهار زر "البراندات الخاصة بنا" في الصفحة الرئيسية
-              </p>
-            </div>
-            <Switch
-              id="showBrandsButton"
-              checked={showBrandsButton}
-              onCheckedChange={setShowBrandsButton}
-            />
           </div>
         </CardContent>
       </Card>
