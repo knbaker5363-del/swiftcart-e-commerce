@@ -29,11 +29,20 @@ const AdminProducts = () => {
     discount_percentage: 0,
     discount_end_date: '',
   });
-  const [options, setOptions] = useState<{ sizes: string[]; colors: string[] }>({
+  // New structure: sizes can have pricing info
+  interface SizeOption {
+    name: string;
+    price_type: 'base' | 'fixed' | 'addition'; // base = use product price, fixed = specific price, addition = add to base price
+    price_value: number | null; // null for base, actual value for fixed/addition
+  }
+  
+  const [options, setOptions] = useState<{ sizes: SizeOption[]; colors: string[] }>({
     sizes: [],
     colors: [],
   });
   const [newSize, setNewSize] = useState('');
+  const [newSizePriceType, setNewSizePriceType] = useState<'base' | 'fixed' | 'addition'>('base');
+  const [newSizePriceValue, setNewSizePriceValue] = useState('');
   const [newColor, setNewColor] = useState('#000000');
   const [uploading, setUploading] = useState(false);
 
@@ -216,6 +225,8 @@ const AdminProducts = () => {
       discount_end_date: '',
     });
     setOptions({ sizes: [], colors: [] });
+    setNewSizePriceType('base');
+    setNewSizePriceValue('');
     setEditingProduct(null);
   };
 
@@ -232,7 +243,15 @@ const AdminProducts = () => {
       discount_percentage: product.discount_percentage || 0,
       discount_end_date: product.discount_end_date || '',
     });
-    setOptions(product.options || { sizes: [], colors: [] });
+    // Handle old format (array of strings) vs new format (array of objects)
+    const productOptions = product.options || { sizes: [], colors: [] };
+    const normalizedSizes = (productOptions.sizes || []).map((size: any) => {
+      if (typeof size === 'string') {
+        return { name: size, price_type: 'base', price_value: null };
+      }
+      return size;
+    });
+    setOptions({ sizes: normalizedSizes, colors: productOptions.colors || [] });
     setOpen(true);
   };
 
@@ -369,33 +388,78 @@ const AdminProducts = () => {
                 <p className="text-xs text-muted-foreground mt-1">يمكنك إضافة عدة صور. تظهر عند hover على المنتج.</p>
               </div>
 
-              <div>
-                <Label>المقاسات</Label>
-                <div className="flex gap-2 mb-2">
-                  <Input
-                    placeholder="أضف مقاس"
-                    value={newSize}
-                    onChange={(e) => setNewSize(e.target.value)}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (newSize.trim()) {
-                        setOptions({ ...options, sizes: [...options.sizes, newSize.trim()] });
-                        setNewSize('');
-                      }
-                    }}
-                  >
-                    إضافة
-                  </Button>
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <Label className="text-base font-semibold mb-3 block">المقاسات مع التسعير</Label>
+                <div className="space-y-3 mb-4">
+                  <div className="flex gap-2 flex-wrap">
+                    <Input
+                      placeholder="اسم المقاس (مثل: S, M, L)"
+                      value={newSize}
+                      onChange={(e) => setNewSize(e.target.value)}
+                      className="flex-1 min-w-[120px]"
+                    />
+                    <Select
+                      value={newSizePriceType}
+                      onValueChange={(value: 'base' | 'fixed' | 'addition') => setNewSizePriceType(value)}
+                    >
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="base">السعر الأساسي</SelectItem>
+                        <SelectItem value="fixed">سعر ثابت</SelectItem>
+                        <SelectItem value="addition">إضافة على السعر</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {newSizePriceType !== 'base' && (
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder={newSizePriceType === 'fixed' ? 'السعر' : 'الإضافة'}
+                        value={newSizePriceValue}
+                        onChange={(e) => setNewSizePriceValue(e.target.value)}
+                        className="w-[100px]"
+                      />
+                    )}
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (newSize.trim()) {
+                          const priceValue = newSizePriceType !== 'base' ? parseFloat(newSizePriceValue) || 0 : null;
+                          setOptions({ 
+                            ...options, 
+                            sizes: [...options.sizes, { 
+                              name: newSize.trim(), 
+                              price_type: newSizePriceType,
+                              price_value: priceValue
+                            }] 
+                          });
+                          setNewSize('');
+                          setNewSizePriceType('base');
+                          setNewSizePriceValue('');
+                        }
+                      }}
+                    >
+                      إضافة
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    • السعر الأساسي: يستخدم سعر المنتج | سعر ثابت: سعر خاص للمقاس | إضافة: زيادة على السعر الأساسي
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {options.sizes.map((size, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-muted rounded-full">
-                      {size}
+                    <span key={i} className="inline-flex items-center gap-2 px-3 py-2 bg-background border rounded-lg">
+                      <span className="font-medium">{size.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {size.price_type === 'base' && 'السعر الأساسي'}
+                        {size.price_type === 'fixed' && `${size.price_value} ₪`}
+                        {size.price_type === 'addition' && `+${size.price_value} ₪`}
+                      </span>
                       <button
                         type="button"
                         onClick={() => setOptions({ ...options, sizes: options.sizes.filter((_, idx) => idx !== i) })}
+                        className="text-destructive hover:text-destructive/80"
                       >
                         <X className="h-3 w-3" />
                       </button>
