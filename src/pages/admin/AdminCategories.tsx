@@ -196,21 +196,21 @@ const SortableCategoryItem = ({
       style={style}
       className={`overflow-hidden shadow-card ${isDragging ? 'ring-2 ring-primary' : ''}`}
     >
-      <div className="flex items-stretch">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
         {/* Drag handle */}
         <div 
           {...attributes} 
           {...listeners}
-          className="flex items-center justify-center px-3 bg-muted/50 cursor-grab active:cursor-grabbing hover:bg-muted transition-colors"
+          className="flex items-center justify-center px-3 py-2 sm:py-0 bg-muted/50 cursor-grab active:cursor-grabbing hover:bg-muted transition-colors"
         >
           <GripVertical className="h-5 w-5 text-muted-foreground" />
         </div>
         
         {/* Category content */}
-        <div className="flex-1 flex items-center gap-4 p-4">
+        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4">
           {/* Image/Icon preview */}
           <div 
-            className="w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0"
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0"
             style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
           >
             {category.image_url ? (
@@ -220,37 +220,39 @@ const SortableCategoryItem = ({
                 className="w-full h-full object-cover rounded-lg"
               />
             ) : category.icon_name ? (
-              <RenderIcon iconName={category.icon_name} className="h-8 w-8 text-primary" />
+              <RenderIcon iconName={category.icon_name} className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             ) : (
-              <Image className="h-8 w-8 text-muted-foreground" />
+              <Image className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
             )}
           </div>
           
           {/* Name */}
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg">{category.name}</h3>
-            <p className="text-sm text-muted-foreground">
+          <div className="flex-1 text-center sm:text-right">
+            <h3 className="font-semibold text-base sm:text-lg">{category.name}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {category.image_url ? 'صورة' : category.icon_name ? 'أيقونة' : 'بدون صورة'}
             </p>
           </div>
           
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center sm:justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onEdit(category)}
+              className="flex-1 sm:flex-none"
             >
               <Edit className="ml-1 h-4 w-4" />
-              تعديل
+              <span className="hidden sm:inline">تعديل</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => onDelete(category.id)}
+              className="flex-1 sm:flex-none text-destructive hover:text-destructive"
             >
               <Trash2 className="ml-1 h-4 w-4" />
-              حذف
+              <span className="hidden sm:inline">حذف</span>
             </Button>
           </div>
         </div>
