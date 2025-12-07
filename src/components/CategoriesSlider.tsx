@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Grid3X3, ChevronDown, List } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Grid3X3, ChevronDown, List, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getIconByName } from '@/lib/categoryIcons';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,6 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface Category {
   id: string;
@@ -19,10 +26,17 @@ interface Category {
   bg_color?: string | null;
 }
 
+interface CategoryDisplaySettings {
+  shape?: 'square' | 'circle';
+  displayType?: 'image' | 'icon';
+  size?: 'small' | 'large';
+}
+
 interface CategoriesSliderProps {
   categories: Category[] | undefined;
   isLoading: boolean;
-  displayStyle?: 'square' | 'circle' | 'icon' | 'dropdown';
+  displayStyle?: 'slider' | 'dropdown' | 'sidebar';
+  settings?: CategoryDisplaySettings;
 }
 
 const RenderCategoryIcon = ({
@@ -39,10 +53,18 @@ const RenderCategoryIcon = ({
   return <IconComponent className={className} />;
 };
 
-const CategoriesSlider = ({ categories, isLoading, displayStyle = 'square' }: CategoriesSliderProps) => {
+const CategoriesSlider = ({ 
+  categories, 
+  isLoading, 
+  displayStyle = 'slider',
+  settings = { shape: 'square', displayType: 'image', size: 'large' }
+}: CategoriesSliderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-const scroll = (direction: 'left' | 'right') => {
+  const { shape = 'square', displayType = 'image', size = 'large' } = settings;
+
+  const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const scrollAmount = 200;
       scrollRef.current.scrollBy({
@@ -67,76 +89,58 @@ const scroll = (direction: 'left' | 'right') => {
     scrollRef.current.setAttribute('data-touch-start-x', touch.clientX.toString());
   };
 
-  const getShapeClass = () => {
-    switch (displayStyle) {
-      case 'circle':
-        return 'rounded-full';
-      case 'icon':
-        return 'rounded-xl';
-      default:
-        return 'rounded-xl';
+  // Size classes
+  const getSizeClasses = () => {
+    if (size === 'small') {
+      return {
+        container: 'w-16 h-16',
+        icon: 'h-6 w-6',
+        minWidth: 'min-w-[80px]',
+        text: 'text-xs',
+        maxWidth: 'max-w-[80px]'
+      };
     }
+    return {
+      container: 'w-24 h-24',
+      icon: 'h-10 w-10',
+      minWidth: 'min-w-[110px]',
+      text: 'text-sm',
+      maxWidth: 'max-w-[110px]'
+    };
   };
 
-  const renderCategory = (category: Category) => {
-    const shapeClass = getShapeClass();
+  const sizeClasses = getSizeClasses();
+  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
+
+  const renderCategory = (category: Category, onClick?: () => void) => {
     const bgColorStyle = category.bg_color ? { backgroundColor: category.bg_color } : {};
+    const showImage = displayType === 'image' && category.image_url;
+    const showIcon = displayType === 'icon' || !category.image_url;
 
-    // Icon only style
-    if (displayStyle === 'icon') {
-      return (
-        <Link
-          key={category.id}
-          to={`/category/${category.id}`}
-          className="flex flex-col items-center gap-2 min-w-[100px] group"
-        >
-          <div
-            className={`w-20 h-20 ${shapeClass} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md`}
-            style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' }}
-          >
-            {category.icon_name ? (
-              <RenderCategoryIcon iconName={category.icon_name} className="h-10 w-10 text-primary" />
-            ) : (
-              <Grid3X3 className="h-10 w-10 text-primary" />
-            )}
-          </div>
-          <span className="text-sm font-medium text-center line-clamp-1 max-w-[100px]">
-            {category.name}
-          </span>
-        </Link>
-      );
-    }
-
-    // Square or Circle with image
     return (
       <Link
         key={category.id}
         to={`/category/${category.id}`}
-        className="flex flex-col items-center gap-2 min-w-[110px] group"
+        onClick={onClick}
+        className={`flex flex-col items-center gap-2 ${sizeClasses.minWidth} group`}
       >
         <div
-          className={`w-24 h-24 ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-border`}
+          className={`${sizeClasses.container} ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-border flex items-center justify-center`}
+          style={showImage ? {} : (category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' })}
         >
-          {category.image_url ? (
+          {showImage ? (
             <img
               src={category.image_url}
               alt={category.name}
               className="w-full h-full object-cover"
             />
           ) : category.icon_name ? (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' }}
-            >
-              <RenderCategoryIcon iconName={category.icon_name} className="h-12 w-12 text-primary" />
-            </div>
+            <RenderCategoryIcon iconName={category.icon_name} className={`${sizeClasses.icon} text-primary`} />
           ) : (
-            <div className="w-full h-full bg-muted flex items-center justify-center">
-              <Grid3X3 className="h-12 w-12 text-muted-foreground" />
-            </div>
+            <Grid3X3 className={`${sizeClasses.icon} text-muted-foreground`} />
           )}
         </div>
-        <span className="text-sm font-medium text-center line-clamp-1 max-w-[110px]">
+        <span className={`${sizeClasses.text} font-medium text-center line-clamp-1 ${sizeClasses.maxWidth}`}>
           {category.name}
         </span>
       </Link>
@@ -148,7 +152,7 @@ const scroll = (direction: 'left' | 'right') => {
       <div className="flex gap-4 overflow-hidden py-2">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="flex flex-col items-center gap-2 min-w-[90px]">
-            <Skeleton className={`w-20 h-20 ${displayStyle === 'circle' ? 'rounded-full' : 'rounded-xl'}`} />
+            <Skeleton className={`${sizeClasses.container} ${shapeClass}`} />
             <Skeleton className="h-4 w-16" />
           </div>
         ))}
@@ -170,28 +174,28 @@ const scroll = (direction: 'left' | 'right') => {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="start" 
-            className="w-56 max-h-[400px] overflow-y-auto bg-background z-50"
+            className="w-64 max-h-[400px] overflow-y-auto bg-background z-50"
           >
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <DropdownMenuItem key={category.id} asChild>
                 <Link 
                   to={`/category/${category.id}`}
                   className="flex items-center gap-3 py-3 cursor-pointer"
                 >
                   <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    className={`${size === 'small' ? 'w-8 h-8' : 'w-10 h-10'} ${shapeClass} flex items-center justify-center shrink-0 overflow-hidden`}
                     style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
                   >
-                    {category.image_url ? (
+                    {displayType === 'image' && category.image_url ? (
                       <img 
                         src={category.image_url} 
                         alt={category.name}
-                        className="w-full h-full object-cover rounded-lg"
+                        className={`w-full h-full object-cover ${shapeClass}`}
                       />
                     ) : category.icon_name ? (
-                      <RenderCategoryIcon iconName={category.icon_name} className="h-4 w-4 text-primary" />
+                      <RenderCategoryIcon iconName={category.icon_name} className="h-5 w-5 text-primary" />
                     ) : (
-                      <Grid3X3 className="h-4 w-4 text-primary" />
+                      <Grid3X3 className="h-5 w-5 text-primary" />
                     )}
                   </div>
                   <span className="font-medium">{category.name}</span>
@@ -204,6 +208,57 @@ const scroll = (direction: 'left' | 'right') => {
     );
   }
 
+  // Sidebar style rendering (slides from right)
+  if (displayStyle === 'sidebar') {
+    return (
+      <>
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="gap-2 h-12 px-6 text-base">
+              <Menu className="h-5 w-5" />
+              <span>التصنيفات</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-80 p-0">
+            <SheetHeader className="p-4 border-b bg-muted/30">
+              <SheetTitle className="text-right">التصنيفات</SheetTitle>
+            </SheetHeader>
+            <div className="overflow-y-auto h-[calc(100vh-80px)]">
+              {categories?.map((category) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.id}`}
+                  onClick={() => setSidebarOpen(false)}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors border-b border-border/50"
+                >
+                  <div 
+                    className={`${size === 'small' ? 'w-10 h-10' : 'w-14 h-14'} ${shapeClass} flex items-center justify-center shrink-0 overflow-hidden shadow-sm`}
+                    style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+                  >
+                    {displayType === 'image' && category.image_url ? (
+                      <img 
+                        src={category.image_url} 
+                        alt={category.name}
+                        className={`w-full h-full object-cover ${shapeClass}`}
+                      />
+                    ) : category.icon_name ? (
+                      <RenderCategoryIcon iconName={category.icon_name} className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
+                    ) : (
+                      <Grid3X3 className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
+                    )}
+                  </div>
+                  <span className="font-medium text-base">{category.name}</span>
+                  <ChevronLeft className="h-5 w-5 mr-auto text-muted-foreground" />
+                </Link>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  // Default slider style
   return (
     <div className="relative group/slider">
       {/* Scroll Left Button */}
@@ -234,7 +289,7 @@ const scroll = (direction: 'left' | 'right') => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
       >
-        {categories.map(renderCategory)}
+        {categories?.map((cat) => renderCategory(cat))}
       </div>
     </div>
   );

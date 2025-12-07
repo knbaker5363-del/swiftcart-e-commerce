@@ -47,6 +47,32 @@ const Home = () => {
   } = useToast();
   const categoryDisplayStyle = (settings?.category_display_style || 'grid') as string;
   const showBrandsButton = settings?.show_brands_button !== false;
+  
+  // Parse category display config
+  const getCategoryDisplayConfig = () => {
+    try {
+      const parsed = JSON.parse(categoryDisplayStyle);
+      if (typeof parsed === 'object') {
+        return {
+          style: parsed.style || 'slider',
+          shape: parsed.shape || 'square',
+          displayType: parsed.displayType || 'image',
+          size: parsed.size || 'large'
+        };
+      }
+    } catch {
+      // Legacy format handling
+    }
+    return {
+      style: 'slider' as const,
+      shape: 'square' as const,
+      displayType: 'image' as const,
+      size: 'large' as const
+    };
+  };
+  
+  const categoryConfig = getCategoryDisplayConfig();
+  
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
       'أبيض': '#FFFFFF',
@@ -112,13 +138,6 @@ const Home = () => {
     setSelectedProduct(product);
     setQuickViewOpen(true);
   };
-  // Map category display style to slider style
-  const getSliderDisplayStyle = (): 'square' | 'circle' | 'icon' | 'dropdown' => {
-    if (categoryDisplayStyle === 'dropdown') return 'dropdown';
-    if (categoryDisplayStyle === 'icon-list') return 'icon';
-    if (categoryDisplayStyle === 'list') return 'circle';
-    return 'square';
-  };
 
   const hideHeaderStoreInfo = settings?.hide_header_store_info || false;
   return <div className="min-h-screen bg-background relative" dir="rtl">
@@ -157,7 +176,12 @@ const Home = () => {
           <CategoriesSlider 
             categories={categories} 
             isLoading={categoriesLoading} 
-            displayStyle={getSliderDisplayStyle()} 
+            displayStyle={categoryConfig.style}
+            settings={{
+              shape: categoryConfig.shape,
+              displayType: categoryConfig.displayType,
+              size: categoryConfig.size
+            }}
           />
         </div>
       </section>
