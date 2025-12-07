@@ -82,19 +82,19 @@ const scroll = (direction: 'left' | 'right') => {
         <Link
           key={category.id}
           to={`/category/${category.id}`}
-          className="flex flex-col items-center gap-2 min-w-[80px] group"
+          className="flex flex-col items-center gap-2 min-w-[100px] group"
         >
           <div
-            className={`w-16 h-16 ${shapeClass} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md`}
+            className={`w-20 h-20 ${shapeClass} flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md`}
             style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' }}
           >
             {category.icon_name ? (
-              <RenderCategoryIcon iconName={category.icon_name} className="h-8 w-8 text-primary" />
+              <RenderCategoryIcon iconName={category.icon_name} className="h-10 w-10 text-primary" />
             ) : (
-              <Grid3X3 className="h-8 w-8 text-primary" />
+              <Grid3X3 className="h-10 w-10 text-primary" />
             )}
           </div>
-          <span className="text-xs font-medium text-center line-clamp-1 max-w-[80px]">
+          <span className="text-sm font-medium text-center line-clamp-1 max-w-[100px]">
             {category.name}
           </span>
         </Link>
@@ -106,10 +106,10 @@ const scroll = (direction: 'left' | 'right') => {
       <Link
         key={category.id}
         to={`/category/${category.id}`}
-        className="flex flex-col items-center gap-2 min-w-[90px] group"
+        className="flex flex-col items-center gap-2 min-w-[110px] group"
       >
         <div
-          className={`w-20 h-20 ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-border`}
+          className={`w-24 h-24 ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-border`}
         >
           {category.image_url ? (
             <img
@@ -122,15 +122,15 @@ const scroll = (direction: 'left' | 'right') => {
               className="w-full h-full flex items-center justify-center"
               style={category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' }}
             >
-              <RenderCategoryIcon iconName={category.icon_name} className="h-10 w-10 text-primary" />
+              <RenderCategoryIcon iconName={category.icon_name} className="h-12 w-12 text-primary" />
             </div>
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
-              <Grid3X3 className="h-10 w-10 text-muted-foreground" />
+              <Grid3X3 className="h-12 w-12 text-muted-foreground" />
             </div>
           )}
         </div>
-        <span className="text-xs font-medium text-center line-clamp-1 max-w-[90px]">
+        <span className="text-sm font-medium text-center line-clamp-1 max-w-[110px]">
           {category.name}
         </span>
       </Link>
