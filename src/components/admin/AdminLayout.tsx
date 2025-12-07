@@ -102,7 +102,13 @@ const AdminLayout = () => {
   if (isMobile) {
     return <div className="min-h-screen bg-background" dir="rtl">
         {/* Mobile Header */}
-        <header className="fixed top-0 right-0 left-0 h-16 bg-card border-b shadow-sm z-50 flex items-center justify-between px-4">
+        <header className="fixed top-0 right-0 left-0 h-16 bg-card border-b shadow-sm z-50 flex items-center px-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} title="العودة للمتجر">
+            <Store className="h-5 w-5" />
+          </Button>
+          <h1 className="flex-1 text-center text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+            لوحة التحكم
+          </h1>
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -113,12 +119,6 @@ const AdminLayout = () => {
               <SidebarContent />
             </SheetContent>
           </Sheet>
-          <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-            لوحة التحكم
-          </h1>
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')} title="العودة للمتجر">
-            <Store className="h-5 w-5" />
-          </Button>
         </header>
 
         {/* Main Content */}
