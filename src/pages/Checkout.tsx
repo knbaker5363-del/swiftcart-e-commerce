@@ -361,9 +361,10 @@ const Checkout = () => {
       });
     } catch (error: any) {
       console.error('Checkout error:', error);
+      const errorMessage = error?.message || error?.code || 'خطأ غير معروف';
       toast({
         title: 'حدث خطأ',
-        description: 'يرجى المحاولة مرة أخرى',
+        description: `يرجى المحاولة مرة أخرى. التفاصيل: ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {
