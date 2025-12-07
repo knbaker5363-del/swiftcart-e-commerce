@@ -40,11 +40,22 @@ const AdminProducts = () => {
     name: string;
     price: number;
   }
+
+  interface CustomVariantOption {
+    value: string;
+    price_addition: number;
+  }
+
+  interface CustomVariant {
+    name: string;
+    options: CustomVariantOption[];
+  }
   
-  const [options, setOptions] = useState<{ sizes: SizeOption[]; colors: string[]; addons: AddOnOption[] }>({
+  const [options, setOptions] = useState<{ sizes: SizeOption[]; colors: string[]; addons: AddOnOption[]; customVariants: CustomVariant[] }>({
     sizes: [],
     colors: [],
     addons: [],
+    customVariants: [],
   });
   const [newSize, setNewSize] = useState('');
   const [newSizePriceType, setNewSizePriceType] = useState<'base' | 'fixed' | 'addition'>('base');
@@ -52,6 +63,10 @@ const AdminProducts = () => {
   const [newColor, setNewColor] = useState('#000000');
   const [newAddonName, setNewAddonName] = useState('');
   const [newAddonPrice, setNewAddonPrice] = useState('');
+  const [newVariantName, setNewVariantName] = useState('');
+  const [newVariantOption, setNewVariantOption] = useState('');
+  const [newVariantOptionPrice, setNewVariantOptionPrice] = useState('');
+  const [currentVariantIndex, setCurrentVariantIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const { data: products } = useQuery({
@@ -232,11 +247,15 @@ const AdminProducts = () => {
       discount_percentage: 0,
       discount_end_date: '',
     });
-    setOptions({ sizes: [], colors: [], addons: [] });
+    setOptions({ sizes: [], colors: [], addons: [], customVariants: [] });
     setNewSizePriceType('base');
     setNewSizePriceValue('');
     setNewAddonName('');
     setNewAddonPrice('');
+    setNewVariantName('');
+    setNewVariantOption('');
+    setNewVariantOptionPrice('');
+    setCurrentVariantIndex(null);
     setEditingProduct(null);
   };
 
@@ -264,7 +283,8 @@ const AdminProducts = () => {
     setOptions({ 
       sizes: normalizedSizes, 
       colors: productOptions.colors || [],
-      addons: productOptions.addons || []
+      addons: productOptions.addons || [],
+      customVariants: productOptions.customVariants || []
     });
     setOpen(true);
   };
@@ -421,7 +441,7 @@ const AdminProducts = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="base">السعر الأساسي</SelectItem>
-                        <SelectItem value="fixed">سعر ثابت</SelectItem>
+                        <SelectItem value="fixed">سعر مختلف</SelectItem>
                         <SelectItem value="addition">إضافة على السعر</SelectItem>
                       </SelectContent>
                     </Select>
@@ -458,7 +478,7 @@ const AdminProducts = () => {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    • السعر الأساسي: يستخدم سعر المنتج | سعر ثابت: سعر خاص للمقاس | إضافة: زيادة على السعر الأساسي
+                    • السعر الأساسي: يستخدم سعر المنتج | سعر مختلف: سعر خاص للمقاس | إضافة: زيادة على السعر الأساسي
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -467,7 +487,7 @@ const AdminProducts = () => {
                       <span className="font-medium">{size.name}</span>
                       <span className="text-xs text-muted-foreground">
                         {size.price_type === 'base' && 'السعر الأساسي'}
-                        {size.price_type === 'fixed' && `${size.price_value} ₪`}
+                        {size.price_type === 'fixed' && `سعر مختلف: ${size.price_value} ₪`}
                         {size.price_type === 'addition' && `+${size.price_value} ₪`}
                       </span>
                       <button
@@ -577,6 +597,139 @@ const AdminProducts = () => {
                 {options.addons.length === 0 && (
                   <p className="text-xs text-muted-foreground mt-2">
                     أضف إضافات اختيارية للمنتج (مثل: إضافة جبنة، صوص حار، إلخ)
+                  </p>
+                )}
+              </div>
+
+              {/* Custom Variants Section */}
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <Label className="text-base font-semibold mb-3 block">متغيرات إضافية (مثل: حجم، نكهة)</Label>
+                
+                {/* Add New Variant Group */}
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    placeholder="اسم المتغير (مثل: حجم، نكهة)"
+                    value={newVariantName}
+                    onChange={(e) => setNewVariantName(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (newVariantName.trim()) {
+                        setOptions({
+                          ...options,
+                          customVariants: [...options.customVariants, { 
+                            name: newVariantName.trim(), 
+                            options: [] 
+                          }]
+                        });
+                        setNewVariantName('');
+                        setCurrentVariantIndex(options.customVariants.length);
+                      }
+                    }}
+                  >
+                    إضافة متغير
+                  </Button>
+                </div>
+
+                {/* Display Existing Variants */}
+                <div className="space-y-4">
+                  {options.customVariants.map((variant, variantIdx) => (
+                    <div key={variantIdx} className="p-3 bg-background border rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium text-sm">{variant.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setOptions({
+                            ...options,
+                            customVariants: options.customVariants.filter((_, idx) => idx !== variantIdx)
+                          })}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      
+                      {/* Add Option to this Variant */}
+                      {currentVariantIndex === variantIdx && (
+                        <div className="flex gap-2 mb-2 flex-wrap">
+                          <Input
+                            placeholder="القيمة (مثل: صغير)"
+                            value={newVariantOption}
+                            onChange={(e) => setNewVariantOption(e.target.value)}
+                            className="flex-1 min-w-[120px]"
+                          />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="سعر إضافي"
+                            value={newVariantOptionPrice}
+                            onChange={(e) => setNewVariantOptionPrice(e.target.value)}
+                            className="w-[100px]"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              if (newVariantOption.trim()) {
+                                const updatedVariants = [...options.customVariants];
+                                updatedVariants[variantIdx].options.push({
+                                  value: newVariantOption.trim(),
+                                  price_addition: parseFloat(newVariantOptionPrice) || 0
+                                });
+                                setOptions({ ...options, customVariants: updatedVariants });
+                                setNewVariantOption('');
+                                setNewVariantOptionPrice('');
+                              }
+                            }}
+                          >
+                            إضافة
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {currentVariantIndex !== variantIdx && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCurrentVariantIndex(variantIdx)}
+                          className="mb-2"
+                        >
+                          إضافة خيار
+                        </Button>
+                      )}
+                      
+                      {/* Display Options */}
+                      <div className="flex flex-wrap gap-2">
+                        {variant.options.map((opt, optIdx) => (
+                          <span key={optIdx} className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded text-sm">
+                            <span>{opt.value}</span>
+                            {opt.price_addition > 0 && (
+                              <span className="text-xs text-muted-foreground">+{opt.price_addition}₪</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updatedVariants = [...options.customVariants];
+                                updatedVariants[variantIdx].options = updatedVariants[variantIdx].options.filter((_, idx) => idx !== optIdx);
+                                setOptions({ ...options, customVariants: updatedVariants });
+                              }}
+                              className="text-destructive hover:text-destructive/80"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {options.customVariants.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    أضف متغيرات مخصصة للمنتج (مثل: حجم المشروب - صغير/وسط/كبير)
                   </p>
                 )}
               </div>
