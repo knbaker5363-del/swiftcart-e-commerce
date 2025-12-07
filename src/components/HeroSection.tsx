@@ -69,6 +69,10 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { settings } = useSettings();
 
+  // Get header layout setting
+  const headerLayout = (settings as any)?.header_layout || 'logo-right';
+  const showImageBorder = (settings as any)?.show_image_border !== false;
+
   // شرائح البانر من الإعدادات أو افتراضية
   const defaultImages = [
     'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
@@ -111,12 +115,117 @@ const HeroSection = () => {
     ? 'text-foreground' 
     : 'text-[hsl(var(--store-name-color))]';
 
-  return (
-    <section className="bg-background py-6">
-      <div className="container">
-        {/* معلومات المتجر للجوال - فوق الشرائح */}
-        <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
-          <div className="w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0">
+  // Logo component
+  const LogoComponent = ({ size = 'lg' }: { size?: 'sm' | 'lg' }) => {
+    const sizeClass = size === 'lg' ? 'w-32 h-32' : 'w-14 h-14';
+    const textSize = size === 'lg' ? 'text-4xl' : 'text-xl';
+    const borderWidth = size === 'lg' ? 'border-4' : 'border-2';
+    
+    return (
+      <div className={`${sizeClass} rounded-full overflow-hidden shadow-hover ${borderWidth} border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+        {settings?.logo_url ? (
+          <img
+            src={settings.logo_url}
+            alt={settings.store_name || 'شعار المتجر'}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-primary flex items-center justify-center">
+            <span className={`${textSize} font-bold text-primary-foreground`}>
+              {settings?.store_name?.charAt(0) || 'م'}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Store info component for desktop based on layout
+  const DesktopStoreInfo = () => {
+    if (headerLayout === 'logo-center') {
+      return (
+        <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
+          <LogoComponent size="lg" />
+          <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
+            {settings?.store_name || 'متجري'}
+          </h2>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+            <MapPin className="h-4 w-4 text-primary" />
+            <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+          </div>
+          <SocialIcons settings={settings} size="md" />
+          <Link to="/my-orders" className="block w-full mt-4">
+            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+              <div className="flex items-center justify-center gap-2">
+                <Package className="h-5 w-5 text-white" />
+                <span className="text-base font-bold text-white">طلباتي</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      );
+    }
+
+    if (headerLayout === 'logo-left') {
+      return (
+        <div className="hidden lg:flex flex-col bg-card rounded-lg shadow-card p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <SocialIcons settings={settings} size="md" />
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mt-4">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <LogoComponent size="lg" />
+              <h2 className={`text-xl font-bold mt-3 ${storeNameClass}`}>
+                {settings?.store_name || 'متجري'}
+              </h2>
+            </div>
+          </div>
+          <Link to="/my-orders" className="block w-full mt-4">
+            <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+              <div className="flex items-center justify-center gap-2">
+                <Package className="h-5 w-5 text-white" />
+                <span className="text-base font-bold text-white">طلباتي</span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      );
+    }
+
+    // Default: logo-right
+    return (
+      <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
+        <LogoComponent size="lg" />
+        <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
+          {settings?.store_name || 'متجري'}
+        </h2>
+        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+          <MapPin className="h-4 w-4 text-primary" />
+          <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+        </div>
+        <SocialIcons settings={settings} size="md" />
+        <Link to="/my-orders" className="block w-full mt-4">
+          <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
+            <div className="flex items-center justify-center gap-2">
+              <Package className="h-5 w-5 text-white" />
+              <span className="text-base font-bold text-white">طلباتي</span>
+            </div>
+          </div>
+        </Link>
+      </div>
+    );
+  };
+
+  // Mobile store info based on layout
+  const MobileStoreInfo = () => {
+    if (headerLayout === 'logo-center') {
+      return (
+        <div className="flex lg:hidden flex-col items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
+          <div className={`w-16 h-16 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
             {settings?.logo_url ? (
               <img
                 src={settings.logo_url}
@@ -125,26 +234,97 @@ const HeroSection = () => {
               />
             ) : (
               <div className="w-full h-full bg-primary flex items-center justify-center">
-                <span className="text-xl font-bold text-primary-foreground">
+                <span className="text-2xl font-bold text-primary-foreground">
                   {settings?.store_name?.charAt(0) || 'م'}
                 </span>
               </div>
             )}
           </div>
+          <h2 className={`text-lg font-bold ${storeNameClass}`}>
+            {settings?.store_name || 'متجري'}
+          </h2>
+          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+            <MapPin className="h-3 w-3 text-primary" />
+            <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+          </div>
+          <SocialIcons settings={settings} size="sm" />
+        </div>
+      );
+    }
+
+    if (headerLayout === 'logo-left') {
+      return (
+        <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
           <div className="flex-1">
-            <h2 className={`text-lg font-bold ${storeNameClass}`}>
-              {settings?.store_name || 'متجري'}
-            </h2>
-            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+            <SocialIcons settings={settings} size="sm" />
+            <div className="flex items-center gap-1 text-muted-foreground text-xs mt-2">
               <MapPin className="h-3 w-3 text-primary" />
               <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
             </div>
           </div>
-          {/* أيقونات التواصل للجوال */}
-          <SocialIcons settings={settings} size="sm" />
+          <div className="flex flex-col items-center">
+            <div className={`w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+              {settings?.logo_url ? (
+                <img
+                  src={settings.logo_url}
+                  alt={settings.store_name || 'شعار المتجر'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-primary flex items-center justify-center">
+                  <span className="text-xl font-bold text-primary-foreground">
+                    {settings?.store_name?.charAt(0) || 'م'}
+                  </span>
+                </div>
+              )}
+            </div>
+            <h2 className={`text-sm font-bold mt-1 ${storeNameClass}`}>
+              {settings?.store_name || 'متجري'}
+            </h2>
+          </div>
         </div>
+      );
+    }
 
-        {/* زر طلباتي للجوال - بين معلومات المتجر والبانر */}
+    // Default: logo-right
+    return (
+      <div className="flex lg:hidden items-center gap-3 mb-4 bg-card rounded-lg shadow-card p-3">
+        <div className={`w-14 h-14 rounded-full overflow-hidden shadow-hover border-2 border-primary/20 flex-shrink-0 ${showImageBorder ? '' : 'border-0 shadow-none'}`}>
+          {settings?.logo_url ? (
+            <img
+              src={settings.logo_url}
+              alt={settings.store_name || 'شعار المتجر'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">
+                {settings?.store_name?.charAt(0) || 'م'}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1">
+          <h2 className={`text-lg font-bold ${storeNameClass}`}>
+            {settings?.store_name || 'متجري'}
+          </h2>
+          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+            <MapPin className="h-3 w-3 text-primary" />
+            <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
+          </div>
+        </div>
+        <SocialIcons settings={settings} size="sm" />
+      </div>
+    );
+  };
+
+  return (
+    <section className="bg-background py-6">
+      <div className="container">
+        {/* معلومات المتجر للجوال */}
+        <MobileStoreInfo />
+
+        {/* زر طلباتي للجوال */}
         <Link to="/my-orders" className="block lg:hidden mb-4">
           <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
             <div className="flex items-center justify-center gap-2">
@@ -156,52 +336,10 @@ const HeroSection = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
-          <div className="hidden lg:flex flex-col items-center justify-center bg-card rounded-lg shadow-card p-6 text-center">
-            {/* شعار المتجر */}
-            <div className="w-32 h-32 rounded-full overflow-hidden mb-4 shadow-hover border-4 border-primary/20">
-              {settings?.logo_url ? (
-                <img
-                  src={settings.logo_url}
-                  alt={settings.store_name || 'شعار المتجر'}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-primary flex items-center justify-center">
-                  <span className="text-4xl font-bold text-primary-foreground">
-                    {settings?.store_name?.charAt(0) || 'م'}
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            {/* اسم المتجر */}
-            <h2 className={`text-2xl font-bold mb-3 ${storeNameClass}`}>
-              {settings?.store_name || 'متجري'}
-            </h2>
-            
-            {/* الموقع */}
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
-              <MapPin className="h-4 w-4 text-primary" />
-              <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
-            </div>
+          <DesktopStoreInfo />
 
-            {/* أيقونات التواصل الاجتماعي */}
-            <SocialIcons settings={settings} size="md" />
-
-            {/* زر طلباتي للديسكتوب */}
-            <Link to="/my-orders" className="block w-full mt-4">
-              <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-                <div className="flex items-center justify-center gap-2">
-                  <Package className="h-5 w-5 text-white" />
-                  <span className="text-base font-bold text-white">طلباتي</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* البانر الرئيسي - يأخذ 3 أعمدة */}
+          {/* البانر الرئيسي */}
           <div className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[180px] sm:h-[220px] lg:h-[400px] group">
-            {/* الشرائح */}
             {slides.map((slide, index) => (
               <div
                 key={slide.id}
@@ -217,7 +355,6 @@ const HeroSection = () => {
               </div>
             ))}
 
-            {/* أزرار التنقل */}
             <button
               onClick={prevSlide}
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -233,7 +370,6 @@ const HeroSection = () => {
               <ChevronRight className="h-6 w-6" />
             </button>
 
-            {/* نقاط التنقل */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
               {slides.map((_, index) => (
                 <button
