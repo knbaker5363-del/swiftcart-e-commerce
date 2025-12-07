@@ -53,6 +53,8 @@ const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const [storePhone, setStorePhone] = useState('');
   const [deliveryPrices, setDeliveryPrices] = useState({
     west_bank: 20,
@@ -134,12 +136,26 @@ const Checkout = () => {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const { data } = await supabase
-        .from('settings')
-        .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside, whatsapp_number, whatsapp_country_code, social_whatsapp, social_instagram, social_facebook, social_tiktok, social_snapchat')
-        .single();
+      setSettingsLoading(true);
+      setSettingsError(null);
       
-      if (data) {
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('store_phone, delivery_west_bank, delivery_jerusalem, delivery_inside, whatsapp_number, whatsapp_country_code, social_whatsapp, social_instagram, social_facebook, social_tiktok, social_snapchat')
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Settings fetch error:', error);
+          setSettingsError('فشل في تحميل إعدادات المتجر. يرجى تحديث الصفحة.');
+          return;
+        }
+        
+        if (!data) {
+          setSettingsError('لم يتم العثور على إعدادات المتجر.');
+          return;
+        }
+        
         if (data.store_phone) {
           setStorePhone(data.store_phone);
         }
@@ -168,6 +184,11 @@ const Checkout = () => {
           tiktok: (data as any).social_tiktok || '',
           snapchat: (data as any).social_snapchat || '',
         });
+      } catch (err) {
+        console.error('Settings fetch exception:', err);
+        setSettingsError('حدث خطأ أثناء تحميل الإعدادات. يرجى تحديث الصفحة.');
+      } finally {
+        setSettingsLoading(false);
       }
     };
     fetchSettings();
@@ -433,6 +454,29 @@ const Checkout = () => {
           رجوع
         </Button>
 
+        {/* Settings Loading State */}
+        {settingsLoading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">جاري تحميل الإعدادات...</p>
+          </div>
+        )}
+
+        {/* Settings Error State */}
+        {settingsError && !settingsLoading && (
+          <div className="text-center py-12">
+            <div className="bg-destructive/10 text-destructive p-6 rounded-lg max-w-md mx-auto">
+              <p className="font-bold mb-2">خطأ في التحميل</p>
+              <p className="mb-4">{settingsError}</p>
+              <Button onClick={() => window.location.reload()}>
+                تحديث الصفحة
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content - only show when settings loaded successfully */}
+        {!settingsLoading && !settingsError && (
         <div className="grid md:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div>
@@ -760,6 +804,7 @@ const Checkout = () => {
             </Card>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
