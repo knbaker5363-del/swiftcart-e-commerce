@@ -26,6 +26,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
 
   // Track product view when dialog opens
   useEffect(() => {
@@ -44,7 +45,12 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
     price_value: number | null;
   }
 
-  const rawOptions = product.options as { sizes?: (string | SizeOption)[], colors?: string[] } | null;
+  interface AddOnOption {
+    name: string;
+    price: number;
+  }
+
+  const rawOptions = product.options as { sizes?: (string | SizeOption)[], colors?: string[], addons?: AddOnOption[] } | null;
   
   // Normalize sizes to always be SizeOption objects
   const normalizedSizes: SizeOption[] = (rawOptions?.sizes || []).map((size) => {
@@ -56,10 +62,27 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   
   const options = {
     sizes: normalizedSizes,
-    colors: rawOptions?.colors || []
+    colors: rawOptions?.colors || [],
+    addons: rawOptions?.addons || []
   };
   
   const hasOptions = options.sizes.length > 0 || options.colors.length > 0;
+
+  const toggleAddon = (addonName: string) => {
+    setSelectedAddons(prev => 
+      prev.includes(addonName) 
+        ? prev.filter(a => a !== addonName)
+        : [...prev, addonName]
+    );
+  };
+
+  // Calculate addons total
+  const getAddonsTotal = () => {
+    return selectedAddons.reduce((total, addonName) => {
+      const addon = options.addons.find(a => a.name === addonName);
+      return total + (addon?.price || 0);
+    }, 0);
+  };
 
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -80,10 +103,11 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
     return color.startsWith('#') ? color : (colorMap[color] || color);
   };
 
-  // Calculate price based on selected size
+  // Calculate price based on selected size and addons
   const calculatePrice = () => {
     const basePrice = product.price;
     const hasDiscount = (product.discount_percentage ?? 0) > 0;
+    const addonsTotal = getAddonsTotal();
     
     if (selectedSize && options.sizes.length > 0) {
       const sizeOption = options.sizes.find(s => s.name === selectedSize);
@@ -94,13 +118,15 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
         } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
           sizePrice = basePrice + sizeOption.price_value;
         }
-        // Apply discount to the calculated size price
-        return hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+        // Apply discount to the calculated size price, then add addons (addons not discounted)
+        const discountedPrice = hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+        return discountedPrice + addonsTotal;
       }
     }
     
-    // Default to base price with discount
-    return hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+    // Default to base price with discount, then add addons
+    const discountedBase = hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+    return discountedBase + addonsTotal;
   };
 
   const hasDiscount = (product.discount_percentage ?? 0) > 0;
@@ -147,9 +173,10 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
       }
     }
 
-    const selectedOptions: Record<string, string> = {};
+    const selectedOptions: Record<string, string | string[]> = {};
     if (selectedSize) selectedOptions.size = selectedSize;
     if (selectedColor) selectedOptions.color = selectedColor;
+    if (selectedAddons.length > 0) selectedOptions.addons = selectedAddons;
 
     addItem({
       id: product.id,
@@ -280,6 +307,31 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
                 {selectedColor && (
                   <p className="text-sm text-muted-foreground">
                     اللون المختار: {selectedColor}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* الإضافات */}
+            {options.addons && options.addons.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">إضافات اختيارية</Label>
+                <div className="flex flex-wrap gap-2">
+                  {options.addons.map((addon, index) => (
+                    <Button
+                      key={`${addon.name}-${index}`}
+                      variant={selectedAddons.includes(addon.name) ? "default" : "outline"}
+                      onClick={() => toggleAddon(addon.name)}
+                      className="flex items-center gap-2"
+                    >
+                      <span>{addon.name}</span>
+                      <span className="text-xs opacity-80">+{addon.price} ₪</span>
+                    </Button>
+                  ))}
+                </div>
+                {selectedAddons.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    الإضافات المختارة: {selectedAddons.join('، ')} (+{getAddonsTotal()} ₪)
                   </p>
                 )}
               </div>

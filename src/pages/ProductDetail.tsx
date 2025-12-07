@@ -23,6 +23,7 @@ const ProductDetail = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [quantity, setQuantity] = useState(1);
 
   const getColorValue = (color: string) => {
@@ -64,7 +65,12 @@ const ProductDetail = () => {
     price_value: number | null;
   }
 
-  const rawOptions = product?.options as { sizes?: (string | SizeOption)[], colors?: string[] } | null;
+  interface AddOnOption {
+    name: string;
+    price: number;
+  }
+
+  const rawOptions = product?.options as { sizes?: (string | SizeOption)[], colors?: string[], addons?: AddOnOption[] } | null;
   
   // Normalize sizes to always be SizeOption objects
   const normalizedSizes: SizeOption[] = (rawOptions?.sizes || []).map((size) => {
@@ -76,14 +82,32 @@ const ProductDetail = () => {
   
   const options = {
     sizes: normalizedSizes,
-    colors: rawOptions?.colors || []
+    colors: rawOptions?.colors || [],
+    addons: rawOptions?.addons || []
   };
 
-  // Calculate price based on selected size
+  const toggleAddon = (addonName: string) => {
+    setSelectedAddons(prev => 
+      prev.includes(addonName) 
+        ? prev.filter(a => a !== addonName)
+        : [...prev, addonName]
+    );
+  };
+
+  // Calculate addons total
+  const getAddonsTotal = () => {
+    return selectedAddons.reduce((total, addonName) => {
+      const addon = options.addons.find(a => a.name === addonName);
+      return total + (addon?.price || 0);
+    }, 0);
+  };
+
+  // Calculate price based on selected size and addons
   const calculatePrice = () => {
     if (!product) return 0;
     const basePrice = product.price;
     const hasDiscount = (product.discount_percentage ?? 0) > 0;
+    const addonsTotal = getAddonsTotal();
     
     if (selectedSize && options.sizes.length > 0) {
       const sizeOption = options.sizes.find(s => s.name === selectedSize);
@@ -94,11 +118,13 @@ const ProductDetail = () => {
         } else if (sizeOption.price_type === 'addition' && sizeOption.price_value !== null) {
           sizePrice = basePrice + sizeOption.price_value;
         }
-        return hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+        const discountedPrice = hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
+        return discountedPrice + addonsTotal;
       }
     }
     
-    return hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+    const discountedBase = hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
+    return discountedBase + addonsTotal;
   };
 
   const getOriginalPrice = () => {
@@ -140,6 +166,11 @@ const ProductDetail = () => {
       return;
     }
 
+    const selectedOptions: Record<string, string | string[]> = {};
+    if (selectedSize) selectedOptions.size = selectedSize;
+    if (selectedColor) selectedOptions.color = selectedColor;
+    if (selectedAddons.length > 0) selectedOptions.addons = selectedAddons;
+
     addItem({
       id: '',
       product_id: product.id,
@@ -147,10 +178,7 @@ const ProductDetail = () => {
       price: currentPrice,
       image_url: product.image_url,
       quantity,
-      selected_options: {
-        size: selectedSize,
-        color: selectedColor,
-      },
+      selected_options: selectedOptions,
     });
 
     toast({
@@ -308,6 +336,31 @@ const ProductDetail = () => {
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
+                </div>
+              )}
+
+              {/* Add-ons Options */}
+              {options.addons.length > 0 && (
+                <div>
+                  <Label className="text-lg font-semibold mb-3 block">إضافات اختيارية</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {options.addons.map((addon, index) => (
+                      <Button
+                        key={`${addon.name}-${index}`}
+                        variant={selectedAddons.includes(addon.name) ? "default" : "outline"}
+                        onClick={() => toggleAddon(addon.name)}
+                        className="flex items-center gap-2"
+                      >
+                        <span>{addon.name}</span>
+                        <span className="text-xs opacity-80">+{addon.price} ₪</span>
+                      </Button>
+                    ))}
+                  </div>
+                  {selectedAddons.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      الإضافات المختارة: {selectedAddons.join('، ')} (+{getAddonsTotal()} ₪)
+                    </p>
+                  )}
                 </div>
               )}
 

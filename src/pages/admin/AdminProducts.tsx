@@ -35,15 +35,23 @@ const AdminProducts = () => {
     price_type: 'base' | 'fixed' | 'addition'; // base = use product price, fixed = specific price, addition = add to base price
     price_value: number | null; // null for base, actual value for fixed/addition
   }
+
+  interface AddOnOption {
+    name: string;
+    price: number;
+  }
   
-  const [options, setOptions] = useState<{ sizes: SizeOption[]; colors: string[] }>({
+  const [options, setOptions] = useState<{ sizes: SizeOption[]; colors: string[]; addons: AddOnOption[] }>({
     sizes: [],
     colors: [],
+    addons: [],
   });
   const [newSize, setNewSize] = useState('');
   const [newSizePriceType, setNewSizePriceType] = useState<'base' | 'fixed' | 'addition'>('base');
   const [newSizePriceValue, setNewSizePriceValue] = useState('');
   const [newColor, setNewColor] = useState('#000000');
+  const [newAddonName, setNewAddonName] = useState('');
+  const [newAddonPrice, setNewAddonPrice] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const { data: products } = useQuery({
@@ -224,9 +232,11 @@ const AdminProducts = () => {
       discount_percentage: 0,
       discount_end_date: '',
     });
-    setOptions({ sizes: [], colors: [] });
+    setOptions({ sizes: [], colors: [], addons: [] });
     setNewSizePriceType('base');
     setNewSizePriceValue('');
+    setNewAddonName('');
+    setNewAddonPrice('');
     setEditingProduct(null);
   };
 
@@ -244,14 +254,18 @@ const AdminProducts = () => {
       discount_end_date: product.discount_end_date || '',
     });
     // Handle old format (array of strings) vs new format (array of objects)
-    const productOptions = product.options || { sizes: [], colors: [] };
+    const productOptions = product.options || { sizes: [], colors: [], addons: [] };
     const normalizedSizes = (productOptions.sizes || []).map((size: any) => {
       if (typeof size === 'string') {
         return { name: size, price_type: 'base', price_value: null };
       }
       return size;
     });
-    setOptions({ sizes: normalizedSizes, colors: productOptions.colors || [] });
+    setOptions({ 
+      sizes: normalizedSizes, 
+      colors: productOptions.colors || [],
+      addons: productOptions.addons || []
+    });
     setOpen(true);
   };
 
@@ -506,6 +520,65 @@ const AdminProducts = () => {
                     </span>
                   ))}
                 </div>
+              </div>
+
+              {/* Add-ons Section */}
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <Label className="text-base font-semibold mb-3 block">الإضافات (مثل: إضافة بطاطا، صوص إضافي)</Label>
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  <Input
+                    placeholder="اسم الإضافة"
+                    value={newAddonName}
+                    onChange={(e) => setNewAddonName(e.target.value)}
+                    className="flex-1 min-w-[150px]"
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="السعر الإضافي"
+                    value={newAddonPrice}
+                    onChange={(e) => setNewAddonPrice(e.target.value)}
+                    className="w-[120px]"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (newAddonName.trim()) {
+                        setOptions({
+                          ...options,
+                          addons: [...options.addons, { 
+                            name: newAddonName.trim(), 
+                            price: parseFloat(newAddonPrice) || 0 
+                          }]
+                        });
+                        setNewAddonName('');
+                        setNewAddonPrice('');
+                      }
+                    }}
+                  >
+                    إضافة
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {options.addons.map((addon, i) => (
+                    <span key={i} className="inline-flex items-center gap-2 px-3 py-2 bg-background border rounded-lg">
+                      <span className="font-medium">{addon.name}</span>
+                      <span className="text-xs text-muted-foreground">+{addon.price} ₪</span>
+                      <button
+                        type="button"
+                        onClick={() => setOptions({ ...options, addons: options.addons.filter((_, idx) => idx !== i) })}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                {options.addons.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    أضف إضافات اختيارية للمنتج (مثل: إضافة جبنة، صوص حار، إلخ)
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
