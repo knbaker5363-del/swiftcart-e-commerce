@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedCustomVariants, setSelectedCustomVariants] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
 
   const getColorValue = (color: string) => {
@@ -70,7 +71,17 @@ const ProductDetail = () => {
     price: number;
   }
 
-  const rawOptions = product?.options as { sizes?: (string | SizeOption)[], colors?: string[], addons?: AddOnOption[] } | null;
+  interface CustomVariantOption {
+    value: string;
+    price_addition: number;
+  }
+
+  interface CustomVariant {
+    name: string;
+    options: CustomVariantOption[];
+  }
+
+  const rawOptions = product?.options as { sizes?: (string | SizeOption)[], colors?: string[], addons?: AddOnOption[], customVariants?: CustomVariant[] } | null;
   
   // Normalize sizes to always be SizeOption objects
   const normalizedSizes: SizeOption[] = (rawOptions?.sizes || []).map((size) => {
@@ -83,7 +94,8 @@ const ProductDetail = () => {
   const options = {
     sizes: normalizedSizes,
     colors: rawOptions?.colors || [],
-    addons: rawOptions?.addons || []
+    addons: rawOptions?.addons || [],
+    customVariants: rawOptions?.customVariants || []
   };
 
   const toggleAddon = (addonName: string) => {
@@ -102,12 +114,22 @@ const ProductDetail = () => {
     }, 0);
   };
 
+  // Calculate custom variants total
+  const getCustomVariantsTotal = () => {
+    return Object.entries(selectedCustomVariants).reduce((total, [variantName, selectedValue]) => {
+      const variant = options.customVariants.find(v => v.name === variantName);
+      const option = variant?.options.find(o => o.value === selectedValue);
+      return total + (option?.price_addition || 0);
+    }, 0);
+  };
+
   // Calculate price based on selected size and addons
   const calculatePrice = () => {
     if (!product) return 0;
     const basePrice = product.price;
     const hasDiscount = (product.discount_percentage ?? 0) > 0;
     const addonsTotal = getAddonsTotal();
+    const customVariantsTotal = getCustomVariantsTotal();
     
     if (selectedSize && options.sizes.length > 0) {
       const sizeOption = options.sizes.find(s => s.name === selectedSize);
@@ -119,12 +141,12 @@ const ProductDetail = () => {
           sizePrice = basePrice + sizeOption.price_value;
         }
         const discountedPrice = hasDiscount ? sizePrice * (1 - (product.discount_percentage ?? 0) / 100) : sizePrice;
-        return discountedPrice + addonsTotal;
+        return discountedPrice + addonsTotal + customVariantsTotal;
       }
     }
     
     const discountedBase = hasDiscount ? basePrice * (1 - (product.discount_percentage ?? 0) / 100) : basePrice;
-    return discountedBase + addonsTotal;
+    return discountedBase + addonsTotal + customVariantsTotal;
   };
 
   const getOriginalPrice = () => {
@@ -166,10 +188,11 @@ const ProductDetail = () => {
       return;
     }
 
-    const selectedOptions: Record<string, string | string[]> = {};
+    const selectedOptions: Record<string, string | string[] | Record<string, string>> = {};
     if (selectedSize) selectedOptions.size = selectedSize;
     if (selectedColor) selectedOptions.color = selectedColor;
     if (selectedAddons.length > 0) selectedOptions.addons = selectedAddons;
+    if (Object.keys(selectedCustomVariants).length > 0) selectedOptions.customVariants = selectedCustomVariants;
 
     addItem({
       id: '',
@@ -361,6 +384,35 @@ const ProductDetail = () => {
                       الإضافات المختارة: {selectedAddons.join('، ')} (+{getAddonsTotal()} ₪)
                     </p>
                   )}
+                </div>
+              )}
+
+              {/* Custom Variants Options */}
+              {options.customVariants.length > 0 && (
+                <div className="space-y-4">
+                  {options.customVariants.map((variant, variantIdx) => (
+                    <div key={`${variant.name}-${variantIdx}`}>
+                      <Label className="text-lg font-semibold mb-3 block">{variant.name}</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {variant.options.map((opt, optIdx) => (
+                          <Button
+                            key={`${opt.value}-${optIdx}`}
+                            variant={selectedCustomVariants[variant.name] === opt.value ? "default" : "outline"}
+                            onClick={() => setSelectedCustomVariants(prev => ({
+                              ...prev,
+                              [variant.name]: opt.value
+                            }))}
+                            className="flex items-center gap-2"
+                          >
+                            <span>{opt.value}</span>
+                            {opt.price_addition > 0 && (
+                              <span className="text-xs opacity-80">+{opt.price_addition} ₪</span>
+                            )}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
