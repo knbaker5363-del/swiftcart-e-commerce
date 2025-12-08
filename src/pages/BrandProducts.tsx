@@ -81,20 +81,48 @@ const BrandProducts = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      {/* Header */}
-      <section className="bg-gradient-primary text-primary-foreground py-12">
-        <div className="container">
-          <div className="flex items-center justify-center gap-4 animate-fade-in">
+      {/* Hero Banner with Background */}
+      <section className="relative overflow-hidden">
+        {/* Background Image or Gradient */}
+        <div className="absolute inset-0">
+          {brand?.logo_url ? (
+            <>
+              <div className="w-full h-full bg-gradient-primary" />
+              <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                <img 
+                  src={brand.logo_url} 
+                  alt={brand.name} 
+                  className="w-96 h-96 object-contain"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-primary" />
+          )}
+        </div>
+        
+        {/* Content */}
+        <div className="container relative py-12 md:py-16">
+          <div className="flex items-center gap-4 animate-fade-in">
             {brand?.logo_url ? (
-              <img src={brand.logo_url} alt={brand.name} className="h-16 w-16 object-contain bg-white rounded-lg p-2" />
+              <div className="p-3 bg-white rounded-xl shadow-lg">
+                <img src={brand.logo_url} alt={brand.name} className="h-16 w-16 object-contain" />
+              </div>
             ) : (
-              <Award className="h-12 w-12" />
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                <Award className="h-10 w-10 text-white" />
+              </div>
             )}
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-2">{brand?.name || 'العلامة التجارية'}</h1>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                {brand?.name || 'العلامة التجارية'}
+              </h1>
               {brand?.description && (
-                <p className="text-lg opacity-90">{brand.description}</p>
+                <p className="text-white/80 text-sm md:text-base mb-1">{brand.description}</p>
               )}
+              <p className="text-white/70 text-sm">
+                {products?.length || 0} منتج متوفر
+              </p>
             </div>
           </div>
         </div>
