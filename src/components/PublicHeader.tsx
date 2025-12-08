@@ -55,7 +55,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const logoShapeClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-lg';
 
   // Logo component for header
-  const HeaderLogo = () => <Link to="/" className={`flex items-center gap-2 shrink-0 ${headerLogoPosition === 'center' ? 'absolute left-1/2 -translate-x-1/2' : 'me-auto'}`}>
+  const HeaderLogo = () => <Link to="/" className="flex items-center gap-2 shrink-0">
       {settings?.logo_url ? <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
           <img src={settings.logo_url} alt={settings.store_name || 'شعار المتجر'} className="w-full h-full object-cover" />
         </div> : <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
@@ -67,13 +67,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         {settings?.store_name || 'متجري'}
       </h1>
     </Link>;
+
   return <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between relative">
-        {/* Categories button - on the left (mobile only) */}
-        <div className="flex items-center gap-1">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Left side - Categories button (mobile only) */}
+        <div className="flex items-center gap-1 sm:hidden">
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="sm:hidden">
+              <Button variant="ghost" size="icon">
                 <List className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -96,10 +97,11 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         </div>
 
         {/* Logo - positioned based on settings */}
-        {headerLogoPosition === 'right' && <HeaderLogo />}
-        {headerLogoPosition === 'center' && <HeaderLogo />}
+        <div className={`flex-1 flex ${headerLogoPosition === 'center' ? 'justify-center' : headerLogoPosition === 'left' ? 'justify-end' : 'justify-start'}`}>
+          <HeaderLogo />
+        </div>
         
-        {/* Cart, Favorites, and Admin button - on the right */}
+        {/* Right side - Cart, Favorites, and Admin button */}
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Admin/User button */}
           {user ? <DropdownMenu>
