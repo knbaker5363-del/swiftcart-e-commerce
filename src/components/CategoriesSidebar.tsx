@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { getIconByName } from '@/lib/categoryIcons';
 import { Grid3X3, Package, Sparkles, Percent, Clock, Tags } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSettings } from '@/contexts/SettingsContext';
+import { FaWhatsapp, FaInstagram, FaFacebookF, FaSnapchatGhost, FaTiktok } from 'react-icons/fa';
 
 interface Category {
   id: string;
@@ -38,6 +40,7 @@ interface CategoriesSidebarProps {
 }
 
 const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
+  const { settings } = useSettings();
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
 
@@ -162,6 +165,67 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
                   >
                     عرض الكل ({brands.length})
                   </Link>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Social Media Links */}
+          {((settings as any)?.social_whatsapp || (settings as any)?.social_instagram || 
+            (settings as any)?.social_facebook || (settings as any)?.social_snapchat || 
+            (settings as any)?.social_tiktok) && (
+            <>
+              <div className="my-3 border-t border-border" />
+              <div className="flex items-center justify-center gap-3 py-3">
+                {(settings as any)?.social_whatsapp && (
+                  <a
+                    href={`https://wa.me/${(settings as any).social_whatsapp}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white hover:scale-110 transition-transform"
+                  >
+                    <FaWhatsapp className="h-4 w-4" />
+                  </a>
+                )}
+                {(settings as any)?.social_instagram && (
+                  <a
+                    href={`https://instagram.com/${(settings as any).social_instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-white hover:scale-110 transition-transform"
+                  >
+                    <FaInstagram className="h-4 w-4" />
+                  </a>
+                )}
+                {(settings as any)?.social_facebook && (
+                  <a
+                    href={`https://facebook.com/${(settings as any).social_facebook}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white hover:scale-110 transition-transform"
+                  >
+                    <FaFacebookF className="h-4 w-4" />
+                  </a>
+                )}
+                {(settings as any)?.social_snapchat && (
+                  <a
+                    href={`https://snapchat.com/add/${(settings as any).social_snapchat}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center text-black hover:scale-110 transition-transform"
+                  >
+                    <FaSnapchatGhost className="h-4 w-4" />
+                  </a>
+                )}
+                {(settings as any)?.social_tiktok && (
+                  <a
+                    href={`https://tiktok.com/@${(settings as any).social_tiktok}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white hover:scale-110 transition-transform"
+                  >
+                    <FaTiktok className="h-4 w-4" />
+                  </a>
                 )}
               </div>
             </>
