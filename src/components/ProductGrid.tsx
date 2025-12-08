@@ -6,6 +6,7 @@ import CartButton from '@/components/CartButton';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { useVisualEffects } from '@/hooks/useVisualEffects';
 
 interface ProductGridProps {
   products: any[];
@@ -16,6 +17,7 @@ interface ProductGridProps {
 const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridProps) => {
   const { settings } = useSettings();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { effects, getProductCardClasses, getHeartClasses } = useVisualEffects();
 
   // Get card display settings
   const cardSize = (settings as any)?.card_size || 'medium';
@@ -84,11 +86,15 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
           ? product.price * (1 - (product.discount_percentage ?? 0) / 100)
           : product.price;
 
+        const cardClasses = getProductCardClasses();
+        const WrapperComponent = effects.scroll_reveal ? ScrollReveal : 'div' as any;
+        const wrapperProps = effects.scroll_reveal ? { direction: "up" as const, delay: index * 50, duration: 400 } : {};
+
         return (
-          <ScrollReveal key={product.id} direction="up" delay={index * 50} duration={400}>
+          <WrapperComponent key={product.id} {...wrapperProps}>
             <Card
-              className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full product-card-pro relative shine-effect"
-          >
+              className={`overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full relative ${cardClasses} ${effects.button_shine ? 'shine-effect' : ''}`}
+            >
             <div className="relative flex-shrink-0">
               <div onClick={() => onProductClick(product)} className="cursor-pointer">
                 <ProductImageCarousel
@@ -109,7 +115,7 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
                 <Heart
                   className={`h-4 w-4 ${
                     isFavorite(product.id)
-                      ? 'fill-destructive text-destructive'
+                      ? `fill-destructive text-destructive ${effects.heart_beat ? 'animate-heartbeat' : ''}`
                       : 'text-foreground'
                   }`}
                 />
@@ -186,7 +192,7 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
               </div>
             </div>
           </Card>
-          </ScrollReveal>
+          </WrapperComponent>
         );
       })}
     </div>
