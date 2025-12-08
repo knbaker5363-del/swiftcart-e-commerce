@@ -238,40 +238,6 @@ const CategoriesSlider = ({
       </div>
     </div>
   );
-  return (
-    <div className="relative group/slider">
-      {/* Scroll Left Button */}
-      <Button
-        variant="secondary"
-        size="icon"
-        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover/slider:opacity-100 transition-opacity"
-        onClick={() => scroll('left')}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-
-      {/* Scroll Right Button */}
-      <Button
-        variant="secondary"
-        size="icon"
-        className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover/slider:opacity-100 transition-opacity"
-        onClick={() => scroll('right')}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-
-      {/* Categories Container */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1 scroll-smooth touch-pan-x"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-      >
-        {categories?.map((cat) => renderCategory(cat))}
-      </div>
-    </div>
-  );
 };
 
 export default CategoriesSlider;
