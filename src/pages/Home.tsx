@@ -152,9 +152,7 @@ const Home = () => {
           {/* Desktop Sidebar */}
           {isSidebarMode && (
             <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-20 h-[calc(100vh-100px)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-1">
-                <CategoriesSidebar />
-              </div>
+              <CategoriesSidebar />
             </aside>
           )}
 
