@@ -774,12 +774,92 @@ const AdminCategories = () => {
                   <div className="mt-3 flex gap-2">
                     <div className="w-12 bg-primary/10 rounded-lg p-1 space-y-1">
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-2 bg-primary/30 rounded" />
+                        <div key={i} className={`h-2 ${displayConfig.shape === 'circle' ? 'rounded-full' : 'rounded'} bg-primary/30`} />
                       ))}
                     </div>
                     <div className="flex-1 bg-muted/50 rounded-lg" />
                   </div>
                 </div>
+                
+                {/* تخصيصات القائمة الجانبية */}
+                {displayConfig.style === 'sidebar' && (
+                  <div className="border-t border-primary/20 p-4 space-y-4 bg-muted/30">
+                    {/* الشكل */}
+                    <div>
+                      <Label className="text-sm mb-2 block">الشكل</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={displayConfig.shape === 'square' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, shape: 'square' })); }}
+                          className="flex-1"
+                        >
+                          <Square className="h-4 w-4 ml-1" />
+                          مربع
+                        </Button>
+                        <Button
+                          variant={displayConfig.shape === 'circle' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, shape: 'circle' })); }}
+                          className="flex-1"
+                        >
+                          <Circle className="h-4 w-4 ml-1" />
+                          دائرة
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* نوع المحتوى */}
+                    <div>
+                      <Label className="text-sm mb-2 block">المحتوى</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={displayConfig.displayType === 'image' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, displayType: 'image' })); }}
+                          className="flex-1"
+                        >
+                          <ImageIcon className="h-4 w-4 ml-1" />
+                          صورة
+                        </Button>
+                        <Button
+                          variant={displayConfig.displayType === 'icon' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, displayType: 'icon' })); }}
+                          className="flex-1"
+                        >
+                          <Sparkles className="h-4 w-4 ml-1" />
+                          أيقونة
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* الحجم */}
+                    <div>
+                      <Label className="text-sm mb-2 block">الحجم</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={displayConfig.size === 'large' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, size: 'large' })); }}
+                          className="flex-1"
+                        >
+                          <Maximize2 className="h-4 w-4 ml-1" />
+                          كبير
+                        </Button>
+                        <Button
+                          variant={displayConfig.size === 'small' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, size: 'small' })); }}
+                          className="flex-1"
+                        >
+                          <Minimize2 className="h-4 w-4 ml-1" />
+                          صغير
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
