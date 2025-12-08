@@ -56,15 +56,30 @@ const AllProducts = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      {/* Header */}
-      <section className="bg-gradient-primary text-primary-foreground py-12">
-        <div className="container">
-          <div className="flex items-center justify-center gap-4 animate-fade-in">
-            <Package className="h-12 w-12" />
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-2">كافة المنتجات</h1>
-              <p className="text-lg opacity-90">
-                تصفح جميع منتجاتنا المتاحة
+      {/* Hero Banner */}
+      <section className="relative overflow-hidden">
+        {/* Background - Dark/Black with gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        
+        {/* Decorative pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+        </div>
+        
+        {/* Content */}
+        <div className="container relative py-12 md:py-16">
+          <div className="flex flex-col items-center justify-center gap-4 animate-fade-in text-center">
+            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
+              <Package className="h-12 w-12 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                كافة المنتجات
+              </h1>
+              <p className="text-white/70 text-base md:text-lg max-w-md mx-auto">
+                تصفح جميع منتجاتنا المتاحة • {products?.length || 0} منتج
               </p>
             </div>
           </div>
