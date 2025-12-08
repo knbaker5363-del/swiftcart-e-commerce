@@ -31,6 +31,8 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
   useEffect(() => {
     if (secretAccess) {
       localStorage.setItem('admin_access_enabled', 'true');
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('adminAccessChanged'));
     }
   }, [secretAccess]);
 
