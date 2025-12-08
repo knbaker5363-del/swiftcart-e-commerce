@@ -24,6 +24,7 @@ const AdminProducts = () => {
     description: '',
     price: '',
     category_id: '',
+    brand_id: '',
     image_url: '',
     additional_images: [] as string[],
     is_active: true,
@@ -87,6 +88,15 @@ const AdminProducts = () => {
     queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase.from('categories').select('*');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: brands } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('brands').select('*').order('name');
       if (error) throw error;
       return data;
     },
@@ -225,6 +235,7 @@ const AdminProducts = () => {
       ...formData,
       price: parseFloat(formData.price),
       category_id: formData.category_id || null,
+      brand_id: formData.brand_id || null,
       options: options,
       discount_percentage: parseFloat(formData.discount_percentage.toString()) || 0,
       discount_end_date: formData.discount_end_date || null,
@@ -243,6 +254,7 @@ const AdminProducts = () => {
       description: '',
       price: '',
       category_id: '',
+      brand_id: '',
       image_url: '',
       additional_images: [],
       is_active: true,
@@ -268,6 +280,7 @@ const AdminProducts = () => {
       description: product.description || '',
       price: product.price.toString(),
       category_id: product.category_id,
+      brand_id: product.brand_id || '',
       image_url: product.image_url || '',
       additional_images: (product.additional_images as string[]) || [],
       is_active: product.is_active,
@@ -363,6 +376,27 @@ const AdminProducts = () => {
                     <p className="text-xs text-destructive mt-1">التصنيف مطلوب</p>
                   )}
                 </div>
+              </div>
+
+              {/* Brand Selection */}
+              <div>
+                <Label>العلامة التجارية</Label>
+                <Select
+                  value={formData.brand_id}
+                  onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر العلامة التجارية (اختياري)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">بدون علامة تجارية</SelectItem>
+                    {brands?.map((brand) => (
+                      <SelectItem key={brand.id} value={brand.id}>
+                        {brand.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Discount Section */}

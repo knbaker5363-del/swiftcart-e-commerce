@@ -21,6 +21,7 @@ import MyOrders from "./pages/MyOrders";
 import Deals from "./pages/Deals";
 import AllProducts from "./pages/AllProducts";
 import Brands from "./pages/Brands";
+import BrandProducts from "./pages/BrandProducts";
 import Category from "./pages/Category";
 import Auth from "./pages/Auth";
 import Setup from "./pages/Setup";
@@ -80,6 +81,7 @@ const App = () => (
                       <Route path="/deals" element={<Deals />} />
                       <Route path="/products" element={<AllProducts />} />
                       <Route path="/brands" element={<Brands />} />
+                      <Route path="/brand/:id" element={<BrandProducts />} />
                       <Route path="/category/:id" element={<Category />} />
                       <Route path="/auth" element={<Auth />} />
 
