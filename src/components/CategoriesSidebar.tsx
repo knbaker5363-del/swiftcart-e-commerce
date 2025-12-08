@@ -35,6 +35,13 @@ const RenderCategoryIcon = ({
   return <IconComponent className={className} />;
 };
 
+interface CategoryDisplayConfig {
+  style: 'slider' | 'grid' | 'sidebar';
+  shape: 'square' | 'circle';
+  displayType: 'image' | 'icon';
+  size: 'small' | 'large';
+}
+
 interface CategoriesSidebarProps {
   onItemClick?: () => void;
 }
@@ -43,6 +50,26 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
   const { settings } = useSettings();
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+
+  // Parse category display config from settings
+  const getCategoryConfig = (): CategoryDisplayConfig => {
+    try {
+      const parsed = JSON.parse(settings?.category_display_style || '{}');
+      if (typeof parsed === 'object') {
+        return {
+          style: parsed.style || 'sidebar',
+          shape: parsed.shape || 'square',
+          displayType: parsed.displayType || 'image',
+          size: parsed.size || 'large'
+        };
+      }
+    } catch {
+      // fallback
+    }
+    return { style: 'sidebar', shape: 'square', displayType: 'image', size: 'large' };
+  };
+
+  const categoryConfig = getCategoryConfig();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,35 +93,53 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
     <div className="h-full flex flex-col bg-card rounded-xl border shadow-card overflow-hidden">
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-1">
-          {/* Categories */}
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              to={`/category/${category.id}`}
-              onClick={onItemClick}
-              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group"
-            >
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0"
-                style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+          {/* Categories with customizable display */}
+          {categories.map((category) => {
+            const shapeClass = categoryConfig.shape === 'circle' ? 'rounded-full' : 'rounded-lg';
+            const sizeClass = categoryConfig.size === 'large' ? 'w-12 h-12' : 'w-9 h-9';
+            const iconSizeClass = categoryConfig.size === 'large' ? 'h-6 w-6' : 'h-4 w-4';
+            
+            // Determine what to display based on displayType setting
+            const showImage = categoryConfig.displayType === 'image' && category.image_url;
+            const showIcon = categoryConfig.displayType === 'icon' || (!category.image_url && category.icon_name);
+
+            return (
+              <Link
+                key={category.id}
+                to={`/category/${category.id}`}
+                onClick={onItemClick}
+                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group"
               >
-                {category.image_url ? (
-                  <img
-                    src={category.image_url}
-                    alt={category.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : category.icon_name ? (
-                  <RenderCategoryIcon iconName={category.icon_name} className="h-5 w-5 text-primary" />
-                ) : (
-                  <Grid3X3 className="h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-              <span className="font-medium text-sm group-hover:text-primary transition-colors">
-                {category.name}
-              </span>
-            </Link>
-          ))}
+                <div 
+                  className={`${sizeClass} ${shapeClass} flex items-center justify-center overflow-hidden flex-shrink-0`}
+                  style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+                >
+                  {showImage && category.image_url ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className={`w-full h-full object-cover ${shapeClass}`}
+                    />
+                  ) : showIcon && category.icon_name ? (
+                    <RenderCategoryIcon iconName={category.icon_name} className={`${iconSizeClass} text-primary`} />
+                  ) : category.image_url && categoryConfig.displayType !== 'icon' ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className={`w-full h-full object-cover ${shapeClass}`}
+                    />
+                  ) : category.icon_name ? (
+                    <RenderCategoryIcon iconName={category.icon_name} className={`${iconSizeClass} text-primary`} />
+                  ) : (
+                    <Grid3X3 className={`${iconSizeClass} text-muted-foreground`} />
+                  )}
+                </div>
+                <span className="font-medium text-sm group-hover:text-primary transition-colors">
+                  {category.name}
+                </span>
+              </Link>
+            );
+          })}
 
           {/* Divider */}
           <div className="my-3 border-t border-border" />

@@ -122,14 +122,14 @@ const Home = () => {
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
-      {/* Search Bar */}
+      {/* Search Bar - Above My Orders */}
       <section className="py-3 bg-muted/30">
         <div className="container">
           <SearchBar />
         </div>
       </section>
 
-      {/* My Orders Button */}
+      {/* My Orders Button - Below Search */}
       <section className="py-2">
         <div className="container">
           <Link to="/my-orders" className="block">
