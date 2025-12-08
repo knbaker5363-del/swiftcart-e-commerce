@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, MessageCircle, Image, Trash2, Instagram, Send } from 'lucide-react';
+import { Upload, X, MessageCircle, Image, Trash2, Instagram, Send, Settings2, HardDrive, Database, FileImage, RefreshCw } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { compressImageToFile } from '@/lib/imageCompression';
@@ -48,6 +49,14 @@ const AdminSettings = () => {
   const [telegramChatId, setTelegramChatId] = useState('');
   const [telegramBotPassword, setTelegramBotPassword] = useState('');
   const [settingUpWebhook, setSettingUpWebhook] = useState(false);
+  
+  // Storage info
+  const [storageInfo, setStorageInfo] = useState<{
+    totalSize: number;
+    fileCount: number;
+    files: { name: string; size: number; type: string }[];
+  } | null>(null);
+  const [loadingStorage, setLoadingStorage] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -155,6 +164,52 @@ const AdminSettings = () => {
       setSettingUpWebhook(false);
     }
   };
+
+  const fetchStorageInfo = async () => {
+    setLoadingStorage(true);
+    try {
+      const { data: files, error } = await supabase.storage.from('product-images').list('', {
+        limit: 1000,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+      
+      if (error) throw error;
+      
+      let totalSize = 0;
+      const fileDetails = (files || []).map(file => {
+        const size = (file.metadata as any)?.size || 0;
+        totalSize += size;
+        return {
+          name: file.name,
+          size: size,
+          type: file.metadata?.mimetype || 'unknown'
+        };
+      });
+      
+      setStorageInfo({
+        totalSize,
+        fileCount: fileDetails.length,
+        files: fileDetails
+      });
+    } catch (error) {
+      console.error('Error fetching storage info:', error);
+      toast({ title: 'خطأ في جلب معلومات التخزين', variant: 'destructive' });
+    } finally {
+      setLoadingStorage(false);
+    }
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 بايت';
+    const k = 1024;
+    const sizes = ['بايت', 'كيلوبايت', 'ميغابايت', 'غيغابايت'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Free tier limit is 1GB
+  const FREE_TIER_LIMIT = 1 * 1024 * 1024 * 1024; // 1GB in bytes
+  const storagePercentage = storageInfo ? (storageInfo.totalSize / FREE_TIER_LIMIT) * 100 : 0;
 
   const handleSave = async () => {
     try {
@@ -455,6 +510,88 @@ const AdminSettings = () => {
             <Button onClick={handleSetupWebhook} disabled={settingUpWebhook || !telegramBotToken} variant="outline">
               {settingUpWebhook ? 'جاري التفعيل...' : 'تفعيل Webhook'}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* إعدادات متقدمة */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings2 className="h-5 w-5" />
+              إعدادات متقدمة
+            </CardTitle>
+            <CardDescription>معلومات تقنية عن المتجر</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* مساحة التخزين */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="h-5 w-5 text-primary" />
+                  <Label className="text-base font-semibold">مساحة التخزين</Label>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchStorageInfo}
+                  disabled={loadingStorage}
+                >
+                  <RefreshCw className={`h-4 w-4 ml-2 ${loadingStorage ? 'animate-spin' : ''}`} />
+                  {loadingStorage ? 'جاري التحميل...' : 'تحديث'}
+                </Button>
+              </div>
+              
+              {storageInfo ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>المستخدم: {formatBytes(storageInfo.totalSize)}</span>
+                      <span>المتاح: 1 غيغابايت</span>
+                    </div>
+                    <Progress value={storagePercentage} className="h-3" />
+                    <p className="text-xs text-muted-foreground text-center">
+                      {storagePercentage.toFixed(1)}% مستخدم من المساحة المتاحة
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-4 text-center">
+                      <Database className="h-8 w-8 mx-auto mb-2 text-primary" />
+                      <p className="text-2xl font-bold">{storageInfo.fileCount}</p>
+                      <p className="text-sm text-muted-foreground">ملف مخزن</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-4 text-center">
+                      <FileImage className="h-8 w-8 mx-auto mb-2 text-primary" />
+                      <p className="text-2xl font-bold">{formatBytes(storageInfo.totalSize)}</p>
+                      <p className="text-sm text-muted-foreground">حجم الملفات</p>
+                    </div>
+                  </div>
+                  
+                  {/* تفاصيل الملفات */}
+                  <div className="space-y-2">
+                    <Label className="text-sm">آخر الملفات المرفوعة</Label>
+                    <div className="max-h-48 overflow-y-auto space-y-2 border rounded-lg p-2">
+                      {storageInfo.files.slice(0, 10).map((file, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm bg-muted/30 rounded p-2">
+                          <span className="truncate max-w-[200px]" title={file.name}>{file.name}</span>
+                          <span className="text-muted-foreground">{formatBytes(file.size)}</span>
+                        </div>
+                      ))}
+                      {storageInfo.files.length > 10 && (
+                        <p className="text-xs text-muted-foreground text-center py-2">
+                          و {storageInfo.files.length - 10} ملفات أخرى...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <HardDrive className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>اضغط على "تحديث" لعرض معلومات التخزين</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
