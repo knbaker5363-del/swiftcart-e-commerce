@@ -12,11 +12,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift } from 'lucide-react';
+import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { SiTiktok, SiSnapchat } from 'react-icons/si';
 import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
+import { checkOrderRateLimit, recordOrderAttempt } from '@/lib/rateLimiter';
 
 const PALESTINIAN_CITIES = {
   west_bank: [
@@ -268,6 +269,20 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      // Check rate limit before processing order
+      const rateLimit = await checkOrderRateLimit(formData.phone);
+      if (!rateLimit.allowed) {
+        toast({
+          title: 'تم تجاوز الحد المسموح',
+          description: `يمكنك إرسال ${5} طلبات فقط كل ${rateLimit.waitMinutes} دقيقة. يرجى المحاولة لاحقاً.`,
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Record this order attempt
+      await recordOrderAttempt(formData.phone);
       const deliveryCost = deliveryPrices[selectedDelivery];
       const discountAmt = appliedPromo ? (total * appliedPromo.discount) / 100 : 0;
       const totalAfterDisc = total - discountAmt;
