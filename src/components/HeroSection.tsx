@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
+import { AnimatedText } from '@/components/ui/animated-text';
 
 // Snapchat icon component
 const SnapchatIcon = ({ className }: { className?: string }) => (
@@ -173,7 +174,7 @@ const HeroSection = () => {
         <div className={`${cardClass} items-center justify-center text-center`}>
           <LogoComponent size="lg" />
           <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
-            {settings?.store_name || 'متجري'}
+            <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
           </h2>
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
             <MapPin className="h-4 w-4 text-primary" />
@@ -198,7 +199,7 @@ const HeroSection = () => {
             <div className="flex flex-col items-center">
               <LogoComponent size="lg" />
               <h2 className={`text-xl font-bold mt-3 ${storeNameClass}`}>
-                {settings?.store_name || 'متجري'}
+                <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
               </h2>
             </div>
           </div>
@@ -210,9 +211,9 @@ const HeroSection = () => {
     return (
       <div className={`${cardClass} items-center justify-center text-center`}>
         <LogoComponent size="lg" />
-        <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
-          {settings?.store_name || 'متجري'}
-        </h2>
+          <h2 className={`text-2xl font-bold mb-3 mt-4 ${storeNameClass}`}>
+            <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
+          </h2>
         <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
           <MapPin className="h-4 w-4 text-primary" />
           <span>{settings?.location || 'الرياض، المملكة العربية السعودية'}</span>
@@ -247,7 +248,7 @@ const HeroSection = () => {
             )}
           </div>
           <h2 className={`text-lg font-bold ${storeNameClass}`}>
-            {settings?.store_name || 'متجري'}
+            <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-xs">
             <MapPin className="h-3 w-3 text-primary" />
@@ -285,7 +286,7 @@ const HeroSection = () => {
               )}
             </div>
             <h2 className={`text-sm font-bold mt-1 ${storeNameClass}`}>
-              {settings?.store_name || 'متجري'}
+              <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
             </h2>
           </div>
         </div>
@@ -312,7 +313,7 @@ const HeroSection = () => {
         </div>
         <div className="flex-1">
           <h2 className={`text-lg font-bold ${storeNameClass}`}>
-            {settings?.store_name || 'متجري'}
+            <AnimatedText text={settings?.store_name || 'متجري'} type="typewriter" />
           </h2>
           <div className="flex items-center gap-1 text-muted-foreground text-xs">
             <MapPin className="h-3 w-3 text-primary" />
