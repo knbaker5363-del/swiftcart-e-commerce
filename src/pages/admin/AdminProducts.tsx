@@ -837,6 +837,38 @@ const AdminProducts = () => {
                 )}
               </div>
 
+              {/* Stock Management */}
+              <div className="p-4 border rounded-lg bg-muted/30">
+                <Label className="text-base font-semibold mb-3 flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  إدارة المخزون
+                </Label>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.track_stock}
+                      onCheckedChange={(checked) => setFormData({ ...formData, track_stock: checked })}
+                    />
+                    <Label>تتبع المخزون</Label>
+                  </div>
+                  {formData.track_stock && (
+                    <div className="space-y-2">
+                      <Label>الكمية المتوفرة</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={formData.stock_quantity}
+                        onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
+                        placeholder="0"
+                      />
+                      {formData.stock_quantity && parseInt(formData.stock_quantity) < 5 && (
+                        <p className="text-xs text-orange-600">⚠️ الكمية منخفضة</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.is_active}
@@ -851,6 +883,7 @@ const AdminProducts = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search Input */}
