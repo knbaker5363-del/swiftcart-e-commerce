@@ -85,9 +85,8 @@ const App = () => (
                       <Route path="/category/:id" element={<Category />} />
                       <Route path="/auth" element={<Auth />} />
 
-                      {/* Admin Routes */}
-                      <Route path="/admin123/login" element={<AdminLogin secretAccess />} />
-                      <Route path="/admin/login" element={<AdminLogin />} />
+                      {/* Admin Routes - Only accessible via /admin123 */}
+                      <Route path="/admin123" element={<AdminLogin secretAccess />} />
                       <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
                         <Route path="products" element={<AdminProducts />} />
                         <Route path="categories" element={<AdminCategories />} />

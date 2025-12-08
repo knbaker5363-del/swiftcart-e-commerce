@@ -132,7 +132,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
                     تسجيل الخروج
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu> : <Link to="/admin/login">
+              </DropdownMenu> : <Link to="/admin123">
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />
                 </Button>
