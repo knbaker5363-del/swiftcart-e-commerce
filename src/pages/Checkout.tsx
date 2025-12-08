@@ -19,27 +19,74 @@ import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
 import { checkOrderRateLimit, recordOrderAttempt } from '@/lib/rateLimiter';
 
-const PALESTINIAN_CITIES = {
-  west_bank: [
-    'رام الله', 'البيرة', 'نابلس', 'الخليل', 'بيت لحم', 'جنين', 'طولكرم', 'قلقيلية', 
-    'سلفيت', 'أريحا', 'طوباس', 'بيت جالا', 'بيت ساحور', 'دورا', 'يطا', 'الظاهرية',
-    'حلحول', 'سعير', 'بني نعيم', 'قباطية', 'عرابة', 'سيلة الحارثية', 'يعبد', 'برقين',
-    'عنبتا', 'كفر قدوم', 'بيتا', 'حوارة', 'عصيرة الشمالية', 'عزون', 'كفل حارس',
-    'دير استيا', 'بديا', 'الزبابدة', 'طمون'
-  ],
-  jerusalem: [
-    'القدس', 'أبو ديس', 'العيزرية', 'السواحرة', 'صور باهر', 'بيت حنينا', 'شعفاط',
-    'العيسوية', 'سلوان', 'جبل المكبر', 'بيت صفافا'
-  ],
-  inside: [
-    'حيفا', 'الناصرة', 'عكا', 'أم الفحم', 'الطيبة', 'باقة الغربية', 'كفر قاسم',
-    'يافا', 'اللد', 'الرملة', 'شفاعمرو', 'سخنين', 'طمرة', 'كفر كنا', 'عرابة',
-    'الطيرة', 'كفر قرع', 'قلنسوة', 'جت', 'يافة الناصرة', 'المغار', 'طرعان',
-    'كابول', 'دير الأسد', 'بئر المكسور', 'جلجولية', 'الطيبة', 'كفر مندا',
-    'البعنة', 'دير حنا', 'عيلوط', 'ترشيحا', 'المزرعة', 'معليا', 'فسوطة',
-    'حرفيش', 'الجديدة-المكر', 'يركا', 'أبو سنان', 'جسر الزرقاء', 'الفريديس',
-    'عين ماهل', 'ام الفحم', 'البقيعة', 'كسرى-سميع', 'الرينة', 'عرعرة', 'بسمة طبعون'
-  ]
+const CITIES_DATA = {
+  palestine: {
+    label: 'فلسطين 🇵🇸',
+    regions: {
+      west_bank: {
+        label: 'الضفة الغربية',
+        cities: [
+          'رام الله', 'البيرة', 'نابلس', 'الخليل', 'بيت لحم', 'جنين', 'طولكرم', 'قلقيلية', 
+          'سلفيت', 'أريحا', 'طوباس', 'بيت جالا', 'بيت ساحور', 'دورا', 'يطا', 'الظاهرية',
+          'حلحول', 'سعير', 'بني نعيم', 'قباطية', 'عرابة', 'سيلة الحارثية', 'يعبد', 'برقين',
+          'عنبتا', 'كفر قدوم', 'بيتا', 'حوارة', 'عصيرة الشمالية', 'عزون', 'كفل حارس',
+          'دير استيا', 'بديا', 'الزبابدة', 'طمون'
+        ]
+      },
+      jerusalem: {
+        label: 'القدس',
+        cities: [
+          'القدس', 'أبو ديس', 'العيزرية', 'السواحرة', 'صور باهر', 'بيت حنينا', 'شعفاط',
+          'العيسوية', 'سلوان', 'جبل المكبر', 'بيت صفافا'
+        ]
+      },
+      inside: {
+        label: 'الداخل (48)',
+        cities: [
+          'حيفا', 'الناصرة', 'عكا', 'أم الفحم', 'الطيبة', 'باقة الغربية', 'كفر قاسم',
+          'يافا', 'اللد', 'الرملة', 'شفاعمرو', 'سخنين', 'طمرة', 'كفر كنا', 'عرابة',
+          'الطيرة', 'كفر قرع', 'قلنسوة', 'جت', 'يافة الناصرة', 'المغار', 'طرعان',
+          'كابول', 'دير الأسد', 'بئر المكسور', 'جلجولية', 'كفر مندا',
+          'البعنة', 'دير حنا', 'عيلوط', 'ترشيحا', 'المزرعة', 'معليا', 'فسوطة',
+          'حرفيش', 'الجديدة-المكر', 'يركا', 'أبو سنان', 'جسر الزرقاء', 'الفريديس',
+          'عين ماهل', 'البقيعة', 'كسرى-سميع', 'الرينة', 'عرعرة', 'بسمة طبعون'
+        ]
+      }
+    }
+  },
+  egypt: {
+    label: 'مصر 🇪🇬',
+    cities: [
+      'القاهرة', 'الإسكندرية', 'الجيزة', 'شبرا الخيمة', 'بورسعيد', 'السويس', 'المحلة الكبرى',
+      'الأقصر', 'أسوان', 'المنصورة', 'طنطا', 'الفيوم', 'الزقازيق', 'أسيوط', 'دمياط',
+      'الإسماعيلية', 'كفر الشيخ', 'قنا', 'بني سويف', 'سوهاج', 'المنيا', 'شرم الشيخ', 'الغردقة'
+    ]
+  },
+  saudi: {
+    label: 'السعودية 🇸🇦',
+    cities: [
+      'الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'الدمام', 'الخبر', 'الظهران',
+      'الطائف', 'تبوك', 'بريدة', 'خميس مشيط', 'أبها', 'القطيف', 'الجبيل', 'حائل',
+      'نجران', 'الهفوف', 'جيزان', 'ينبع', 'عرعر', 'سكاكا', 'القنفذة', 'رابغ'
+    ]
+  },
+  jordan: {
+    label: 'الأردن 🇯🇴',
+    cities: [
+      'عمان', 'إربد', 'الزرقاء', 'العقبة', 'السلط', 'مادبا', 'الكرك', 'جرش', 'معان',
+      'عجلون', 'الطفيلة', 'الرمثا', 'المفرق'
+    ]
+  },
+  uae: {
+    label: 'الإمارات 🇦🇪',
+    cities: [
+      'دبي', 'أبو ظبي', 'الشارقة', 'عجمان', 'رأس الخيمة', 'الفجيرة', 'أم القيوين', 'العين'
+    ]
+  },
+  other: {
+    label: 'دولة أخرى 🌍',
+    cities: []
+  }
 };
 
 const checkoutSchema = z.object({
@@ -431,59 +478,76 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" dir="rtl">
       <PublicHeader onCartOpen={() => {}} />
       
       <AlertDialog open={showOrderDialog} onOpenChange={(open) => {
         setShowOrderDialog(open);
         if (!open) setDialogStep('copy');
       }}>
-        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl">تفاصيل الطلب</AlertDialogTitle>
+        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-0" dir="rtl">
+          {/* Success Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center text-white">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <MessageCircle className="h-8 w-8" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-bold text-white">
+              ✓ تم حفظ طلبك بنجاح!
+            </AlertDialogTitle>
+          </div>
+          
+          <div className="p-6">
             <AlertDialogDescription asChild>
               <div className="space-y-4 text-right">
-                <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap text-foreground font-arabic text-base leading-relaxed">
+                <p className="text-muted-foreground text-center mb-4">
+                  اضغط على الزر أدناه للتواصل معنا عبر واتساب لإتمام الطلب
+                </p>
+                <div className="bg-muted/50 p-4 rounded-xl whitespace-pre-wrap text-foreground font-arabic text-sm leading-relaxed max-h-[300px] overflow-y-auto border">
                   {orderMessage}
                 </div>
               </div>
             </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 justify-center">
+          </div>
+          
+          <AlertDialogFooter className="p-6 pt-0">
             <AlertDialogAction asChild>
               <Button
                 onClick={handleContactAndFinish}
-                className="gap-2 bg-green-600 hover:bg-green-700"
+                size="lg"
+                className="w-full gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-lg py-6"
               >
-                <MessageCircle className="h-4 w-4" />
-                تواصل معنا
+                <MessageCircle className="h-6 w-6" />
+                تواصل عبر واتساب
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="container py-8 max-w-4xl">
-        <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
+      <div className="container py-8 max-w-5xl">
+        <Button variant="ghost" className="mb-6 hover:bg-muted" onClick={() => navigate(-1)}>
           <ArrowRight className="ml-2 h-4 w-4" />
-          رجوع
+          رجوع للسلة
         </Button>
 
         {/* Settings Loading State */}
         {settingsLoading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">جاري تحميل الإعدادات...</p>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+            <p className="text-muted-foreground text-lg">جاري تحميل الإعدادات...</p>
           </div>
         )}
 
         {/* Settings Error State */}
         {settingsError && !settingsLoading && (
-          <div className="text-center py-12">
-            <div className="bg-destructive/10 text-destructive p-6 rounded-lg max-w-md mx-auto">
-              <p className="font-bold mb-2">خطأ في التحميل</p>
-              <p className="mb-4">{settingsError}</p>
-              <Button onClick={() => window.location.reload()}>
+          <div className="text-center py-16">
+            <div className="bg-destructive/10 text-destructive p-8 rounded-2xl max-w-md mx-auto">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4" />
+              <p className="font-bold text-xl mb-2">خطأ في التحميل</p>
+              <p className="mb-6">{settingsError}</p>
+              <Button size="lg" onClick={() => window.location.reload()}>
                 تحديث الصفحة
               </Button>
             </div>
@@ -492,10 +556,16 @@ const Checkout = () => {
 
         {/* Main Content - only show when settings loaded successfully */}
         {!settingsLoading && !settingsError && (
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Checkout Form */}
-          <div>
-            <h1 className="text-3xl font-bold mb-6">إتمام الطلب</h1>
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Checkout Form - Takes more space */}
+          <div className="lg:col-span-3">
+            <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8 border">
+              <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                إتمام الطلب
+              </h1>
             
             {/* Gift Notification Banner */}
             {activeGiftOffer && giftProducts && giftProducts.length > 0 && (
@@ -578,29 +648,71 @@ const Checkout = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="city">المدينة *</Label>
+                <Label htmlFor="city">المدينة / البلد *</Label>
                 <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
                   <SelectTrigger id="city" className="w-full">
                     <SelectValue placeholder="اختر المدينة" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border-border max-h-[300px]">
+                    {/* Palestine */}
                     <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold">الضفة الغربية</SelectLabel>
-                      {PALESTINIAN_CITIES.west_bank.map((city) => (
+                      <SelectLabel className="text-muted-foreground font-bold text-base">{CITIES_DATA.palestine.label}</SelectLabel>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.west_bank.label}</SelectLabel>
+                      {CITIES_DATA.palestine.regions.west_bank.cities.map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
                     </SelectGroup>
                     <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold">القدس</SelectLabel>
-                      {PALESTINIAN_CITIES.jerusalem.map((city) => (
+                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.jerusalem.label}</SelectLabel>
+                      {CITIES_DATA.palestine.regions.jerusalem.cities.map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
                     </SelectGroup>
                     <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold">الداخل (48)</SelectLabel>
-                      {PALESTINIAN_CITIES.inside.map((city) => (
+                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.inside.label}</SelectLabel>
+                      {CITIES_DATA.palestine.regions.inside.cities.map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
+                    </SelectGroup>
+                    
+                    {/* Egypt */}
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.egypt.label}</SelectLabel>
+                      {CITIES_DATA.egypt.cities.map((city) => (
+                        <SelectItem key={`eg-${city}`} value={`مصر - ${city}`}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    
+                    {/* Saudi Arabia */}
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.saudi.label}</SelectLabel>
+                      {CITIES_DATA.saudi.cities.map((city) => (
+                        <SelectItem key={`sa-${city}`} value={`السعودية - ${city}`}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    
+                    {/* Jordan */}
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.jordan.label}</SelectLabel>
+                      {CITIES_DATA.jordan.cities.map((city) => (
+                        <SelectItem key={`jo-${city}`} value={`الأردن - ${city}`}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    
+                    {/* UAE */}
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.uae.label}</SelectLabel>
+                      {CITIES_DATA.uae.cities.map((city) => (
+                        <SelectItem key={`ae-${city}`} value={`الإمارات - ${city}`}>{city}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                    
+                    {/* Other */}
+                    <SelectGroup>
+                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.other.label}</SelectLabel>
+                      <SelectItem value="دولة أخرى">أخرى (سأكتب في العنوان)</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -773,50 +885,75 @@ const Checkout = () => {
                 )}
               </div>
             </form>
+            </div>
           </div>
 
-          {/* Order Summary */}
-          <div>
-            <h2 className="text-2xl font-bold mb-4">ملخص الطلب</h2>
-            <Card className="p-6 shadow-card bg-gradient-card">
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm pb-2 border-b">
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-muted-foreground">
-                        {item.selected_options.size && `مقاس: ${item.selected_options.size}`}
-                        {item.selected_options.color && ` • لون: ${item.selected_options.color}`}
+          {/* Order Summary - Sticky on desktop */}
+          <div className="lg:col-span-2">
+            <div className="lg:sticky lg:top-24">
+              <div className="bg-card rounded-2xl shadow-lg p-6 border">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Gift className="h-5 w-5 text-primary" />
+                  ملخص الطلب
+                </h2>
+                
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0">
+                      {item.image_url && (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name}
+                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.selected_options.size && `${item.selected_options.size}`}
+                          {item.selected_options.size && item.selected_options.color && ' • '}
+                          {item.selected_options.color && `${item.selected_options.color}`}
+                          {' × '}{item.quantity}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-sm whitespace-nowrap">
+                        {(item.price * item.quantity).toFixed(2)} ₪
                       </p>
-                      <p className="text-muted-foreground">الكمية: {item.quantity}</p>
                     </div>
-                    <p className="font-medium">
-                      {(item.price * item.quantity).toFixed(2)} ₪
-                    </p>
-                  </div>
-                ))}
-                <div className="space-y-2 pt-4 border-t">
+                  ))}
+                </div>
+                
+                <div className="space-y-2 pt-4 mt-4 border-t">
                   <div className="flex justify-between text-sm">
-                    <span>المجموع الفرعي:</span>
+                    <span className="text-muted-foreground">المجموع الفرعي</span>
                     <span>{total.toFixed(2)} ₪</span>
                   </div>
                   {appliedPromo && (
                     <div className="flex justify-between text-sm text-green-600">
-                      <span>الخصم ({appliedPromo.discount}%):</span>
+                      <span>الخصم ({appliedPromo.discount}%)</span>
                       <span>-{discountAmount.toFixed(2)} ₪</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
-                    <span>التوصيل:</span>
+                    <span className="text-muted-foreground">التوصيل</span>
                     <span>{deliveryPrices[selectedDelivery].toFixed(2)} ₪</span>
                   </div>
                 </div>
-                <div className="flex justify-between text-xl font-bold pt-4 border-t-2">
-                  <span>المجموع الكلي:</span>
-                  <span className="text-primary">{(totalAfterDiscount + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
+                
+                <div className="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-primary/20">
+                  <span>المجموع الكلي</span>
+                  <span className="text-primary text-xl">{(totalAfterDiscount + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
+                </div>
+                
+                {/* Secure checkout badge */}
+                <div className="mt-4 pt-4 border-t text-center">
+                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                    <span className="inline-block w-4 h-4">🔒</span>
+                    طلب آمن ومحمي
+                  </p>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
         )}
