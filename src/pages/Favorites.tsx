@@ -3,23 +3,27 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import ProductQuickView from '@/components/ProductQuickView';
+import ProductGrid from '@/components/ProductGrid';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Favorites = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { favorites } = useFavorites();
   const navigate = useNavigate();
+  const { settings } = useSettings();
 
-  // Helper function to convert color names to hex values
+  // Get card display settings for skeleton grid
+  const cardsPerRowMobile = (settings as any)?.cards_per_row_mobile || 2;
+  const cardsPerRowDesktop = (settings as any)?.cards_per_row_desktop || 4;
+
   const getColorValue = (colorName: string): string => {
     const colorMap: { [key: string]: string } = {
       'أحمر': '#ef4444',
@@ -59,12 +63,6 @@ const Favorites = () => {
     enabled: favorites.length > 0,
   });
 
-  const handleToggleFavorite = (e: React.MouseEvent, productId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleFavorite(productId);
-  };
-
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
@@ -92,90 +90,24 @@ const Favorites = () => {
               تصفح المنتجات
             </Button>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
-            {isLoading ? (
-              // Loading skeletons
-              Array.from({ length: favorites.length }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-64 bg-gray-200 rounded-t-lg" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-6 bg-gray-200 rounded w-1/2" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              products?.map((product) => {
-                const options = product.options as any;
-                const additionalImages = (product.additional_images as string[]) || [];
-                const discount = product.discount_percentage || 0;
-                const hasDiscount = discount > 0;
-                const originalPrice = hasDiscount ? product.price / (1 - discount / 100) : product.price;
-
-                return (
-                  <div key={product.id} onClick={() => handleProductClick(product)} className="cursor-pointer">
-                    <Card className="overflow-hidden bg-card shadow-card hover:shadow-card-hover transition-all duration-300 group relative h-full flex flex-col text-xs">
-                      {/* Discount Badge */}
-                      {hasDiscount && (
-                        <Badge className="absolute top-2 right-2 z-10 bg-destructive text-destructive-foreground text-[10px] px-1.5">
-                          -{discount}%
-                        </Badge>
-                      )}
-
-                      {/* Favorite Icon */}
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, product.id)}
-                        className="absolute top-2 left-2 z-10 p-1.5 rounded-full bg-destructive hover:bg-destructive/90 shadow-md transition-all"
-                      >
-                        <Heart className="w-3.5 h-3.5 text-white fill-white" />
-                      </button>
-
-                      {/* Product Image */}
-                      <ProductImageCarousel
-                        mainImage={product.image_url || ''}
-                        additionalImages={additionalImages}
-                        productName={product.name}
-                      />
-
-                      {/* Product Info */}
-                      <div className="p-2 flex flex-col flex-grow text-center">
-                        <h3 className="font-semibold text-sm line-clamp-2 mb-1">
-                          {product.name}
-                        </h3>
-
-                        <div className="flex items-center justify-center gap-1.5 mb-1">
-                          <span className="text-sm font-bold text-primary">
-                            {product.price.toFixed(0)} ₪
-                          </span>
-                          {hasDiscount && (
-                            <span className="text-[10px] text-muted-foreground line-through">
-                              {originalPrice.toFixed(0)} ₪
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Colors */}
-                        {options?.colors && Array.isArray(options.colors) && options.colors.length > 0 && (
-                          <div className="flex flex-wrap justify-center gap-1 mt-auto">
-                            {options.colors.slice(0, 4).map((color: string, idx: number) => (
-                              <div
-                                key={idx}
-                                className="w-4 h-4 rounded-full border border-border"
-                                style={{ backgroundColor: getColorValue(color) }}
-                                title={color}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </Card>
-                  </div>
-                );
-              })
-            )}
+        ) : isLoading ? (
+          <div 
+            className="grid gap-2 md:gap-3"
+            style={{ 
+              gridTemplateColumns: `repeat(${cardsPerRowMobile}, 1fr)` 
+            }}
+          >
+            {Array.from({ length: favorites.length }).map((_, i) => (
+              <Skeleton key={i} className="h-64 rounded-lg" />
+            ))}
           </div>
-        )}
+        ) : products && products.length > 0 ? (
+          <ProductGrid
+            products={products}
+            onProductClick={handleProductClick}
+            getColorValue={getColorValue}
+          />
+        ) : null}
       </div>
 
       <ProductQuickView

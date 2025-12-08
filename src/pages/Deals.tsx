@@ -3,26 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ShoppingCart, Tag } from 'lucide-react';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel';
-import { useFavorites } from '@/contexts/FavoritesContext';
-import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/hooks/use-toast';
+import { Tag } from 'lucide-react';
 import ProductQuickView from '@/components/ProductQuickView';
 import { useSettings } from '@/contexts/SettingsContext';
+import ProductGrid from '@/components/ProductGrid';
 
 const Deals = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const { toggleFavorite, isFavorite } = useFavorites();
-  const { addItem } = useCart();
-  const { toast } = useToast();
   const { settings } = useSettings();
   const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
 
@@ -65,10 +57,6 @@ const Deals = () => {
     setQuickViewOpen(true);
   };
 
-  const calculateDiscountedPrice = (price: number, discount: number) => {
-    return price - (price * discount / 100);
-  };
-
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
@@ -76,7 +64,6 @@ const Deals = () => {
 
       {/* Hero Banner */}
       <section className="relative overflow-hidden">
-        {/* Background - Dynamic color from settings */}
         <div className="absolute inset-0" style={{ backgroundColor: heroBannerColor }} />
         
         {/* Decorative pattern overlay */}
@@ -86,7 +73,6 @@ const Deals = () => {
           }} />
         </div>
         
-        {/* Content */}
         <div className="container relative py-12 md:py-16">
           <div className="flex flex-col items-center justify-center gap-4 animate-fade-in text-center">
             <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
@@ -114,115 +100,11 @@ const Deals = () => {
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
-              {products.map((product) => {
-                const mainImage = product.image_url || '';
-                const additionalImages = Array.isArray(product.additional_images)
-                  ? (product.additional_images.filter((img): img is string => typeof img === 'string'))
-                  : [];
-                const discountedPrice = calculateDiscountedPrice(
-                  product.price,
-                  product.discount_percentage
-                );
-                const options = product.options as { sizes?: string[], colors?: string[] } | null;
-
-                return (
-                  <Card
-                    key={product.id}
-                    className="group overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col"
-                  >
-                    {/* Category Header */}
-                    {product.categories && (
-                      <div className="bg-muted py-1.5 text-center">
-                        <span className="text-xs font-medium text-muted-foreground">{product.categories.name}</span>
-                      </div>
-                    )}
-
-                    <div className="relative">
-                      <div onClick={() => handleProductClick(product)} className="cursor-pointer">
-                        <ProductImageCarousel
-                          mainImage={mainImage}
-                          additionalImages={additionalImages}
-                          productName={product.name}
-                        />
-                      </div>
-                      
-                      {/* Discount Badge */}
-                      <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs px-2">
-                        -{product.discount_percentage}%
-                      </Badge>
-
-                      {/* Favorite Button */}
-                      <button
-                        onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-background rounded-full transition-colors"
-                      >
-                        <Heart
-                          className={`h-4 w-4 ${
-                            isFavorite(product.id)
-                              ? 'fill-red-500 text-red-500'
-                              : 'text-foreground'
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    <div className="p-3 flex flex-col flex-grow text-center">
-                      {/* Price */}
-                      <div className="flex items-center justify-center gap-2 mb-1">
-                        <span className="text-xs text-muted-foreground line-through">{product.price.toFixed(0)} ₪</span>
-                        <span className="text-base font-bold text-primary">{discountedPrice.toFixed(0)} ₪</span>
-                      </div>
-
-                      {/* Product Name */}
-                      <div onClick={() => handleProductClick(product)} className="cursor-pointer mb-2">
-                        <h3 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
-                      </div>
-
-                      {/* Sizes */}
-                      {options?.sizes && options.sizes.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-1 mb-2">
-                          {options.sizes.map((size: any, idx: number) => {
-                            const sizeName = typeof size === 'string' ? size : size.name;
-                            return (
-                              <span key={idx} className="text-[10px] px-2 py-0.5 border border-border rounded-md bg-background">
-                                {sizeName}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Colors */}
-                      {options?.colors && options.colors.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-1 mb-2">
-                          {options.colors.map((color, idx) => (
-                            <div
-                              key={idx}
-                              className="w-5 h-5 rounded border border-border"
-                              style={{ backgroundColor: getColorValue(color) }}
-                              title={color}
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Add to Cart Button */}
-                      <Button
-                        onClick={() => handleProductClick(product)}
-                        className="w-auto px-6 mx-auto mt-auto"
-                        size="sm"
-                        variant="secondary"
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+            <ProductGrid
+              products={products}
+              onProductClick={handleProductClick}
+              getColorValue={getColorValue}
+            />
           ) : (
             <div className="text-center py-20">
               <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
