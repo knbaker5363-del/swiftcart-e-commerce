@@ -449,6 +449,9 @@ export type Database = {
           background_pattern: string | null
           background_style: string | null
           banner_images: Json | null
+          card_size: string | null
+          cards_per_row_desktop: number | null
+          cards_per_row_mobile: number | null
           cart_button_style: string | null
           cart_button_text: string | null
           cart_icon_style: string | null
@@ -495,6 +498,9 @@ export type Database = {
           background_pattern?: string | null
           background_style?: string | null
           banner_images?: Json | null
+          card_size?: string | null
+          cards_per_row_desktop?: number | null
+          cards_per_row_mobile?: number | null
           cart_button_style?: string | null
           cart_button_text?: string | null
           cart_icon_style?: string | null
@@ -541,6 +547,9 @@ export type Database = {
           background_pattern?: string | null
           background_style?: string | null
           banner_images?: Json | null
+          card_size?: string | null
+          cards_per_row_desktop?: number | null
+          cards_per_row_mobile?: number | null
           cart_button_style?: string | null
           cart_button_text?: string | null
           cart_icon_style?: string | null

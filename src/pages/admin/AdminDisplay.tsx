@@ -126,6 +126,11 @@ const AdminDisplay = () => {
   const [storeNameBlack, setStoreNameBlack] = useState(false);
   const [heroBannerColor, setHeroBannerColor] = useState('#000000');
 
+  // Card display settings
+  const [cardSize, setCardSize] = useState('medium');
+  const [cardsPerRowMobile, setCardsPerRowMobile] = useState(2);
+  const [cardsPerRowDesktop, setCardsPerRowDesktop] = useState(4);
+
   // Load settings
   useEffect(() => {
     if (settings) {
@@ -147,6 +152,9 @@ const AdminDisplay = () => {
       setShowImageBorder((settings as any)?.show_image_border !== false);
       setStoreNameBlack((settings as any)?.store_name_black || false);
       setHeroBannerColor((settings as any)?.hero_banner_color || '#000000');
+      setCardSize((settings as any)?.card_size || 'medium');
+      setCardsPerRowMobile((settings as any)?.cards_per_row_mobile || 2);
+      setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
     }
   }, [settings]);
 
@@ -204,6 +212,9 @@ const AdminDisplay = () => {
           show_image_border: showImageBorder,
           store_name_black: storeNameBlack,
           hero_banner_color: heroBannerColor,
+          card_size: cardSize,
+          cards_per_row_mobile: cardsPerRowMobile,
+          cards_per_row_desktop: cardsPerRowDesktop,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -766,6 +777,115 @@ const AdminDisplay = () => {
                 {cartButtonText || ''}
               </Button>
               <span className="text-muted-foreground">← هكذا سيظهر زر السلة</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Card Display Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            عرض البطاقات
+          </CardTitle>
+          <CardDescription>تخصيص حجم بطاقات المنتجات وعددها في كل صف</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Card Size */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">حجم البطاقة</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'small', name: 'صغير', desc: 'بطاقات صغيرة ومدمجة' },
+                { id: 'medium', name: 'متوسط', desc: 'الحجم الافتراضي' },
+                { id: 'large', name: 'كبير', desc: 'بطاقات كبيرة وواضحة' },
+              ].map((size) => (
+                <button
+                  key={size.id}
+                  onClick={() => setCardSize(size.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all ${
+                    cardSize === size.id
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-semibold">{size.name}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{size.desc}</div>
+                  {cardSize === size.id && <Check className="h-4 w-4 text-primary mx-auto mt-2" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cards per row - Mobile */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">عدد البطاقات في الصف (الجوال)</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setCardsPerRowMobile(num)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all ${
+                    cardsPerRowMobile === num
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-bold text-2xl">{num}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {num === 1 ? 'بطاقة واحدة' : num === 2 ? 'بطاقتان' : '3 بطاقات'}
+                  </div>
+                  {cardsPerRowMobile === num && <Check className="h-4 w-4 text-primary mx-auto mt-2" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cards per row - Desktop */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">عدد البطاقات في الصف (الكمبيوتر)</Label>
+            <div className="grid grid-cols-4 gap-3">
+              {[2, 3, 4, 5].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setCardsPerRowDesktop(num)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all ${
+                    cardsPerRowDesktop === num
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-bold text-2xl">{num}</div>
+                  <div className="text-xs text-muted-foreground">{num} بطاقات</div>
+                  {cardsPerRowDesktop === num && <Check className="h-4 w-4 text-primary mx-auto mt-2" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Preview Grid */}
+          <div>
+            <Label className="text-sm mb-2 block">معاينة الشبكة:</Label>
+            <div className="p-4 bg-muted rounded-lg">
+              <div 
+                className="grid gap-2"
+                style={{ gridTemplateColumns: `repeat(${cardsPerRowDesktop}, 1fr)` }}
+              >
+                {Array.from({ length: cardsPerRowDesktop * 2 }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`bg-background border rounded-lg flex items-center justify-center ${
+                      cardSize === 'small' ? 'h-20' : cardSize === 'large' ? 'h-40' : 'h-28'
+                    }`}
+                  >
+                    <span className="text-xs text-muted-foreground">منتج</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-3">
+                سطح المكتب: {cardsPerRowDesktop} بطاقات | الجوال: {cardsPerRowMobile} بطاقات | الحجم: {cardSize === 'small' ? 'صغير' : cardSize === 'large' ? 'كبير' : 'متوسط'}
+              </p>
             </div>
           </div>
         </CardContent>
