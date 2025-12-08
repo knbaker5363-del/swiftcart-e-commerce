@@ -276,7 +276,6 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
