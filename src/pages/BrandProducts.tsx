@@ -1,0 +1,240 @@
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { PublicHeader } from '@/components/PublicHeader';
+import { CartDrawer } from '@/components/CartDrawer';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Award, Heart } from 'lucide-react';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import ProductQuickView from '@/components/ProductQuickView';
+import CartButton from '@/components/CartButton';
+import { Button } from '@/components/ui/button';
+
+const BrandProducts = () => {
+  const { id } = useParams<{ id: string }>();
+  const [cartOpen, setCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
+
+  const { data: brand, isLoading: brandLoading } = useQuery({
+    queryKey: ['brand', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: products, isLoading: productsLoading } = useQuery({
+    queryKey: ['brand-products', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, categories(name)')
+        .eq('brand_id', id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const getColorValue = (color: string) => {
+    const colorMap: Record<string, string> = {
+      'أبيض': '#FFFFFF',
+      'أسود': '#000000',
+      'أحمر': '#FF0000',
+      'أزرق': '#0000FF',
+      'أخضر': '#00FF00',
+      'أصفر': '#FFFF00',
+      'برتقالي': '#FFA500',
+      'بني': '#8B4513',
+      'رمادي': '#808080',
+      'زهري': '#FFC0CB',
+      'بنفسجي': '#800080',
+      'كحلي': '#000080',
+      'أزرق غامق': '#00008B'
+    };
+    return color.startsWith('#') ? color : colorMap[color] || color;
+  };
+
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setQuickViewOpen(true);
+  };
+
+  const isLoading = brandLoading || productsLoading;
+
+  return (
+    <div className="min-h-screen bg-background" dir="rtl">
+      <PublicHeader onCartOpen={() => setCartOpen(true)} />
+      <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
+
+      {/* Header */}
+      <section className="bg-gradient-primary text-primary-foreground py-12">
+        <div className="container">
+          <div className="flex items-center justify-center gap-4 animate-fade-in">
+            {brand?.logo_url ? (
+              <img src={brand.logo_url} alt={brand.name} className="h-16 w-16 object-contain bg-white rounded-lg p-2" />
+            ) : (
+              <Award className="h-12 w-12" />
+            )}
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-2">{brand?.name || 'العلامة التجارية'}</h1>
+              {brand?.description && (
+                <p className="text-lg opacity-90">{brand.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Products Grid */}
+      <section className="py-8">
+        <div className="container">
+          <h2 className="text-2xl font-bold mb-6">
+            منتجات {brand?.name} ({products?.length || 0})
+          </h2>
+
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="h-72 rounded-lg" />
+              ))}
+            </div>
+          ) : products && products.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {products.map((product) => {
+                const productOptions = product.options as { sizes?: any[]; colors?: string[] } || {};
+                const hasDiscount = product.discount_percentage && product.discount_percentage > 0;
+                const discountedPrice = hasDiscount
+                  ? product.price * (1 - product.discount_percentage / 100)
+                  : product.price;
+
+                return (
+                  <Card
+                    key={product.id}
+                    className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer flex flex-col"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    <div className="relative aspect-square">
+                      <ProductImageCarousel
+                        mainImage={product.image_url}
+                        additionalImages={(product.additional_images as string[]) || []}
+                        productName={product.name}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(product.id);
+                        }}
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`}
+                        />
+                      </Button>
+                      {hasDiscount && (
+                        <Badge className="absolute top-2 left-2 z-10 bg-destructive text-destructive-foreground">
+                          -{product.discount_percentage}%
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="p-3 flex flex-col flex-1 text-center gap-2">
+                      <h3 className="font-bold text-sm line-clamp-2">{product.name}</h3>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="font-bold text-primary">
+                          {discountedPrice.toFixed(2)} ₪
+                        </span>
+                        {hasDiscount && (
+                          <span className="text-xs text-muted-foreground line-through">
+                            {product.price.toFixed(2)} ₪
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Colors */}
+                      {productOptions.colors && productOptions.colors.length > 0 && (
+                        <div className="flex justify-center gap-1 flex-wrap">
+                          {productOptions.colors.slice(0, 5).map((color, idx) => (
+                            <span
+                              key={idx}
+                              className="w-4 h-4 rounded-full border border-border"
+                              style={{ backgroundColor: getColorValue(color) }}
+                            />
+                          ))}
+                          {productOptions.colors.length > 5 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{productOptions.colors.length - 5}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Sizes */}
+                      {productOptions.sizes && productOptions.sizes.length > 0 && (
+                        <div className="flex justify-center gap-1 flex-wrap">
+                          {productOptions.sizes.slice(0, 4).map((size, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs px-1.5 py-0">
+                              {typeof size === 'string' ? size : size.name}
+                            </Badge>
+                          ))}
+                          {productOptions.sizes.length > 4 && (
+                            <Badge variant="outline" className="text-xs px-1.5 py-0">
+                              +{productOptions.sizes.length - 4}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex justify-center mt-auto">
+                        <CartButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductClick(product);
+                          }}
+                          size="sm"
+                          variant="secondary"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <Award className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-2xl font-bold mb-2">لا توجد منتجات</h3>
+              <p className="text-muted-foreground">
+                لم يتم إضافة منتجات لهذه العلامة التجارية بعد
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Quick View Modal */}
+      <ProductQuickView
+        product={selectedProduct}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+      />
+    </div>
+  );
+};
+
+export default BrandProducts;

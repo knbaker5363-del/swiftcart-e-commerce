@@ -55,24 +55,26 @@ const Brands = () => {
           ) : brands && brands.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
               {brands.map((brand) => (
-                <Card key={brand.id} className="overflow-hidden shadow-card">
-                  <div className="aspect-square p-6 flex items-center justify-center bg-white">
-                    {brand.logo_url ? (
-                      <img
-                        src={brand.logo_url}
-                        alt={brand.name}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary">
-                        {brand.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4 bg-card">
-                    <h3 className="font-bold text-center text-lg">{brand.name}</h3>
-                  </div>
-                </Card>
+                <Link key={brand.id} to={`/brand/${brand.id}`}>
+                  <Card className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer">
+                    <div className="aspect-square p-6 flex items-center justify-center bg-white">
+                      {brand.logo_url ? (
+                        <img
+                          src={brand.logo_url}
+                          alt={brand.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary">
+                          {brand.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4 bg-card">
+                      <h3 className="font-bold text-center text-lg">{brand.name}</h3>
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           ) : (
