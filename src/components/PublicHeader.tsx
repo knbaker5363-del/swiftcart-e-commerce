@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, User, LogOut, Grid3X3, List } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Grid3X3, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -10,9 +10,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import CategoriesSidebar from './CategoriesSidebar';
+
 interface PublicHeaderProps {
   onCartOpen: () => void;
 }
+
 export const PublicHeader: React.FC<PublicHeaderProps> = ({
   onCartOpen
 }) => {
@@ -33,23 +36,13 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const navigate = useNavigate();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
-  const [categories, setCategories] = useState<any[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const {
-        data
-      } = await supabase.from('categories').select('*').order('sort_order', {
-        ascending: true
-      });
-      if (data) setCategories(data);
-    };
-    fetchCategories();
-  }, []);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+  
   const headerLogoPosition = (settings as any)?.header_logo_position || 'right';
   const logoShape = (settings as any)?.logo_shape || 'circle';
   const logoShapeClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-lg';
@@ -71,26 +64,19 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   return <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Left side - Categories button (mobile only) */}
-        <div className="flex items-center gap-1 sm:hidden">
+        <div className="flex items-center gap-1 lg:hidden">
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <List className="h-5 w-5" />
+                <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] bg-background">
-              <SheetHeader>
-                <SheetTitle className="text-right">التصنيفات</SheetTitle>
+            <SheetContent side="right" className="w-[300px] p-0 bg-background">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle className="text-right">القائمة</SheetTitle>
               </SheetHeader>
-              <div className="mt-4 space-y-2">
-                {categories.map(category => <Link key={category.id} to={`/category/${category.id}`} onClick={() => setCategoriesOpen(false)} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors">
-                    {category.image_url ? <img src={category.image_url} alt={category.name} className="w-10 h-10 rounded-lg object-cover" /> : <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
-                  backgroundColor: category.bg_color || 'hsl(var(--muted))'
-                }}>
-                        <Grid3X3 className="h-5 w-5 text-foreground/70" />
-                      </div>}
-                    <span className="font-medium">{category.name}</span>
-                  </Link>)}
+              <div className="h-[calc(100vh-80px)]">
+                <CategoriesSidebar onItemClick={() => setCategoriesOpen(false)} />
               </div>
             </SheetContent>
           </Sheet>
