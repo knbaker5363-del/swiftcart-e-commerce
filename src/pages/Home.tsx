@@ -73,6 +73,7 @@ const Home = () => {
   };
   
   const categoryConfig = getCategoryDisplayConfig();
+  const isSidebarMode = categoryConfig.style === 'sidebar';
   
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -174,20 +175,22 @@ const Home = () => {
       {/* Main Content with Sidebar */}
       <div className="container">
         <div className="flex gap-6">
-          {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)]">
-            <CategoriesSidebar />
-          </aside>
+          {/* Desktop Sidebar - Only show when sidebar mode is enabled */}
+          {isSidebarMode && (
+            <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)]">
+              <CategoriesSidebar />
+            </aside>
+          )}
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-            {/* Categories Slider - Mobile Only */}
-            <section className="py-6 md:py-8 lg:hidden">
+            {/* Categories Slider/Grid - Show when NOT in sidebar mode on desktop, always show on mobile */}
+            <section className={`py-6 md:py-8 ${isSidebarMode ? 'lg:hidden' : ''}`}>
               <h2 className="text-xl font-bold mb-4">التصنيفات</h2>
               <CategoriesSlider 
                 categories={categories} 
                 isLoading={categoriesLoading} 
-                displayStyle={categoryConfig.style}
+                displayStyle={categoryConfig.style === 'sidebar' ? 'slider' : categoryConfig.style}
                 settings={{
                   shape: categoryConfig.shape,
                   displayType: categoryConfig.displayType,
@@ -196,8 +199,8 @@ const Home = () => {
               />
             </section>
 
-            {/* Deals Bar & Brands Button - Mobile Only */}
-            <section className="py-4 md:py-6 lg:hidden">
+            {/* Deals Bar & Brands Button - Show when NOT in sidebar mode on desktop, always show on mobile */}
+            <section className={`py-4 md:py-6 ${isSidebarMode ? 'lg:hidden' : ''}`}>
               <div className="space-y-3">
                 <DealsBar />
                 <BrandsButton visible={showBrandsButton} />
