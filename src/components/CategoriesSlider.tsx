@@ -208,53 +208,99 @@ const CategoriesSlider = ({
     );
   }
 
-  // Sidebar style rendering (slides from right)
+  // Sidebar style rendering (shows 4 categories + "View More" button)
   if (displayStyle === 'sidebar') {
+    const visibleCategories = categories?.slice(0, 4) || [];
+    const hasMore = (categories?.length || 0) > 4;
+
     return (
-      <>
-        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="gap-2 h-12 px-6 text-base">
-              <Menu className="h-5 w-5" />
-              <span>التصنيفات</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-80 p-0">
-            <SheetHeader className="p-4 border-b bg-muted/30">
-              <SheetTitle className="text-right">التصنيفات</SheetTitle>
-            </SheetHeader>
-            <div className="overflow-y-auto h-[calc(100vh-80px)]">
-              {categories?.map((category) => (
-                <Link
-                  key={category.id}
-                  to={`/category/${category.id}`}
-                  onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors border-b border-border/50"
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        {/* Show first 4 categories */}
+        {visibleCategories.map((category) => {
+          const bgColorStyle = category.bg_color ? { backgroundColor: category.bg_color } : {};
+          const showImage = displayType === 'image' && category.image_url;
+          
+          return (
+            <Link
+              key={category.id}
+              to={`/category/${category.id}`}
+              className="flex flex-col items-center gap-2 group"
+            >
+              <div
+                className={`${size === 'small' ? 'w-16 h-16' : 'w-20 h-20'} ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-border flex items-center justify-center`}
+                style={showImage ? {} : (category.bg_color ? bgColorStyle : { backgroundColor: 'hsl(var(--primary) / 0.1)' })}
+              >
+                {showImage ? (
+                  <img
+                    src={category.image_url}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : category.icon_name ? (
+                  <RenderCategoryIcon iconName={category.icon_name} className={`${size === 'small' ? 'h-6 w-6' : 'h-8 w-8'} text-primary`} />
+                ) : (
+                  <Grid3X3 className={`${size === 'small' ? 'h-6 w-6' : 'h-8 w-8'} text-muted-foreground`} />
+                )}
+              </div>
+              <span className={`${size === 'small' ? 'text-xs' : 'text-sm'} font-medium text-center line-clamp-1 max-w-[80px]`}>
+                {category.name}
+              </span>
+            </Link>
+          );
+        })}
+
+        {/* View More Button - opens sidebar */}
+        {hasMore && (
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetTrigger asChild>
+              <button className="flex flex-col items-center gap-2 group cursor-pointer">
+                <div
+                  className={`${size === 'small' ? 'w-16 h-16' : 'w-20 h-20'} ${shapeClass} overflow-hidden transition-all duration-300 group-hover:scale-110 shadow-md border-2 border-primary/50 flex items-center justify-center bg-primary/10`}
                 >
-                  <div 
-                    className={`${size === 'small' ? 'w-10 h-10' : 'w-14 h-14'} ${shapeClass} flex items-center justify-center shrink-0 overflow-hidden shadow-sm`}
-                    style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+                  <Menu className={`${size === 'small' ? 'h-6 w-6' : 'h-8 w-8'} text-primary`} />
+                </div>
+                <span className={`${size === 'small' ? 'text-xs' : 'text-sm'} font-medium text-center text-primary`}>
+                  عرض المزيد
+                </span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 p-0 bg-background">
+              <SheetHeader className="p-4 border-b bg-muted/30">
+                <SheetTitle className="text-right">جميع التصنيفات</SheetTitle>
+              </SheetHeader>
+              <div className="overflow-y-auto h-[calc(100vh-80px)]">
+                {categories?.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.id}`}
+                    onClick={() => setSidebarOpen(false)}
+                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors border-b border-border/50"
                   >
-                    {displayType === 'image' && category.image_url ? (
-                      <img 
-                        src={category.image_url} 
-                        alt={category.name}
-                        className={`w-full h-full object-cover ${shapeClass}`}
-                      />
-                    ) : category.icon_name ? (
-                      <RenderCategoryIcon iconName={category.icon_name} className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
-                    ) : (
-                      <Grid3X3 className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
-                    )}
-                  </div>
-                  <span className="font-medium text-base">{category.name}</span>
-                  <ChevronLeft className="h-5 w-5 mr-auto text-muted-foreground" />
-                </Link>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
-      </>
+                    <div 
+                      className={`${size === 'small' ? 'w-10 h-10' : 'w-14 h-14'} ${shapeClass} flex items-center justify-center shrink-0 overflow-hidden shadow-sm`}
+                      style={{ backgroundColor: category.bg_color || 'hsl(var(--primary) / 0.1)' }}
+                    >
+                      {displayType === 'image' && category.image_url ? (
+                        <img 
+                          src={category.image_url} 
+                          alt={category.name}
+                          className={`w-full h-full object-cover ${shapeClass}`}
+                        />
+                      ) : category.icon_name ? (
+                        <RenderCategoryIcon iconName={category.icon_name} className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
+                      ) : (
+                        <Grid3X3 className={`${size === 'small' ? 'h-5 w-5' : 'h-7 w-7'} text-primary`} />
+                      )}
+                    </div>
+                    <span className="font-medium text-base">{category.name}</span>
+                    <ChevronLeft className="h-5 w-5 mr-auto text-muted-foreground" />
+                  </Link>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+      </div>
     );
   }
 
