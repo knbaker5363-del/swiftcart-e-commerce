@@ -4,16 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings2, HardDrive, Database, FileImage, RefreshCw, Lock, Mail, Eye, EyeOff, Send } from 'lucide-react';
+import { HardDrive, Database, FileImage, RefreshCw, Send, Table } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 
 const AdminAdvancedSettings = () => {
   const { settings, loading } = useSettings();
-  const { user } = useAuth();
   const { toast } = useToast();
   
   // Telegram
@@ -21,6 +18,7 @@ const AdminAdvancedSettings = () => {
   const [telegramChatId, setTelegramChatId] = useState('');
   const [telegramBotPassword, setTelegramBotPassword] = useState('');
   const [settingUpWebhook, setSettingUpWebhook] = useState(false);
+  const [savingTelegram, setSavingTelegram] = useState(false);
   
   // Storage info
   const [storageInfo, setStorageInfo] = useState<{
@@ -30,14 +28,16 @@ const AdminAdvancedSettings = () => {
   } | null>(null);
   const [loadingStorage, setLoadingStorage] = useState(false);
   
-  // Password change
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [updatingEmail, setUpdatingEmail] = useState(false);
-  const [updatingPassword, setUpdatingPassword] = useState(false);
-  const [savingTelegram, setSavingTelegram] = useState(false);
+  // Database info
+  const [dbInfo, setDbInfo] = useState<{
+    products: number;
+    categories: number;
+    brands: number;
+    orders: number;
+    pageViews: number;
+    productViews: number;
+  } | null>(null);
+  const [loadingDb, setLoadingDb] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -123,6 +123,34 @@ const AdminAdvancedSettings = () => {
     }
   };
 
+  const fetchDbInfo = async () => {
+    setLoadingDb(true);
+    try {
+      const [products, categories, brands, orders, pageViews, productViews] = await Promise.all([
+        supabase.from('products').select('id', { count: 'exact', head: true }),
+        supabase.from('categories').select('id', { count: 'exact', head: true }),
+        supabase.from('brands').select('id', { count: 'exact', head: true }),
+        supabase.from('orders').select('id', { count: 'exact', head: true }),
+        supabase.from('page_views').select('id', { count: 'exact', head: true }),
+        supabase.from('product_views').select('id', { count: 'exact', head: true }),
+      ]);
+      
+      setDbInfo({
+        products: products.count || 0,
+        categories: categories.count || 0,
+        brands: brands.count || 0,
+        orders: orders.count || 0,
+        pageViews: pageViews.count || 0,
+        productViews: productViews.count || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching db info:', error);
+      toast({ title: 'خطأ في جلب معلومات قاعدة البيانات', variant: 'destructive' });
+    } finally {
+      setLoadingDb(false);
+    }
+  };
+
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 بايت';
     const k = 1024;
@@ -131,59 +159,22 @@ const AdminAdvancedSettings = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const FREE_TIER_LIMIT = 1 * 1024 * 1024 * 1024;
-  const storagePercentage = storageInfo ? (storageInfo.totalSize / FREE_TIER_LIMIT) * 100 : 0;
-
-  const handleUpdateEmail = async () => {
-    if (!newEmail) {
-      toast({ title: 'يرجى إدخال البريد الإلكتروني الجديد', variant: 'destructive' });
-      return;
-    }
-    
-    setUpdatingEmail(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ email: newEmail });
-      if (error) throw error;
-      toast({ title: 'تم إرسال رابط التأكيد', description: 'يرجى التحقق من بريدك الإلكتروني الجديد' });
-      setNewEmail('');
-    } catch (error: any) {
-      console.error('Email update error:', error);
-      toast({ title: 'خطأ في تحديث البريد الإلكتروني', description: error.message, variant: 'destructive' });
-    } finally {
-      setUpdatingEmail(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    if (!newPassword || !confirmPassword) {
-      toast({ title: 'يرجى ملء جميع الحقول', variant: 'destructive' });
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      toast({ title: 'كلمات المرور غير متطابقة', variant: 'destructive' });
-      return;
-    }
-    
-    if (newPassword.length < 6) {
-      toast({ title: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل', variant: 'destructive' });
-      return;
-    }
-    
-    setUpdatingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      toast({ title: 'تم تحديث كلمة المرور بنجاح' });
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      console.error('Password update error:', error);
-      toast({ title: 'خطأ في تحديث كلمة المرور', description: error.message, variant: 'destructive' });
-    } finally {
-      setUpdatingPassword(false);
-    }
-  };
+  // Storage: 1GB limit
+  const STORAGE_LIMIT = 1 * 1024 * 1024 * 1024;
+  const storagePercentage = storageInfo ? (storageInfo.totalSize / STORAGE_LIMIT) * 100 : 0;
+  
+  // Database: 500MB limit
+  const DB_LIMIT = 500 * 1024 * 1024;
+  // Estimate DB size based on record counts (rough estimate)
+  const estimatedDbSize = dbInfo ? 
+    (dbInfo.products * 2048) + // ~2KB per product
+    (dbInfo.categories * 512) + // ~0.5KB per category
+    (dbInfo.brands * 512) + // ~0.5KB per brand
+    (dbInfo.orders * 1024) + // ~1KB per order
+    (dbInfo.pageViews * 256) + // ~0.25KB per page view
+    (dbInfo.productViews * 256) // ~0.25KB per product view
+    : 0;
+  const dbPercentage = (estimatedDbSize / DB_LIMIT) * 100;
 
   if (loading) {
     return (
@@ -250,98 +241,14 @@ const AdminAdvancedSettings = () => {
           </CardContent>
         </Card>
 
-        {/* إعدادات الحساب */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              إعدادات الحساب
-            </CardTitle>
-            <CardDescription>تغيير البريد الإلكتروني وكلمة المرور للأدمن</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* البريد الإلكتروني */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">البريد الحالي:</span>
-                <span className="font-medium" dir="ltr">{user?.email}</span>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>البريد الإلكتروني الجديد</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    type="email"
-                    value={newEmail} 
-                    onChange={e => setNewEmail(e.target.value)} 
-                    placeholder="example@email.com" 
-                    dir="ltr"
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleUpdateEmail} 
-                    disabled={updatingEmail || !newEmail}
-                    variant="outline"
-                  >
-                    {updatingEmail ? 'جاري...' : 'تحديث'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* كلمة المرور */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>كلمة المرور الجديدة</Label>
-                <div className="relative">
-                  <Input 
-                    type={showNewPassword ? 'text' : 'password'}
-                    value={newPassword} 
-                    onChange={e => setNewPassword(e.target.value)} 
-                    placeholder="كلمة المرور الجديدة" 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>تأكيد كلمة المرور الجديدة</Label>
-                <Input 
-                  type={showNewPassword ? 'text' : 'password'}
-                  value={confirmPassword} 
-                  onChange={e => setConfirmPassword(e.target.value)} 
-                  placeholder="أعد إدخال كلمة المرور" 
-                />
-              </div>
-              
-              <Button 
-                onClick={handleUpdatePassword} 
-                disabled={updatingPassword || !newPassword || !confirmPassword}
-                className="w-full"
-              >
-                {updatingPassword ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* مساحة التخزين */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <HardDrive className="h-5 w-5" />
-              مساحة التخزين
+              مساحة تخزين الصور
             </CardTitle>
-            <CardDescription>معلومات عن المساحة المستخدمة</CardDescription>
+            <CardDescription>معلومات عن مساحة تخزين الصور (1 غيغابايت)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-end">
@@ -371,12 +278,12 @@ const AdminAdvancedSettings = () => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <Database className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <FileImage className="h-8 w-8 mx-auto mb-2 text-primary" />
                     <p className="text-2xl font-bold">{storageInfo.fileCount}</p>
                     <p className="text-sm text-muted-foreground">ملف مخزن</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <FileImage className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <HardDrive className="h-8 w-8 mx-auto mb-2 text-primary" />
                     <p className="text-2xl font-bold">{formatBytes(storageInfo.totalSize)}</p>
                     <p className="text-sm text-muted-foreground">حجم الملفات</p>
                   </div>
@@ -404,6 +311,81 @@ const AdminAdvancedSettings = () => {
               <div className="text-center py-8 text-muted-foreground">
                 <HardDrive className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>اضغط على "تحديث" لعرض معلومات التخزين</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* مساحة قاعدة البيانات */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              مساحة قاعدة البيانات
+            </CardTitle>
+            <CardDescription>معلومات عن حجم البيانات المخزنة (500 ميغابايت)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={fetchDbInfo}
+                disabled={loadingDb}
+              >
+                <RefreshCw className={`h-4 w-4 ml-2 ${loadingDb ? 'animate-spin' : ''}`} />
+                {loadingDb ? 'جاري التحميل...' : 'تحديث'}
+              </Button>
+            </div>
+            
+            {dbInfo ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>المستخدم تقريباً: {formatBytes(estimatedDbSize)}</span>
+                    <span>المتاح: 500 ميغابايت</span>
+                  </div>
+                  <Progress value={Math.min(dbPercentage, 100)} className="h-3" />
+                  <p className="text-xs text-muted-foreground text-center">
+                    {dbPercentage.toFixed(2)}% مستخدم تقريباً من المساحة المتاحة
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.products}</p>
+                    <p className="text-xs text-muted-foreground">منتج</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.categories}</p>
+                    <p className="text-xs text-muted-foreground">تصنيف</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.brands}</p>
+                    <p className="text-xs text-muted-foreground">براند</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.orders}</p>
+                    <p className="text-xs text-muted-foreground">طلب</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.pageViews}</p>
+                    <p className="text-xs text-muted-foreground">زيارة صفحة</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold">{dbInfo.productViews}</p>
+                    <p className="text-xs text-muted-foreground">مشاهدة منتج</p>
+                  </div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground text-center bg-muted/30 rounded p-2">
+                  💡 هذا تقدير تقريبي. المساحة الفعلية قد تختلف قليلاً.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Database className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>اضغط على "تحديث" لعرض معلومات قاعدة البيانات</p>
               </div>
             )}
           </CardContent>
