@@ -158,7 +158,7 @@ const Home = () => {
       {/* My Orders Button - يظهر دائماً */}
       <section className="py-2">
         <div className="container">
-          <Link to="/my-orders" className="block lg:hidden">
+          <Link to="/my-orders" className="block">
             <div className="w-full p-3 rounded-xl bg-black hover:bg-black/90 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
               <div className="flex items-center justify-center gap-2">
                 <Package className="h-5 w-5 text-white" />
