@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Grid3X3 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +15,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface PublicHeaderProps {
   onCartOpen: () => void;
@@ -26,6 +35,19 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
   const navigate = useNavigate();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('categories')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,7 +95,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between relative">
         {/* User/Admin button - on the left */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -81,7 +103,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
+              <DropdownMenuContent align="start" className="bg-background border">
                 <DropdownMenuItem disabled className="text-sm text-muted-foreground">
                   {user.email}
                 </DropdownMenuItem>
@@ -104,6 +126,46 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onCartOpen }) => {
               </Button>
             </Link>
           )}
+          
+          {/* Categories button - mobile only */}
+          <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="sm:hidden">
+                <Grid3X3 className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] bg-background">
+              <SheetHeader>
+                <SheetTitle className="text-right">التصنيفات</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 space-y-2">
+                {categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.id}`}
+                    onClick={() => setCategoriesOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    {category.image_url ? (
+                      <img 
+                        src={category.image_url} 
+                        alt={category.name}
+                        className="w-10 h-10 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: category.bg_color || 'hsl(var(--muted))' }}
+                      >
+                        <Grid3X3 className="h-5 w-5 text-foreground/70" />
+                      </div>
+                    )}
+                    <span className="font-medium">{category.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Logo - positioned based on settings */}
