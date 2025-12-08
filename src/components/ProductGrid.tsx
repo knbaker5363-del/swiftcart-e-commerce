@@ -5,6 +5,7 @@ import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import CartButton from '@/components/CartButton';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { ScrollReveal } from '@/components/ui/scroll-reveal';
 
 interface ProductGridProps {
   products: any[];
@@ -72,7 +73,7 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
 
   return (
     <div className={`grid gap-2 md:gap-3 ${getGridClasses()}`}>
-      {products.map((product: any) => {
+      {products.map((product: any, index: number) => {
         const additionalImages = product.additional_images as string[] | null;
         const options = product.options as {
           sizes?: any[];
@@ -84,9 +85,9 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
           : product.price;
 
         return (
-          <Card
-            key={product.id}
-            className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full"
+          <ScrollReveal key={product.id} direction="up" delay={index * 50} duration={400}>
+            <Card
+              className="overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full product-card-pro relative shine-effect"
           >
             <div className="relative flex-shrink-0">
               <div onClick={() => onProductClick(product)} className="cursor-pointer">
@@ -185,6 +186,7 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
               </div>
             </div>
           </Card>
+          </ScrollReveal>
         );
       })}
     </div>
