@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical, Square, Circle, ImageIcon, Sparkles, Maximize2, Minimize2, PanelRightOpen, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical, Square, Circle, ImageIcon, Sparkles, Maximize2, Minimize2, LayoutGrid } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getIconByName, getAvailableIconNames } from '@/lib/categoryIcons';
@@ -253,7 +253,7 @@ const SortableCategoryItem = ({
 
 // Category Display Settings Type
 interface CategoryDisplayConfig {
-  style: 'slider' | 'dropdown' | 'sidebar';
+  style: 'slider' | 'grid';
   shape: 'square' | 'circle';
   displayType: 'image' | 'icon';
   size: 'small' | 'large';
@@ -298,10 +298,11 @@ const AdminCategories = () => {
       } catch {
         // Legacy string format - convert to new format
         const legacyMap: Record<string, CategoryDisplayConfig['style']> = {
-          'grid': 'slider',
+          'grid': 'grid',
           'list': 'slider',
           'icon-list': 'slider',
-          'dropdown': 'dropdown'
+          'dropdown': 'slider',
+          'sidebar': 'slider'
         };
         setDisplayConfig(prev => ({
           ...prev,
@@ -638,155 +639,41 @@ const AdminCategories = () => {
                 )}
               </div>
               
-              {/* القائمة المنسدلة */}
+              {/* شبكة التصنيفات */}
               <div 
                 className={`rounded-xl border-2 transition-all cursor-pointer ${
-                  displayConfig.style === 'dropdown'
+                  displayConfig.style === 'grid'
                     ? 'border-primary bg-primary/10 shadow-lg'
                     : 'border-border hover:border-primary/50'
                 }`}
-                onClick={() => setDisplayConfig(prev => ({ ...prev, style: 'dropdown' }))}
+                onClick={() => setDisplayConfig(prev => ({ ...prev, style: 'grid' }))}
               >
                 <div className="p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <ChevronDown className="h-5 w-5 text-primary" />
+                      <Grid3X3 className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <span className="font-semibold">قائمة منسدلة</span>
-                      {displayConfig.style === 'dropdown' && <Check className="h-4 w-4 text-primary inline mr-2" />}
+                      <span className="font-semibold">شبكة مربعات</span>
+                      {displayConfig.style === 'grid' && <Check className="h-4 w-4 text-primary inline mr-2" />}
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">زر يفتح قائمة بجميع التصنيفات</p>
+                  <p className="text-xs text-muted-foreground">عرض 10 تصنيفات كمربعات + عرض المزيد</p>
                   
                   {/* معاينة */}
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg text-sm">
-                      <span>التصنيفات</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </div>
+                  <div className="mt-3 grid grid-cols-5 gap-1">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                      <div key={i} className={`w-5 h-5 ${displayConfig.shape === 'circle' ? 'rounded-full' : 'rounded'} bg-primary/20`} />
+                    ))}
                   </div>
                 </div>
                 
-                {/* تخصيصات القائمة المنسدلة */}
-                {displayConfig.style === 'dropdown' && (
+                {/* تخصيصات الشبكة */}
+                {displayConfig.style === 'grid' && (
                   <div className="border-t border-primary/20 p-4 space-y-4 bg-muted/30">
                     {/* الشكل */}
                     <div>
-                      <Label className="text-sm mb-2 block">شكل الأيقونات</Label>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={displayConfig.shape === 'square' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, shape: 'square' })); }}
-                          className="flex-1"
-                        >
-                          <Square className="h-4 w-4 ml-1" />
-                          مربع
-                        </Button>
-                        <Button
-                          variant={displayConfig.shape === 'circle' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, shape: 'circle' })); }}
-                          className="flex-1"
-                        >
-                          <Circle className="h-4 w-4 ml-1" />
-                          دائرة
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* نوع المحتوى */}
-                    <div>
-                      <Label className="text-sm mb-2 block">المحتوى</Label>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={displayConfig.displayType === 'image' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, displayType: 'image' })); }}
-                          className="flex-1"
-                        >
-                          <ImageIcon className="h-4 w-4 ml-1" />
-                          صورة
-                        </Button>
-                        <Button
-                          variant={displayConfig.displayType === 'icon' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, displayType: 'icon' })); }}
-                          className="flex-1"
-                        >
-                          <Sparkles className="h-4 w-4 ml-1" />
-                          أيقونة
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* الحجم */}
-                    <div>
-                      <Label className="text-sm mb-2 block">الحجم</Label>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={displayConfig.size === 'large' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, size: 'large' })); }}
-                          className="flex-1"
-                        >
-                          <Maximize2 className="h-4 w-4 ml-1" />
-                          كبير
-                        </Button>
-                        <Button
-                          variant={displayConfig.size === 'small' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); setDisplayConfig(prev => ({ ...prev, size: 'small' })); }}
-                          className="flex-1"
-                        >
-                          <Minimize2 className="h-4 w-4 ml-1" />
-                          صغير
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* القائمة الجانبية */}
-              <div 
-                className={`rounded-xl border-2 transition-all cursor-pointer ${
-                  displayConfig.style === 'sidebar'
-                    ? 'border-primary bg-primary/10 shadow-lg'
-                    : 'border-border hover:border-primary/50'
-                }`}
-                onClick={() => setDisplayConfig(prev => ({ ...prev, style: 'sidebar' }))}
-              >
-                <div className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <PanelRightOpen className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="font-semibold">قائمة جانبية</span>
-                      {displayConfig.style === 'sidebar' && <Check className="h-4 w-4 text-primary inline mr-2" />}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">تنسحب من اليمين لعرض التصنيفات</p>
-                  
-                  {/* معاينة */}
-                  <div className="mt-3 flex">
-                    <div className="flex-1 bg-muted/50 rounded-r-lg h-20"></div>
-                    <div className="w-12 bg-primary/20 rounded-l-lg h-20 flex flex-col gap-1 p-1 justify-center">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="h-2 bg-primary/30 rounded" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* تخصيصات القائمة الجانبية */}
-                {displayConfig.style === 'sidebar' && (
-                  <div className="border-t border-primary/20 p-4 space-y-4 bg-muted/30">
-                    {/* الشكل */}
-                    <div>
-                      <Label className="text-sm mb-2 block">شكل الأيقونات</Label>
+                      <Label className="text-sm mb-2 block">الشكل</Label>
                       <div className="flex gap-2">
                         <Button
                           variant={displayConfig.shape === 'square' ? 'default' : 'outline'}
