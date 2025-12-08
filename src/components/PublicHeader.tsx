@@ -69,34 +69,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
     </Link>;
   return <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between relative">
-        {/* User/Admin button - on the left */}
+        {/* Categories button - on the left (mobile only) */}
         <div className="flex items-center gap-1">
-          {user ? <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-background border">
-                <DropdownMenuItem disabled className="text-sm text-muted-foreground">
-                  {user.email}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin/products')}>
-                    لوحة الإدارة
-                  </DropdownMenuItem>}
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="ml-2 h-4 w-4" />
-                  تسجيل الخروج
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> : <Link to="/admin/login">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>}
-          
-          {/* Categories button - mobile only */}
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="sm:hidden">
@@ -125,7 +99,34 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         {headerLogoPosition === 'right' && <HeaderLogo />}
         {headerLogoPosition === 'center' && <HeaderLogo />}
         
+        {/* Cart, Favorites, and Admin button - on the right */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Admin/User button */}
+          {user ? <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border">
+                <DropdownMenuItem disabled className="text-sm text-muted-foreground">
+                  {user.email}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin/products')}>
+                    لوحة الإدارة
+                  </DropdownMenuItem>}
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="ml-2 h-4 w-4" />
+                  تسجيل الخروج
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu> : <Link to="/admin/login">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>}
+          
           <Link to="/favorites">
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
