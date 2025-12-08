@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical, Square, Circle, ImageIcon, Sparkles, Maximize2, Minimize2, LayoutGrid } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Grid3X3, Check, Settings2, GripVertical, Square, Circle, ImageIcon, Sparkles, Maximize2, Minimize2, LayoutGrid, PanelRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getIconByName, getAvailableIconNames } from '@/lib/categoryIcons';
@@ -253,7 +253,7 @@ const SortableCategoryItem = ({
 
 // Category Display Settings Type
 interface CategoryDisplayConfig {
-  style: 'slider' | 'grid';
+  style: 'slider' | 'grid' | 'sidebar';
   shape: 'square' | 'circle';
   displayType: 'image' | 'icon';
   size: 'small' | 'large';
@@ -747,6 +747,39 @@ const AdminCategories = () => {
                     </div>
                   </div>
                 )}
+              </div>
+              
+              {/* القائمة الجانبية */}
+              <div 
+                className={`rounded-xl border-2 transition-all cursor-pointer ${
+                  displayConfig.style === 'sidebar'
+                    ? 'border-primary bg-primary/10 shadow-lg'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onClick={() => setDisplayConfig(prev => ({ ...prev, style: 'sidebar' }))}
+              >
+                <div className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <PanelRight className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="font-semibold">قائمة جانبية</span>
+                      {displayConfig.style === 'sidebar' && <Check className="h-4 w-4 text-primary inline mr-2" />}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">قائمة ثابتة على سطح المكتب + زر قائمة في الهاتف</p>
+                  
+                  {/* معاينة */}
+                  <div className="mt-3 flex gap-2">
+                    <div className="w-12 bg-primary/10 rounded-lg p-1 space-y-1">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="h-2 bg-primary/30 rounded" />
+                      ))}
+                    </div>
+                    <div className="flex-1 bg-muted/50 rounded-lg" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
