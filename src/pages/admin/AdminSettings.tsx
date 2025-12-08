@@ -5,14 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, MessageCircle, Image, Trash2, Instagram, Send, Settings2, HardDrive, Database, FileImage, RefreshCw } from 'lucide-react';
+import { Upload, X, MessageCircle, Image, Trash2, Instagram, Send, Settings2, HardDrive, Database, FileImage, RefreshCw, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { compressImageToFile } from '@/lib/imageCompression';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminSettings = () => {
   const { settings, loading } = useSettings();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   // Store info
@@ -57,6 +60,16 @@ const AdminSettings = () => {
     files: { name: string; size: number; type: string }[];
   } | null>(null);
   const [loadingStorage, setLoadingStorage] = useState(false);
+  
+  // Password change
+  const [newEmail, setNewEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [updatingEmail, setUpdatingEmail] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -210,6 +223,58 @@ const AdminSettings = () => {
   // Free tier limit is 1GB
   const FREE_TIER_LIMIT = 1 * 1024 * 1024 * 1024; // 1GB in bytes
   const storagePercentage = storageInfo ? (storageInfo.totalSize / FREE_TIER_LIMIT) * 100 : 0;
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail) {
+      toast({ title: 'يرجى إدخال البريد الإلكتروني الجديد', variant: 'destructive' });
+      return;
+    }
+    
+    setUpdatingEmail(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) throw error;
+      toast({ title: 'تم إرسال رابط التأكيد', description: 'يرجى التحقق من بريدك الإلكتروني الجديد' });
+      setNewEmail('');
+    } catch (error: any) {
+      console.error('Email update error:', error);
+      toast({ title: 'خطأ في تحديث البريد الإلكتروني', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdatingEmail(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast({ title: 'يرجى ملء جميع الحقول', variant: 'destructive' });
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'كلمات المرور غير متطابقة', variant: 'destructive' });
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast({ title: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل', variant: 'destructive' });
+      return;
+    }
+    
+    setUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast({ title: 'تم تحديث كلمة المرور بنجاح' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      toast({ title: 'خطأ في تحديث كلمة المرور', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -469,50 +534,6 @@ const AdminSettings = () => {
           </CardContent>
         </Card>
 
-        {/* تيليجرام */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5" />
-              إشعارات تيليجرام
-            </CardTitle>
-            <CardDescription>ربط بوت تيليجرام لإشعارات الطلبات</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Bot Token</Label>
-              <Input 
-                type="password"
-                value={telegramBotToken} 
-                onChange={e => setTelegramBotToken(e.target.value)} 
-                placeholder="توكين البوت من @BotFather" 
-                dir="ltr" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Chat ID</Label>
-              <Input 
-                value={telegramChatId} 
-                onChange={e => setTelegramChatId(e.target.value)} 
-                placeholder="يتم ملؤه تلقائياً" 
-                dir="ltr" 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>كلمة مرور البوت</Label>
-              <Input 
-                type="password"
-                value={telegramBotPassword} 
-                onChange={e => setTelegramBotPassword(e.target.value)} 
-                placeholder="كلمة مرور لحماية البوت" 
-              />
-            </div>
-            <Button onClick={handleSetupWebhook} disabled={settingUpWebhook || !telegramBotToken} variant="outline">
-              {settingUpWebhook ? 'جاري التفعيل...' : 'تفعيل Webhook'}
-            </Button>
-          </CardContent>
-        </Card>
-
         {/* إعدادات متقدمة */}
         <Card>
           <CardHeader>
@@ -520,9 +541,138 @@ const AdminSettings = () => {
               <Settings2 className="h-5 w-5" />
               إعدادات متقدمة
             </CardTitle>
-            <CardDescription>معلومات تقنية عن المتجر</CardDescription>
+            <CardDescription>إعدادات تقنية ومتقدمة للمتجر</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
+            
+            {/* تيليجرام */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Send className="h-5 w-5 text-primary" />
+                <Label className="text-base font-semibold">إشعارات تيليجرام</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">ربط بوت تيليجرام لإشعارات الطلبات</p>
+              
+              <div className="space-y-4 bg-muted/30 rounded-lg p-4">
+                <div className="space-y-2">
+                  <Label>Bot Token</Label>
+                  <Input 
+                    type="password"
+                    value={telegramBotToken} 
+                    onChange={e => setTelegramBotToken(e.target.value)} 
+                    placeholder="توكين البوت من @BotFather" 
+                    dir="ltr" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Chat ID</Label>
+                  <Input 
+                    value={telegramChatId} 
+                    onChange={e => setTelegramChatId(e.target.value)} 
+                    placeholder="يتم ملؤه تلقائياً" 
+                    dir="ltr" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>كلمة مرور البوت</Label>
+                  <Input 
+                    type="password"
+                    value={telegramBotPassword} 
+                    onChange={e => setTelegramBotPassword(e.target.value)} 
+                    placeholder="كلمة مرور لحماية البوت" 
+                  />
+                </div>
+                <Button onClick={handleSetupWebhook} disabled={settingUpWebhook || !telegramBotToken} variant="outline" className="w-full">
+                  {settingUpWebhook ? 'جاري التفعيل...' : 'تفعيل Webhook'}
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+            
+            {/* تغيير بيانات الحساب */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                <Label className="text-base font-semibold">إعدادات الحساب</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">تغيير البريد الإلكتروني وكلمة المرور للأدمن</p>
+              
+              <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+                {/* البريد الإلكتروني الحالي */}
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">البريد الحالي:</span>
+                  <span className="font-medium" dir="ltr">{user?.email}</span>
+                </div>
+                
+                {/* تغيير البريد الإلكتروني */}
+                <div className="space-y-2">
+                  <Label>البريد الإلكتروني الجديد</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      type="email"
+                      value={newEmail} 
+                      onChange={e => setNewEmail(e.target.value)} 
+                      placeholder="example@email.com" 
+                      dir="ltr"
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleUpdateEmail} 
+                      disabled={updatingEmail || !newEmail}
+                      variant="outline"
+                    >
+                      {updatingEmail ? 'جاري...' : 'تحديث'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+                {/* تغيير كلمة المرور */}
+                <div className="space-y-2">
+                  <Label>كلمة المرور الجديدة</Label>
+                  <div className="relative">
+                    <Input 
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={newPassword} 
+                      onChange={e => setNewPassword(e.target.value)} 
+                      placeholder="كلمة المرور الجديدة" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>تأكيد كلمة المرور الجديدة</Label>
+                  <Input 
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    placeholder="أعد إدخال كلمة المرور" 
+                  />
+                </div>
+                
+                <Button 
+                  onClick={handleUpdatePassword} 
+                  disabled={updatingPassword || !newPassword || !confirmPassword}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {updatingPassword ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
+                </Button>
+              </div>
+            </div>
+            
+            <Separator />
+            
             {/* مساحة التخزين */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
