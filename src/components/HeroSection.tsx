@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, MessageCircle, Instagram, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { AnimatedText } from '@/components/ui/animated-text';
-
+import { useVisualEffects } from '@/hooks/useVisualEffects';
 // Snapchat icon component
 const SnapchatIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -68,7 +68,26 @@ const SocialIcons = ({ settings, size = 'md' }: { settings: any; size?: 'sm' | '
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
+  const bannerRef = useRef<HTMLDivElement>(null);
   const { settings } = useSettings();
+  const { effects } = useVisualEffects();
+
+  // Parallax scroll effect
+  useEffect(() => {
+    if (!effects.image_parallax) return;
+    
+    const handleScroll = () => {
+      if (bannerRef.current) {
+        const rect = bannerRef.current.getBoundingClientRect();
+        const scrollProgress = -rect.top;
+        setScrollY(scrollProgress * 0.3); // Parallax speed factor
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [effects.image_parallax]);
 
   // Get header layout setting
   const headerLayout = (settings as any)?.header_layout || 'logo-right';
@@ -335,7 +354,10 @@ const HeroSection = () => {
           {!hideHeaderStoreInfo && <DesktopStoreInfo />}
 
           {/* البانر الرئيسي */}
-          <div className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[180px] sm:h-[220px] lg:h-[400px] group">
+          <div 
+            ref={bannerRef}
+            className="lg:col-span-3 relative rounded-lg overflow-hidden shadow-card h-[180px] sm:h-[220px] lg:h-[400px] group"
+          >
             {slides.map((slide, index) => (
               <div
                 key={slide.id}
@@ -346,7 +368,10 @@ const HeroSection = () => {
                 <img
                   src={slide.image}
                   alt={`شريحة ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-100"
+                  style={effects.image_parallax ? {
+                    transform: `translateY(${scrollY}px) scale(1.1)`,
+                  } : undefined}
                 />
               </div>
             ))}
