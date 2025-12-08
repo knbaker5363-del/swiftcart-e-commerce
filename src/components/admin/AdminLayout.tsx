@@ -76,32 +76,31 @@ const AdminLayout = () => {
     label: 'إعدادات متقدمة'
   }];
   const SidebarContent = () => <>
-      <div className="p-6 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between border-b">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             لوحة التحكم
           </h1>
-          <p className="text-sm text-muted-foreground mt-1 truncate">{user.email}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[180px]">{user.email}</p>
         </div>
-        
       </div>
 
-      <nav className="px-4 space-y-2 flex-1">
-        {navItems.map(item => <NavLink key={item.to} to={item.to} className={cn('flex items-center gap-3 px-4 py-3 rounded-lg transition-colors', 'hover:bg-muted')} activeClassName="bg-primary text-primary-foreground hover:bg-primary" onClick={() => isMobile && setSidebarOpen(false)}>
-            <item.icon className="h-5 w-5" />
+      <nav className="px-2 py-2 space-y-1 flex-1 overflow-y-auto">
+        {navItems.map(item => <NavLink key={item.to} to={item.to} className={cn('flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm', 'hover:bg-muted')} activeClassName="bg-primary text-primary-foreground hover:bg-primary" onClick={() => isMobile && setSidebarOpen(false)}>
+            <item.icon className="h-4 w-4 flex-shrink-0" />
             <span className="font-medium">{item.label}</span>
           </NavLink>)}
       </nav>
 
-      <div className="p-4 border-t space-y-2">
-        <Button variant="secondary" className="w-full justify-start" onClick={() => {
+      <div className="p-3 border-t space-y-1.5">
+        <Button variant="secondary" size="sm" className="w-full justify-start text-sm" onClick={() => {
         navigate('/');
         isMobile && setSidebarOpen(false);
       }}>
           <Store className="ml-2 h-4 w-4" />
           العودة إلى المتجر
         </Button>
-        <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
+        <Button variant="outline" size="sm" className="w-full justify-start text-sm" onClick={handleLogout}>
           <LogOut className="ml-2 h-4 w-4" />
           تسجيل الخروج
         </Button>
@@ -139,12 +138,12 @@ const AdminLayout = () => {
   }
   return <div className="min-h-screen bg-background" dir="rtl">
       {/* Desktop Sidebar */}
-      <aside className="fixed right-0 top-0 h-full w-64 bg-card border-l shadow-card z-50 flex flex-col">
+      <aside className="fixed right-0 top-0 h-full w-56 bg-card border-l shadow-card z-50 flex flex-col">
         <SidebarContent />
       </aside>
 
       {/* Main Content */}
-      <main className="mr-64 min-h-screen">
+      <main className="mr-56 min-h-screen">
         <div className="p-8">
           <Outlet />
         </div>
