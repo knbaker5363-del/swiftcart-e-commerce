@@ -279,6 +279,15 @@ const AdminDisplay = () => {
                 logoShape={logoShape}
                 headerLogoPosition={headerLogoPosition}
                 animationEffect={animationEffect}
+                storeName={settings?.store_name || 'متجري'}
+                storeNameBlack={storeNameBlack}
+                hideHeaderStoreInfo={hideHeaderStoreInfo}
+                socialMediaPosition={socialMediaPosition}
+                showImageBorder={showImageBorder}
+                heroBannerColor={heroBannerColor}
+                cardSize={cardSize}
+                cardsPerRowMobile={cardsPerRowMobile}
+                cardsPerRowDesktop={cardsPerRowDesktop}
               />
             </div>
             
@@ -619,14 +628,13 @@ const AdminDisplay = () => {
             </div>
           </div>
 
-          {/* Header logo position */}
+          {/* Header logo position - Only right and center */}
           <div>
             <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { id: 'right', name: 'على اليمين', icon: '➡️' },
                 { id: 'center', name: 'في المنتصف', icon: '⬛' },
-                { id: 'left', name: 'على اليسار', icon: '⬅️' },
               ].map(pos => (
                 <button
                   key={pos.id}
@@ -635,7 +643,7 @@ const AdminDisplay = () => {
                     headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <div className="text-3xl mb-2">{pos.id === 'right' ? '➡️' : pos.id === 'center' ? '⬛' : '⬅️'}</div>
+                  <div className="text-3xl mb-2">{pos.icon}</div>
                   <div className="font-medium text-sm">{pos.name}</div>
                 </button>
               ))}
