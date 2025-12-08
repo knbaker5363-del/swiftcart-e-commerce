@@ -9,7 +9,11 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Mail, Shield } from 'lucide-react';
 
-const AdminLogin = () => {
+interface AdminLoginProps {
+  secretAccess?: boolean;
+}
+
+const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
   const navigate = useNavigate();
   const { signIn, user, isAdmin, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -22,6 +26,13 @@ const AdminLogin = () => {
     fullName: '',
     creationCode: '',
   });
+
+  // Enable admin access when accessing via secret URL
+  useEffect(() => {
+    if (secretAccess) {
+      localStorage.setItem('admin_access_enabled', 'true');
+    }
+  }, [secretAccess]);
 
   useEffect(() => {
     if (!authLoading && user && isAdmin) {

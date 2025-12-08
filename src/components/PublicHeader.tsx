@@ -37,6 +37,13 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [adminAccessEnabled, setAdminAccessEnabled] = useState(false);
+
+  // Check if admin access is enabled via secret URL
+  useEffect(() => {
+    const isEnabled = localStorage.getItem('admin_access_enabled') === 'true';
+    setAdminAccessEnabled(isEnabled);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -89,31 +96,33 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         
         {/* Right side - Cart, Favorites, and Admin button */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Admin/User button */}
-          {user ? <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+          {/* Admin/User button - Only show if admin access is enabled */}
+          {adminAccessEnabled && (
+            user ? <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border">
+                  <DropdownMenuItem disabled className="text-sm text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin/products')}>
+                      لوحة الإدارة
+                    </DropdownMenuItem>}
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="ml-2 h-4 w-4" />
+                    تسجيل الخروج
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu> : <Link to="/admin/login">
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border">
-                <DropdownMenuItem disabled className="text-sm text-muted-foreground">
-                  {user.email}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin/products')}>
-                    لوحة الإدارة
-                  </DropdownMenuItem>}
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="ml-2 h-4 w-4" />
-                  تسجيل الخروج
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> : <Link to="/admin/login">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>}
+              </Link>
+          )}
           
           <Link to="/favorites">
             <Button variant="ghost" size="icon" className="relative">
