@@ -736,13 +736,296 @@
 /* Custom animations */
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+    background-position: 200% 0;
   }
   100% {
-    transform: translateX(100%);
+    background-position: -200% 0;
   }
 }
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+/* ===== PROFESSIONAL EFFECTS FROM 21st.dev ===== */
+
+/* Wave Animation for Text */
+@keyframes wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-wave {
+  animation: wave 0.6s ease-in-out;
+}
+
+/* Gradient Text Animation */
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Blink Cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Glow Pulse */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Border Glow Animation */
+@keyframes border-glow {
+  0%, 100% {
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.2);
+  }
+  50% {
+    border-color: hsl(var(--primary) / 0.8);
+    box-shadow: 0 0 25px hsl(var(--primary) / 0.4);
+  }
+}
+
+.animated-border-glow {
+  border: 2px solid transparent;
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Rotating Border Gradient */
+@keyframes rotate-gradient {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+.rotating-border {
+  position: relative;
+}
+
+.rotating-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    hsl(var(--primary)),
+    hsl(var(--accent)),
+    hsl(var(--secondary)),
+    hsl(var(--primary))
+  );
+  z-index: -1;
+  animation: rotate-gradient 3s linear infinite;
+}
+
+/* Float Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Shine Effect */
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: none;
+}
+
+.shine-effect:hover::after {
+  animation: shine 0.7s ease-in-out;
+}
+
+/* Heartbeat Animation */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.1); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.1); }
+  70% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* Bounce In Animation */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s ease-out;
+}
+
+/* Slide Up Fade */
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.5s ease-out forwards;
+}
+
+/* Stagger children animation helper */
+.stagger-children > * {
+  opacity: 0;
+  animation: slide-up-fade 0.5s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 450ms; }
+
+/* Glass Morphism */
+.glass {
+  background: hsl(var(--background) / 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Neon Glow */
+.neon-glow {
+  text-shadow: 
+    0 0 5px hsl(var(--primary)),
+    0 0 10px hsl(var(--primary)),
+    0 0 20px hsl(var(--primary)),
+    0 0 40px hsl(var(--primary));
+}
+
+/* Card Hover Lift */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px hsl(var(--foreground) / 0.1);
+}
+
+/* Magnetic Button Effect */
+.magnetic-hover {
+  transition: transform 0.15s ease;
+}
+
+/* Product Card Professional Hover */
+.product-card-pro {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.product-card-pro:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px hsl(var(--primary) / 0.15),
+    0 0 0 1px hsl(var(--primary) / 0.1);
+}
+
+.product-card-pro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.3),
+    transparent,
+    hsl(var(--accent) / 0.3)
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.product-card-pro:hover::before {
+  opacity: 1;
 }
