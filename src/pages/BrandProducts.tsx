@@ -13,6 +13,7 @@ import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import ProductQuickView from '@/components/ProductQuickView';
 import CartButton from '@/components/CartButton';
 import { Button } from '@/components/ui/button';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const BrandProducts = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,8 @@ const BrandProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { settings } = useSettings();
+  const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
 
   const { data: brand, isLoading: brandLoading } = useQuery({
     queryKey: ['brand', id],
@@ -83,21 +86,16 @@ const BrandProducts = () => {
 
       {/* Hero Banner with Background */}
       <section className="relative overflow-hidden">
-        {/* Background Image or Gradient */}
-        <div className="absolute inset-0">
-          {brand?.logo_url ? (
-            <>
-              <div className="w-full h-full bg-gradient-primary" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                <img 
-                  src={brand.logo_url} 
-                  alt={brand.name} 
-                  className="w-96 h-96 object-contain"
-                />
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full bg-gradient-primary" />
+        {/* Background - Dynamic color from settings */}
+        <div className="absolute inset-0" style={{ backgroundColor: heroBannerColor }}>
+          {brand?.logo_url && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+              <img 
+                src={brand.logo_url} 
+                alt={brand.name} 
+                className="w-96 h-96 object-contain"
+              />
+            </div>
           )}
         </div>
         

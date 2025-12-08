@@ -25,7 +25,8 @@ const Category = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
 
-  // Check if dark theme
+  // Get hero banner color from settings
+  const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
   const isDarkTheme = settings?.theme === 'dark' || settings?.theme === 'night';
 
   const getColorValue = (color: string) => {
@@ -110,7 +111,7 @@ const Category = () => {
 
       {/* Hero Banner with Background */}
       <section className="relative overflow-hidden">
-        {/* Background Image or Gradient */}
+        {/* Background - Dynamic color from settings or category image */}
         <div className="absolute inset-0">
           {category?.image_url ? (
             <>
@@ -122,7 +123,7 @@ const Category = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
             </>
           ) : (
-            <div className="w-full h-full bg-gradient-primary" />
+            <div className="w-full h-full" style={{ backgroundColor: heroBannerColor }} />
           )}
         </div>
         
