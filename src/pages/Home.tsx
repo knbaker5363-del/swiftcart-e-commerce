@@ -20,6 +20,7 @@ import SearchBar from '@/components/SearchBar';
 import CategoriesSidebar from '@/components/CategoriesSidebar';
 import BrandsButton from '@/components/BrandsButton';
 import ProductGrid from '@/components/ProductGrid';
+import SEOManager from '@/components/SEOManager';
 
 const Home = () => {
   useDocumentTitle();
@@ -116,6 +117,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background relative" dir="rtl">
+      <SEOManager />
       <BackgroundPattern />
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
