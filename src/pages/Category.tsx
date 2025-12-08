@@ -108,27 +108,45 @@ const Category = () => {
         onOpenChange={setQuickViewOpen} 
       />
 
-      {/* Back Button */}
-      <div className="container pt-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)} 
-          className={`gap-2 ${textColorClass}`}
-        >
-          <ArrowRight className="h-4 w-4" />
-          رجوع
-        </Button>
-      </div>
-
-      {/* Header */}
-      <section className="py-8">
-        <div className="container">
-          <div className={`flex items-center justify-center gap-4 animate-fade-in ${textColorClass}`}>
-            <FolderOpen className="h-10 w-10" />
-            <div className="text-center">
-              <h1 className="text-3xl font-bold mb-1">{category?.name || 'التصنيف'}</h1>
-              <p className="text-sm opacity-80">
-                تصفح جميع منتجات {category?.name}
+      {/* Hero Banner with Background */}
+      <section className="relative overflow-hidden">
+        {/* Background Image or Gradient */}
+        <div className="absolute inset-0">
+          {category?.image_url ? (
+            <>
+              <img 
+                src={category.image_url} 
+                alt={category.name} 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-primary" />
+          )}
+        </div>
+        
+        {/* Content */}
+        <div className="container relative py-12 md:py-16">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="gap-2 text-white hover:bg-white/20 mb-4"
+          >
+            <ArrowRight className="h-4 w-4" />
+            رجوع
+          </Button>
+          
+          <div className="flex items-center gap-4 animate-fade-in">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+              <FolderOpen className="h-10 w-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                {category?.name || 'التصنيف'}
+              </h1>
+              <p className="text-white/80 text-sm md:text-base">
+                تصفح جميع منتجات {category?.name} • {products?.length || 0} منتج
               </p>
             </div>
           </div>
