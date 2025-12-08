@@ -140,21 +140,21 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           )}
           
           <Link to="/favorites">
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative overflow-visible">
               <Heart className="h-5 w-5" />
               {favoritesCount > 0 && (
-                <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-600">
+                <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center z-10">
                   {favoritesCount}
-                </Badge>
+                </span>
               )}
             </Button>
           </Link>
-          <Button variant="outline" size="icon" className="relative" onClick={onCartOpen}>
+          <Button variant="outline" size="icon" className="relative overflow-visible" onClick={onCartOpen}>
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
-              <Badge variant="destructive" className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+              <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center z-10">
                 {itemCount}
-              </Badge>
+              </span>
             )}
           </Button>
         </div>
