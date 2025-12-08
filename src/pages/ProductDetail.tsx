@@ -13,6 +13,8 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, ShoppingCart, Heart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import SEOManager from '@/components/SEOManager';
+import ProductSchemaMarkup from '@/components/ProductSchemaMarkup';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -211,6 +213,17 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
+      {product && (
+        <>
+          <SEOManager 
+            title={product.name}
+            description={product.description || product.name}
+            image={product.image_url || undefined}
+            type="product"
+          />
+          <ProductSchemaMarkup product={product} />
+        </>
+      )}
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
