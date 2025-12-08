@@ -41,8 +41,23 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
 
   // Check if admin access is enabled via secret URL
   useEffect(() => {
-    const isEnabled = localStorage.getItem('admin_access_enabled') === 'true';
-    setAdminAccessEnabled(isEnabled);
+    const checkAdminAccess = () => {
+      const isEnabled = localStorage.getItem('admin_access_enabled') === 'true';
+      setAdminAccessEnabled(isEnabled);
+    };
+    
+    checkAdminAccess();
+    
+    // Listen for storage changes (including from other tabs)
+    window.addEventListener('storage', checkAdminAccess);
+    
+    // Custom event for same-tab updates
+    window.addEventListener('adminAccessChanged', checkAdminAccess);
+    
+    return () => {
+      window.removeEventListener('storage', checkAdminAccess);
+      window.removeEventListener('adminAccessChanged', checkAdminAccess);
+    };
   }, []);
 
   const handleSignOut = async () => {
