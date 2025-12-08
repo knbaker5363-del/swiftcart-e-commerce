@@ -23,7 +23,7 @@ interface Settings {
   show_image_border: boolean;
   logo_shape: 'square' | 'circle';
   site_style: 'classic' | 'modern' | 'minimal';
-  header_logo_position: 'right' | 'center';
+  header_logo_position: 'right' | 'center' | 'left';
   hide_header_store_info: boolean;
   social_media_position: 'hero' | 'footer';
   // New display settings

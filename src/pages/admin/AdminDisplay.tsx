@@ -118,7 +118,6 @@ const AdminDisplay = () => {
   // Layout settings
   const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
   const [logoShape, setLogoShape] = useState('circle');
-  const [siteStyle, setSiteStyle] = useState('classic');
   const [headerLogoPosition, setHeaderLogoPosition] = useState('right');
   const [hideHeaderStoreInfo, setHideHeaderStoreInfo] = useState(false);
   const [socialMediaPosition, setSocialMediaPosition] = useState('hero');
@@ -140,7 +139,6 @@ const AdminDisplay = () => {
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
       setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
       setLogoShape((settings as any)?.logo_shape || 'circle');
-      setSiteStyle((settings as any)?.site_style || 'classic');
       setHeaderLogoPosition((settings as any)?.header_logo_position || 'right');
       setHideHeaderStoreInfo((settings as any)?.hide_header_store_info || false);
       setSocialMediaPosition((settings as any)?.social_media_position || 'hero');
@@ -197,7 +195,6 @@ const AdminDisplay = () => {
           background_image_url: backgroundImageUrl,
           header_layout: headerLayout,
           logo_shape: logoShape,
-          site_style: siteStyle,
           header_logo_position: headerLogoPosition,
           hide_header_store_info: hideHeaderStoreInfo,
           social_media_position: socialMediaPosition,
@@ -209,6 +206,16 @@ const AdminDisplay = () => {
         .eq('id', settings?.id);
 
       if (error) throw error;
+
+      // Apply font immediately
+      const fontMap: Record<string, string> = {
+        'tajawal': 'Tajawal, sans-serif',
+        'cairo': 'Cairo, sans-serif',
+        'almarai': 'Almarai, sans-serif',
+        'noto-kufi': '"Noto Kufi Arabic", sans-serif',
+        'ibm-plex': '"IBM Plex Sans Arabic", sans-serif',
+      };
+      document.body.style.fontFamily = fontMap[fontFamily] || fontMap['tajawal'];
 
       await refreshSettings();
       
@@ -497,29 +504,6 @@ const AdminDisplay = () => {
             </div>
           </div>
 
-          {/* Site style */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">نمط الموقع</Label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: 'classic', name: 'كلاسيكي', icon: '🏛️' },
-                { id: 'modern', name: 'عصري', icon: '✨' },
-                { id: 'minimal', name: 'بسيط', icon: '◻️' },
-              ].map(style => (
-                <button
-                  key={style.id}
-                  onClick={() => setSiteStyle(style.id)}
-                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
-                    siteStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{style.icon}</div>
-                  <div className="font-medium">{style.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Logo and header layout */}
           <div>
             <Label className="text-base font-medium mb-3 block">شكل اللوجو</Label>
@@ -545,10 +529,11 @@ const AdminDisplay = () => {
           {/* Header logo position */}
           <div>
             <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { id: 'right', name: 'على اليمين', icon: '➡️' },
                 { id: 'center', name: 'في المنتصف', icon: '⬛' },
+                { id: 'left', name: 'على اليسار', icon: '⬅️' },
               ].map(pos => (
                 <button
                   key={pos.id}
@@ -557,7 +542,7 @@ const AdminDisplay = () => {
                     headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <div className="text-3xl mb-2">{pos.icon}</div>
+                  <div className="text-3xl mb-2">{pos.id === 'right' ? '➡️' : pos.id === 'center' ? '⬛' : '⬅️'}</div>
                   <div className="font-medium text-sm">{pos.name}</div>
                 </button>
               ))}

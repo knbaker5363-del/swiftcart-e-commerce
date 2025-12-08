@@ -329,7 +329,7 @@ const HeroSection = () => {
       <div className="container">
         {!hideHeaderStoreInfo && <MobileStoreInfo />}
 
-        <div className={`grid grid-cols-1 ${hideHeaderStoreInfo ? '' : 'lg:grid-cols-4'} gap-4`}>
+        <div className={`grid grid-cols-1 ${!hideHeaderStoreInfo ? 'lg:grid-cols-4' : ''} gap-4`}>
           {/* معلومات المتجر - على اليمين في الديسكتوب */}
           {!hideHeaderStoreInfo && <DesktopStoreInfo />}
 
