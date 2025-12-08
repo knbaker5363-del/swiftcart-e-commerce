@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, X, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Search, Download, Upload, Package } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { compressImageToFile, isImageFile } from '@/lib/imageCompression';
 import { Badge } from '@/components/ui/badge';
+import { exportProductsToCSV, downloadCSV, parseCSVFile, importProductsFromCSV } from '@/lib/productExportImport';
 
 const AdminProducts = () => {
   const { toast } = useToast();
@@ -30,6 +31,8 @@ const AdminProducts = () => {
     is_active: true,
     discount_percentage: 0,
     discount_end_date: '',
+    stock_quantity: '' as string,
+    track_stock: false,
   });
   // New structure: sizes can have pricing info
   interface SizeOption {
@@ -71,6 +74,8 @@ const AdminProducts = () => {
   const [currentVariantIndex, setCurrentVariantIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
@@ -239,6 +244,8 @@ const AdminProducts = () => {
       options: options,
       discount_percentage: parseFloat(formData.discount_percentage.toString()) || 0,
       discount_end_date: formData.discount_end_date || null,
+      stock_quantity: formData.stock_quantity ? parseInt(formData.stock_quantity) : null,
+      track_stock: formData.track_stock,
     };
 
     if (editingProduct) {
@@ -260,6 +267,8 @@ const AdminProducts = () => {
       is_active: true,
       discount_percentage: 0,
       discount_end_date: '',
+      stock_quantity: '',
+      track_stock: false,
     });
     setOptions({ sizes: [], colors: [], addons: [], customVariants: [] });
     setNewSizePriceType('base');
@@ -286,6 +295,8 @@ const AdminProducts = () => {
       is_active: product.is_active,
       discount_percentage: product.discount_percentage || 0,
       discount_end_date: product.discount_end_date || '',
+      stock_quantity: product.stock_quantity?.toString() || '',
+      track_stock: product.track_stock || false,
     });
     // Handle old format (array of strings) vs new format (array of objects)
     const productOptions = product.options || { sizes: [], colors: [], addons: [] };
@@ -310,11 +321,61 @@ const AdminProducts = () => {
     product.categories?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleExport = async () => {
+    try {
+      toast({ title: 'جاري تصدير المنتجات...' });
+      const csv = await exportProductsToCSV();
+      downloadCSV(csv, `products-${new Date().toISOString().split('T')[0]}.csv`);
+      toast({ title: 'تم تصدير المنتجات بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في التصدير', variant: 'destructive' });
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setImporting(true);
+    try {
+      toast({ title: 'جاري استيراد المنتجات...' });
+      const rows = await parseCSVFile(file);
+      const result = await importProductsFromCSV(rows);
+      
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      toast({ 
+        title: `تم الاستيراد: ${result.success} منتج`,
+        description: result.failed > 0 ? `فشل: ${result.failed}` : undefined
+      });
+    } catch (error) {
+      toast({ title: 'خطأ في الاستيراد', variant: 'destructive' });
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">إدارة المنتجات</h1>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="ml-2 h-4 w-4" />
+            تصدير CSV
+          </Button>
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+            <Upload className="ml-2 h-4 w-4" />
+            {importing ? 'جاري الاستيراد...' : 'استيراد CSV'}
+          </Button>
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="ml-2 h-4 w-4" />

@@ -7,8 +7,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
-import { ShoppingCart, ShoppingBag, Package, Briefcase, Gift, Heart } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, Package, Briefcase, Gift, Heart, AlertCircle } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { ProductShareButtons } from '@/components/ProductShareButtons';
+import { ProductSchemaMarkup } from '@/components/ProductSchemaMarkup';
+import { Badge } from '@/components/ui/badge';
 
 // Cart icon mapping
 const cartIcons = {
@@ -53,6 +56,12 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
 
   // Return null if product is not provided
   if (!product) return null;
+
+  // Stock management
+  const trackStock = product.track_stock || false;
+  const stockQuantity = product.stock_quantity ?? null;
+  const isOutOfStock = trackStock && stockQuantity !== null && stockQuantity <= 0;
+  const isLowStock = trackStock && stockQuantity !== null && stockQuantity > 0 && stockQuantity < 5;
 
   // Size option type for new pricing structure
   interface SizeOption {
@@ -243,6 +252,9 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{product.name}</DialogTitle>
         </DialogHeader>
+        
+        {/* Schema.org markup */}
+        <ProductSchemaMarkup product={product} />
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* صور المنتج */}
@@ -407,14 +419,53 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
               </div>
             )}
 
+            {/* Stock Status */}
+            {trackStock && stockQuantity !== null && (
+              <div className="flex items-center gap-2">
+                {isOutOfStock ? (
+                  <Badge variant="destructive" className="flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    نفد من المخزون
+                  </Badge>
+                ) : isLowStock ? (
+                  <Badge variant="secondary" className="flex items-center gap-1 bg-orange-100 text-orange-700">
+                    <AlertCircle className="h-3 w-3" />
+                    متبقي {stockQuantity} فقط
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    متوفر ({stockQuantity})
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* أزرار المشاركة */}
+            <div className="pt-2 border-t">
+              <ProductShareButtons 
+                productName={product.name}
+                productImage={product.image_url}
+              />
+            </div>
+
             {/* زر الإضافة للسلة */}
             <Button 
               onClick={handleAddToCart}
               className="w-full py-6 text-lg gap-2"
               size="lg"
+              disabled={isOutOfStock}
             >
-              <CartIcon className="h-5 w-5" />
-              {cartButtonText}
+              {isOutOfStock ? (
+                <>
+                  <AlertCircle className="h-5 w-5" />
+                  نفد من المخزون
+                </>
+              ) : (
+                <>
+                  <CartIcon className="h-5 w-5" />
+                  {cartButtonText}
+                </>
+              )}
             </Button>
           </div>
         </div>

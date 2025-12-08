@@ -30,6 +30,11 @@ interface Settings {
   cart_icon_style: string;
   cart_button_text: string;
   font_family: string;
+  // SEO settings
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_keywords: string | null;
+  og_image_url: string | null;
 }
 
 interface SettingsContextType {
@@ -163,7 +168,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         // New display settings
         cart_icon_style: data.cart_icon_style || 'cart',
         cart_button_text: data.cart_button_text || 'إضافة للسلة',
-        font_family: data.font_family || 'tajawal'
+        font_family: data.font_family || 'tajawal',
+        // SEO settings
+        seo_title: data.seo_title || null,
+        seo_description: data.seo_description || null,
+        seo_keywords: data.seo_keywords || null,
+        og_image_url: data.og_image_url || null
       };
       
       setSettings(parsedSettings as Settings);
