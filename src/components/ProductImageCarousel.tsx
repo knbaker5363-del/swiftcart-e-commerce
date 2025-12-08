@@ -68,24 +68,7 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
         </Button>
       </div>
 
-      {/* Dots Indicator */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        {allImages.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setCurrentIndex(idx);
-            }}
-            className={`h-2 rounded-full transition-all ${
-              idx === currentIndex
-                ? 'w-8 bg-primary'
-                : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Dots Indicator - Hidden */}
     </div>
   );
 };
