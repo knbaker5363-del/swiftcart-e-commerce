@@ -14,6 +14,7 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import ProductQuickView from '@/components/ProductQuickView';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Deals = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -22,6 +23,8 @@ const Deals = () => {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { settings } = useSettings();
+  const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
 
   const getColorValue = (color: string) => {
     const colorMap: Record<string, string> = {
@@ -73,8 +76,8 @@ const Deals = () => {
 
       {/* Hero Banner */}
       <section className="relative overflow-hidden">
-        {/* Background - Red/Sale theme with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-700 to-red-900" />
+        {/* Background - Dynamic color from settings */}
+        <div className="absolute inset-0" style={{ backgroundColor: heroBannerColor }} />
         
         {/* Decorative pattern overlay */}
         <div className="absolute inset-0 opacity-10">

@@ -461,6 +461,7 @@ export type Database = {
           font_family: string | null
           header_layout: string | null
           header_logo_position: string | null
+          hero_banner_color: string | null
           hide_header_store_info: boolean | null
           id: string
           location: string | null
@@ -506,6 +507,7 @@ export type Database = {
           font_family?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
+          hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
           id?: string
           location?: string | null
@@ -551,6 +553,7 @@ export type Database = {
           font_family?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
+          hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
           id?: string
           location?: string | null

@@ -124,6 +124,7 @@ const AdminDisplay = () => {
   const [cartButtonStyle, setCartButtonStyle] = useState('default');
   const [showImageBorder, setShowImageBorder] = useState(true);
   const [storeNameBlack, setStoreNameBlack] = useState(false);
+  const [heroBannerColor, setHeroBannerColor] = useState('#000000');
 
   // Load settings
   useEffect(() => {
@@ -145,6 +146,7 @@ const AdminDisplay = () => {
       setCartButtonStyle((settings as any)?.cart_button_style || 'default');
       setShowImageBorder((settings as any)?.show_image_border !== false);
       setStoreNameBlack((settings as any)?.store_name_black || false);
+      setHeroBannerColor((settings as any)?.hero_banner_color || '#000000');
     }
   }, [settings]);
 
@@ -201,6 +203,7 @@ const AdminDisplay = () => {
           cart_button_style: cartButtonStyle,
           show_image_border: showImageBorder,
           store_name_black: storeNameBlack,
+          hero_banner_color: heroBannerColor,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -396,6 +399,85 @@ const AdminDisplay = () => {
                 {accentColor === color.id && <Check className="h-3 w-3 text-primary" />}
               </button>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hero Banner Color */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            لون البانر العلوي
+          </CardTitle>
+          <CardDescription>تخصيص لون الخلفية للبانر العلوي في صفحات التصنيفات والعلامات التجارية</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Label>اللون:</Label>
+              <Input
+                type="color"
+                value={heroBannerColor}
+                onChange={(e) => setHeroBannerColor(e.target.value)}
+                className="w-16 h-10 cursor-pointer p-1"
+              />
+              <Input
+                type="text"
+                value={heroBannerColor}
+                onChange={(e) => setHeroBannerColor(e.target.value)}
+                className="w-28"
+                placeholder="#000000"
+                dir="ltr"
+              />
+            </div>
+          </div>
+          
+          {/* Quick color presets */}
+          <div>
+            <Label className="text-sm mb-2 block">ألوان سريعة:</Label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { color: '#000000', name: 'أسود' },
+                { color: '#1a1a2e', name: 'كحلي' },
+                { color: '#0f3460', name: 'أزرق غامق' },
+                { color: '#16213e', name: 'نيلي' },
+                { color: '#1b1b2f', name: 'ليلي' },
+                { color: '#2d132c', name: 'بنفسجي غامق' },
+                { color: '#1a3c34', name: 'أخضر غامق' },
+                { color: '#3d0c02', name: 'أحمر غامق' },
+                { color: '#4a1942', name: 'مارون' },
+                { color: '#2c3e50', name: 'رمادي داكن' },
+              ].map((preset) => (
+                <button
+                  key={preset.color}
+                  onClick={() => setHeroBannerColor(preset.color)}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                    heroBannerColor === preset.color ? 'border-primary shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg border border-white/20"
+                    style={{ backgroundColor: preset.color }}
+                  />
+                  <span className="text-[10px]">{preset.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Preview */}
+          <div>
+            <Label className="text-sm mb-2 block">معاينة:</Label>
+            <div 
+              className="w-full h-24 rounded-lg flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: heroBannerColor }}
+            >
+              <div className="text-center">
+                <p className="text-lg">العلامات التجارية</p>
+                <p className="text-sm opacity-70">تسوق من أفضل العلامات</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

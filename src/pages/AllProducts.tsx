@@ -13,12 +13,15 @@ import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const AllProducts = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { settings } = useSettings();
+  const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['all-products'],
@@ -58,8 +61,8 @@ const AllProducts = () => {
 
       {/* Hero Banner */}
       <section className="relative overflow-hidden">
-        {/* Background - Dark/Black with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        {/* Background - Dynamic color from settings */}
+        <div className="absolute inset-0" style={{ backgroundColor: heroBannerColor }} />
         
         {/* Decorative pattern overlay */}
         <div className="absolute inset-0 opacity-10">
