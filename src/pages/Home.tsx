@@ -271,15 +271,16 @@ const Home = () => {
                             </div>}
                           
                           {/* Add to Cart Button */}
-                          <CartButton
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleProductClick(product);
-                            }}
-                            className="w-auto px-6 mx-auto mt-auto"
-                            size="sm"
-                            variant="secondary"
-                          />
+                          <div className="flex justify-center mt-auto">
+                            <CartButton
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleProductClick(product);
+                              }}
+                              size="sm"
+                              variant="secondary"
+                            />
+                          </div>
                         </div>
                       </Card>;
               })}
