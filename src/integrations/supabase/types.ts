@@ -208,6 +208,27 @@ export type Database = {
           },
         ]
       }
+      order_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string
+          phone_number: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address: string
+          phone_number: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string
+          phone_number?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -342,6 +363,8 @@ export type Database = {
           name: string
           options: Json | null
           price: number
+          stock_quantity: number | null
+          track_stock: boolean | null
         }
         Insert: {
           additional_images?: Json | null
@@ -357,6 +380,8 @@ export type Database = {
           name: string
           options?: Json | null
           price: number
+          stock_quantity?: number | null
+          track_stock?: boolean | null
         }
         Update: {
           additional_images?: Json | null
@@ -372,6 +397,8 @@ export type Database = {
           name?: string
           options?: Json | null
           price?: number
+          stock_quantity?: number | null
+          track_stock?: boolean | null
         }
         Relationships: [
           {
@@ -470,6 +497,10 @@ export type Database = {
           location: string | null
           logo_shape: string | null
           logo_url: string | null
+          og_image_url: string | null
+          seo_description: string | null
+          seo_keywords: string | null
+          seo_title: string | null
           show_brands_button: boolean | null
           show_image_border: boolean | null
           site_style: string | null
@@ -519,6 +550,10 @@ export type Database = {
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
+          og_image_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_title?: string | null
           show_brands_button?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null
@@ -568,6 +603,10 @@ export type Database = {
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
+          og_image_url?: string | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_title?: string | null
           show_brands_button?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null

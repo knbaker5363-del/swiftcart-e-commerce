@@ -3,9 +3,10 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, MessageCircle, Image, Trash2, Instagram } from 'lucide-react';
+import { Upload, X, MessageCircle, Image, Trash2, Instagram, Search, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { compressImageToFile } from '@/lib/imageCompression';
@@ -42,6 +43,13 @@ const AdminSettings = () => {
   const [socialFacebook, setSocialFacebook] = useState('');
   const [socialSnapchat, setSocialSnapchat] = useState('');
   const [socialTiktok, setSocialTiktok] = useState('');
+  
+  // SEO settings
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoKeywords, setSeoKeywords] = useState('');
+  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null);
+  const [uploadingOgImage, setUploadingOgImage] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -61,8 +69,33 @@ const AdminSettings = () => {
       setSocialFacebook((settings as any).social_facebook || '');
       setSocialSnapchat((settings as any).social_snapchat || '');
       setSocialTiktok((settings as any).social_tiktok || '');
+      // SEO
+      setSeoTitle((settings as any).seo_title || '');
+      setSeoDescription((settings as any).seo_description || '');
+      setSeoKeywords((settings as any).seo_keywords || '');
+      setOgImageUrl((settings as any).og_image_url || null);
     }
   }, [settings]);
+
+  const handleOgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingOgImage(true);
+    try {
+      const compressedFile = await compressImageToFile(file, 1200, 630, 0.9);
+      const fileName = `og-image-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setOgImageUrl(publicUrl);
+      toast({ title: 'تم رفع صورة المشاركة بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+    } finally {
+      setUploadingOgImage(false);
+    }
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -144,6 +177,10 @@ const AdminSettings = () => {
         social_facebook: socialFacebook || null,
         social_snapchat: socialSnapchat || null,
         social_tiktok: socialTiktok || null,
+        seo_title: seoTitle || null,
+        seo_description: seoDescription || null,
+        seo_keywords: seoKeywords || null,
+        og_image_url: ogImageUrl,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       
@@ -376,6 +413,90 @@ const AdminSettings = () => {
             <div className="space-y-2">
               <Label>تيك توك</Label>
               <Input value={socialTiktok} onChange={e => setSocialTiktok(e.target.value)} placeholder="https://tiktok.com/..." dir="ltr" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* إعدادات SEO */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              إعدادات SEO ومحركات البحث
+            </CardTitle>
+            <CardDescription>تحسين ظهور متجرك في نتائج البحث</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>عنوان الموقع (Title)</Label>
+              <Input 
+                value={seoTitle} 
+                onChange={e => setSeoTitle(e.target.value)} 
+                placeholder="متجري - تسوق أفضل المنتجات"
+                maxLength={60}
+              />
+              <p className="text-xs text-muted-foreground">{seoTitle.length}/60 حرف - يظهر في تبويب المتصفح ونتائج البحث</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>وصف الموقع (Description)</Label>
+              <Textarea 
+                value={seoDescription} 
+                onChange={e => setSeoDescription(e.target.value)} 
+                placeholder="اكتشف مجموعة واسعة من المنتجات عالية الجودة بأسعار تنافسية"
+                maxLength={160}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">{seoDescription.length}/160 حرف - يظهر في نتائج البحث</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>الكلمات المفتاحية</Label>
+              <Input 
+                value={seoKeywords} 
+                onChange={e => setSeoKeywords(e.target.value)} 
+                placeholder="تسوق، منتجات، عروض، توصيل"
+              />
+              <p className="text-xs text-muted-foreground">افصل بين الكلمات بفاصلة</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>صورة المشاركة (OG Image)</Label>
+              <div className="flex items-center gap-4">
+                {ogImageUrl ? (
+                  <div className="relative">
+                    <img src={ogImageUrl} alt="OG" className="w-40 h-20 rounded-lg object-cover border" />
+                    <button onClick={() => setOgImageUrl(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-40 h-20 rounded-lg bg-muted flex items-center justify-center">
+                    <Image className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Input type="file" accept="image/*" onChange={handleOgImageUpload} disabled={uploadingOgImage} />
+                  <p className="text-sm text-muted-foreground mt-1">{uploadingOgImage ? 'جاري الرفع...' : 'صورة تظهر عند مشاركة الموقع (1200×630)'}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* معاينة Google */}
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                معاينة في نتائج البحث
+              </p>
+              <div className="bg-background p-3 rounded border">
+                <p className="text-blue-600 text-lg hover:underline cursor-pointer">
+                  {seoTitle || storeName || 'عنوان الموقع'}
+                </p>
+                <p className="text-green-700 text-sm">www.yourstore.com</p>
+                <p className="text-muted-foreground text-sm">
+                  {seoDescription || 'وصف الموقع يظهر هنا...'}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
