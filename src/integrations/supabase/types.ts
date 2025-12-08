@@ -519,6 +519,7 @@ export type Database = {
           text_style: string | null
           theme: string
           updated_at: string
+          visual_effects: Json | null
           whatsapp_country_code: string | null
           whatsapp_number: string | null
         }
@@ -572,6 +573,7 @@ export type Database = {
           text_style?: string | null
           theme?: string
           updated_at?: string
+          visual_effects?: Json | null
           whatsapp_country_code?: string | null
           whatsapp_number?: string | null
         }
@@ -625,6 +627,7 @@ export type Database = {
           text_style?: string | null
           theme?: string
           updated_at?: string
+          visual_effects?: Json | null
           whatsapp_country_code?: string | null
           whatsapp_number?: string | null
         }
