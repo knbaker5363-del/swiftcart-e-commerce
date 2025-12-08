@@ -111,21 +111,8 @@ const Category = () => {
 
       {/* Hero Banner with Background */}
       <section className="relative overflow-hidden">
-        {/* Background - Dynamic color from settings or category image */}
-        <div className="absolute inset-0">
-          {category?.image_url ? (
-            <>
-              <img 
-                src={category.image_url} 
-                alt={category.name} 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-            </>
-          ) : (
-            <div className="w-full h-full" style={{ backgroundColor: heroBannerColor }} />
-          )}
-        </div>
+        {/* Background - Dynamic color from settings */}
+        <div className="absolute inset-0" style={{ backgroundColor: heroBannerColor }} />
         
         {/* Content */}
         <div className="container relative py-12 md:py-16">
