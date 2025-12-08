@@ -151,8 +151,10 @@ const Home = () => {
         <div className="flex gap-6">
           {/* Desktop Sidebar */}
           {isSidebarMode && (
-            <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)]">
-              <CategoriesSidebar />
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <div className="sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                <CategoriesSidebar />
+              </div>
             </aside>
           )}
 

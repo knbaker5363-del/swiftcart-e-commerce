@@ -90,9 +90,8 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-xl border shadow-card overflow-hidden">
-      <ScrollArea className="flex-1">
-        <div className="p-3 space-y-1">
+    <div className="flex flex-col bg-card rounded-xl border shadow-card">
+      <div className="p-3 space-y-1">
           {/* Categories with customizable display */}
           {categories.map((category) => {
             const shapeClass = categoryConfig.shape === 'circle' ? 'rounded-full' : 'rounded-lg';
@@ -276,7 +275,7 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
             </>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
