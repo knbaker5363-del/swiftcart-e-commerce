@@ -12,7 +12,7 @@ interface Settings {
   animation_effect: string | null;
   accent_color: string | null;
   store_name_black: boolean;
-  category_display_style: 'grid' | 'list' | 'icon-list';
+  category_display_style: 'grid' | 'slider' | 'list' | 'icon-list';
   show_brands_button: boolean;
   // New appearance options
   background_style: 'solid' | 'gradient' | 'pattern' | 'image';
