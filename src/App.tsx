@@ -36,6 +36,7 @@ import AdminPromoCodes from "./pages/admin/AdminPromoCodes";
 import AdminGifts from "./pages/admin/AdminGifts";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminDisplay from "./pages/admin/AdminDisplay";
+import AdminAdvancedSettings from "./pages/admin/AdminAdvancedSettings";
 import NotFound from "./pages/NotFound";
 
 const AnimatedEffectsWrapper = () => {
@@ -97,6 +98,7 @@ const App = () => (
                         <Route path="gifts" element={<AdminGifts />} />
                         <Route path="analytics" element={<AdminAnalytics />} />
                         <Route path="display" element={<AdminDisplay />} />
+                        <Route path="advanced" element={<AdminAdvancedSettings />} />
                       </Route>
 
                       {/* 404 */}
