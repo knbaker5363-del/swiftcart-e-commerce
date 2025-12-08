@@ -41,6 +41,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedCustomVariants, setSelectedCustomVariants] = useState<Record<string, string>>({});
 
   // Get cart icon and text from settings
   const cartIconStyle = (settings as any)?.cart_icon_style || 'cart';
@@ -54,7 +55,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
     }
   }, [open, product?.id]);
 
-  // Return null if product is not provided
+  // Return null if product is not provided - AFTER all hooks
   if (!product) return null;
 
   // Stock management
@@ -103,9 +104,6 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   };
   
   const hasOptions = options.sizes.length > 0 || options.colors.length > 0 || options.customVariants.length > 0;
-  
-  // State for custom variant selections
-  const [selectedCustomVariants, setSelectedCustomVariants] = useState<Record<string, string>>({});
 
   const toggleAddon = (addonName: string) => {
     setSelectedAddons(prev => 
