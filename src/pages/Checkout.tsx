@@ -19,6 +19,12 @@ import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
 import { checkOrderRateLimit, recordOrderAttempt } from '@/lib/rateLimiter';
 import { cn } from '@/lib/utils';
+import { BouncingBalls } from '@/components/ui/bouncing-balls';
+import { ExclusiveOfferBadge } from '@/components/ui/exclusive-offer-badge';
+import { ConfettiEffect } from '@/components/ui/confetti-effect';
+import { FloatingParticles } from '@/components/ui/floating-particles';
+import { GlowingCard } from '@/components/ui/glowing-card';
+import { SlideToUnlock } from '@/components/ui/slide-to-unlock';
 
 const CITIES_DATA = {
   palestine: {
@@ -130,21 +136,28 @@ const CheckoutProgress = ({ currentStep }: { currentStep: number }) => {
   );
 };
 
-// Feature badges component
+// Feature badges component with enhanced animations
 const FeatureBadges = () => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
     {[
-      { icon: Truck, label: 'توصيل سريع', color: 'text-blue-500' },
-      { icon: Shield, label: 'دفع آمن', color: 'text-green-500' },
-      { icon: Clock, label: '24/7 دعم', color: 'text-orange-500' },
-      { icon: Gift, label: 'هدايا مجانية', color: 'text-pink-500' },
+      { icon: Truck, label: 'توصيل سريع', color: 'text-blue-500', bg: 'bg-blue-500/10 hover:bg-blue-500/20' },
+      { icon: Shield, label: 'دفع آمن', color: 'text-green-500', bg: 'bg-green-500/10 hover:bg-green-500/20' },
+      { icon: Clock, label: '24/7 دعم', color: 'text-orange-500', bg: 'bg-orange-500/10 hover:bg-orange-500/20' },
+      { icon: Gift, label: 'هدايا مجانية', color: 'text-pink-500', bg: 'bg-pink-500/10 hover:bg-pink-500/20' },
     ].map((feature, i) => (
       <div 
         key={i} 
-        className="flex items-center gap-2 p-3 bg-muted/50 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted transition-all duration-300 group"
+        className={cn(
+          "flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 group cursor-pointer",
+          "hover:shadow-lg hover:-translate-y-1",
+          feature.bg
+        )}
+        style={{ animationDelay: `${i * 100}ms` }}
       >
-        <feature.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", feature.color)} />
-        <span className="text-xs font-medium">{feature.label}</span>
+        <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center shadow-inner">
+          <feature.icon className={cn("h-4 w-4 transition-all group-hover:scale-125", feature.color)} />
+        </div>
+        <span className="text-xs font-bold">{feature.label}</span>
       </div>
     ))}
   </div>
@@ -196,7 +209,8 @@ const Checkout = () => {
   const [showGiftDialog, setShowGiftDialog] = useState(false);
   const [selectedGift, setSelectedGift] = useState<{ id: string; name: string; image_url: string | null; price: number } | null>(null);
   const [giftSkipped, setGiftSkipped] = useState(false);
-
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [useSlideButton, setUseSlideButton] = useState(true);
   // Track scroll for sticky header
   useEffect(() => {
     const handleScroll = () => {
@@ -495,6 +509,7 @@ const Checkout = () => {
       }
       
       setOrderMessage(message);
+      setShowConfetti(true);
       setShowOrderDialog(true);
       
       // Save order ID to localStorage for this device
@@ -542,7 +557,22 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 relative overflow-hidden" dir="rtl">
+      {/* Floating Particles Background */}
+      <FloatingParticles particleCount={15} />
+      
+      {/* Bouncing Balls Background */}
+      <BouncingBalls 
+        ballCount={4} 
+        minRadius={30} 
+        maxRadius={60} 
+        speed={0.5}
+        className="opacity-20"
+      />
+      
+      {/* Confetti on Order Success */}
+      <ConfettiEffect active={showConfetti} duration={4000} particleCount={80} />
+      
       {/* Sticky Header */}
       <div className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
@@ -652,6 +682,15 @@ const Checkout = () => {
         {/* Main Content - only show when settings loaded successfully */}
         {!settingsLoading && !settingsError && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Exclusive Offer Badge */}
+            <div className="flex justify-center mb-6">
+              <ExclusiveOfferBadge
+                label="عرض خاص"
+                description="توصيل مجاني للطلبات فوق 200₪!"
+                variant="success"
+              />
+            </div>
+            
             {/* Progress Steps */}
             <CheckoutProgress currentStep={1} />
             
@@ -659,9 +698,8 @@ const Checkout = () => {
             <FeatureBadges />
             
             <div className="grid lg:grid-cols-5 gap-8">
-              {/* Checkout Form - Takes more space */}
-              <div className="lg:col-span-3">
-                <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8 border transition-all duration-300 hover:shadow-xl">
+              <GlowingCard className="lg:col-span-3" borderGlow hoverEffect>
+                <div className="p-6 md:p-8">
                   <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                       <Phone className="h-6 w-6 text-primary" />
@@ -1061,7 +1099,7 @@ const Checkout = () => {
                   </div>
                 </form>
                 </div>
-              </div>
+              </GlowingCard>
 
               {/* Order Summary - Sticky on desktop */}
               <div className="lg:col-span-2">
