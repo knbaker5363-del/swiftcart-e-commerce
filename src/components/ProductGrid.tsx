@@ -74,7 +74,7 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
   const textSizes = getTextSizes();
 
   return (
-    <div className={`grid gap-2 md:gap-3 ${getGridClasses()}`}>
+    <div className={`grid gap-2 md:gap-3 ${getGridClasses()}`} dir="rtl">
       {products.map((product: any, index: number) => {
         const additionalImages = product.additional_images as string[] | null;
         const options = product.options as {
