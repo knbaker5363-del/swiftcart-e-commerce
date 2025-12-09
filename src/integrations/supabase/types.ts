@@ -517,6 +517,7 @@ export type Database = {
           seo_title: string | null
           show_brands_button: boolean | null
           show_header_logo: boolean | null
+          show_header_store_name: boolean | null
           show_image_border: boolean | null
           site_style: string | null
           social_facebook: string | null
@@ -588,6 +589,7 @@ export type Database = {
           seo_title?: string | null
           show_brands_button?: boolean | null
           show_header_logo?: boolean | null
+          show_header_store_name?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
@@ -659,6 +661,7 @@ export type Database = {
           seo_title?: string | null
           show_brands_button?: boolean | null
           show_header_logo?: boolean | null
+          show_header_store_name?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
