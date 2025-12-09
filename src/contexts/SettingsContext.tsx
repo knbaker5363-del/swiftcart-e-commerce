@@ -30,6 +30,7 @@ interface Settings {
   cart_icon_style: string;
   cart_button_text: string;
   font_family: string;
+  gift_icon_style: string;
   // SEO settings
   seo_title: string | null;
   seo_description: string | null;
@@ -169,6 +170,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         cart_icon_style: data.cart_icon_style || 'cart',
         cart_button_text: data.cart_button_text || 'إضافة للسلة',
         font_family: data.font_family || 'tajawal',
+        gift_icon_style: data.gift_icon_style || 'pink-gold',
         // SEO settings
         seo_title: data.seo_title || null,
         seo_description: data.seo_description || null,

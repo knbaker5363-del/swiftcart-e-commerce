@@ -1,7 +1,8 @@
 import { HiSparkles } from 'react-icons/hi2';
 import { PiGiftFill, PiStarFourFill, PiFireFill, PiCrownFill } from 'react-icons/pi';
 import { IoSparkles, IoRibbonSharp } from 'react-icons/io5';
-import { GiftIcon } from '@/components/ui/gift-icon';
+import { GiftIcon, GiftIconStyleType } from '@/components/ui/gift-icon';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface GiftNotificationBannerProps {
   currentAmount: number;
@@ -14,9 +15,12 @@ export const GiftNotificationBanner = ({
   minimumAmount,
   remainingAmount,
 }: GiftNotificationBannerProps) => {
+  const { settings } = useSettings();
   const progress = Math.min((currentAmount / minimumAmount) * 100, 100);
   const isEligible = currentAmount >= minimumAmount;
   const isClose = progress >= 70 && !isEligible;
+  
+  const giftIconStyle = ((settings as any)?.gift_icon_style || 'pink-gold') as GiftIconStyleType;
 
   return (
     <div 
@@ -43,7 +47,8 @@ export const GiftNotificationBanner = ({
           <GiftIcon 
             size="md" 
             animated={true}
-            glowColor={isEligible ? '#10B981' : isClose ? '#F97316' : '#EC4899'}
+            style={giftIconStyle}
+            glowColor={isEligible ? '#10B981' : isClose ? '#F97316' : undefined}
           />
           
           {/* Extra sparkle effect when eligible */}
@@ -111,7 +116,7 @@ export const GiftNotificationBanner = ({
                 className="absolute top-1/2 -translate-y-1/2 z-10"
                 style={{ left: `calc(${Math.min(progress, 92)}% - 10px)` }}
               >
-                <GiftIcon size="sm" animated={false} glowColor="transparent" />
+                <GiftIcon size="sm" animated={false} style={giftIconStyle} glowColor="transparent" />
               </div>
             )}
           </div>

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 import StorePreview from '@/components/admin/StorePreview';
+import { GiftIcon, giftIconStyleOptions, GiftIconStyleType } from '@/components/ui/gift-icon';
 
 // Cart icon options
 const cartIconOptions = [
@@ -131,6 +132,9 @@ const AdminDisplay = () => {
   const [cardsPerRowMobile, setCardsPerRowMobile] = useState(2);
   const [cardsPerRowDesktop, setCardsPerRowDesktop] = useState(4);
 
+  // Gift icon style
+  const [giftIconStyle, setGiftIconStyle] = useState<GiftIconStyleType>('pink-gold');
+
   // Load settings
   useEffect(() => {
     if (settings) {
@@ -155,6 +159,7 @@ const AdminDisplay = () => {
       setCardSize((settings as any)?.card_size || 'medium');
       setCardsPerRowMobile((settings as any)?.cards_per_row_mobile || 2);
       setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
+      setGiftIconStyle((settings as any)?.gift_icon_style || 'pink-gold');
     }
   }, [settings]);
 
@@ -215,6 +220,7 @@ const AdminDisplay = () => {
           card_size: cardSize,
           cards_per_row_mobile: cardsPerRowMobile,
           cards_per_row_desktop: cardsPerRowDesktop,
+          gift_icon_style: giftIconStyle,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -895,6 +901,39 @@ const AdminDisplay = () => {
                 سطح المكتب: {cardsPerRowDesktop} بطاقات | الجوال: {cardsPerRowMobile} بطاقات | الحجم: {cardSize === 'small' ? 'صغير' : cardSize === 'large' ? 'كبير' : 'متوسط'}
               </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Gift Icon Style */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gift className="h-5 w-5" />
+            شكل أيقونة الهدية
+          </CardTitle>
+          <CardDescription>اختر شكل ولون أيقونة الهدية التي تظهر في عروض الهدايا</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {giftIconStyleOptions.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => setGiftIconStyle(option.id)}
+                className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all hover:scale-105 ${
+                  giftIconStyle === option.id
+                    ? 'border-primary bg-primary/10 shadow-lg'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <GiftIcon size="md" style={option.id} animated={giftIconStyle === option.id} />
+                <div className="text-center">
+                  <div className="font-semibold text-sm">{option.name}</div>
+                  <div className="text-xs text-muted-foreground">{option.description}</div>
+                </div>
+                {giftIconStyle === option.id && <Check className="h-4 w-4 text-primary" />}
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
