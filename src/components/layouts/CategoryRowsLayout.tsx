@@ -188,9 +188,9 @@ const CategoryRow = ({
   };
 
   return (
-    <section className="space-y-4">
+    <Card className="p-4 bg-card border border-border rounded-xl shadow-sm">
       {/* Category Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4" dir="rtl">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
           {category.image_url && (
             <img
@@ -213,8 +213,8 @@ const CategoryRow = ({
 
       {/* Products Row */}
       {isScrollable ? (
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-4 pb-4">
+        <ScrollArea className="w-full whitespace-nowrap" dir="rtl">
+          <div className="flex gap-4 pb-4 flex-row-reverse">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -222,13 +222,13 @@ const CategoryRow = ({
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" dir="rtl">
           {products.slice(0, productsPerRow).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
-    </section>
+    </Card>
   );
 };
 
