@@ -54,6 +54,7 @@ const AdminLayout = () => {
     {
       title: 'العروض والتسويق',
       items: [
+        { to: '/admin/special-offers', icon: Sparkles, label: 'العروض الخاصة' },
         { to: '/admin/promo-codes', icon: Tag, label: 'أكواد الخصم' },
         { to: '/admin/gifts', icon: Gift, label: 'الهدايا والعروض' },
         { to: '/admin/announcement', icon: Megaphone, label: 'شريط الإعلانات' },

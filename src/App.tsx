@@ -39,6 +39,9 @@ import AdminDisplay from "./pages/admin/AdminDisplay";
 import AdminAdvancedSettings from "./pages/admin/AdminAdvancedSettings";
 import AdminEffects from "./pages/admin/AdminEffects";
 import AdminAnnouncement from "./pages/admin/AdminAnnouncement";
+import AdminSpecialOffers from "./pages/admin/AdminSpecialOffers";
+import SpecialOffers from "./pages/SpecialOffers";
+import SpecialOfferDetail from "./pages/SpecialOfferDetail";
 import NotFound from "./pages/NotFound";
 
 const AnimatedEffectsWrapper = () => {
@@ -86,6 +89,8 @@ const App = () => (
                       <Route path="/brands" element={<Brands />} />
                       <Route path="/brand/:id" element={<BrandProducts />} />
                       <Route path="/category/:id" element={<Category />} />
+                      <Route path="/special-offers" element={<SpecialOffers />} />
+                      <Route path="/special-offer/:id" element={<SpecialOfferDetail />} />
                       <Route path="/auth" element={<Auth />} />
 
                       {/* Admin Routes - Only accessible via /admin123 */}
@@ -103,6 +108,7 @@ const App = () => (
                         <Route path="advanced" element={<AdminAdvancedSettings />} />
                         <Route path="effects" element={<AdminEffects />} />
                         <Route path="announcement" element={<AdminAnnouncement />} />
+                        <Route path="special-offers" element={<AdminSpecialOffers />} />
                       </Route>
 
                       {/* 404 */}
