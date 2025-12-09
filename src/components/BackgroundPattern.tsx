@@ -1,4 +1,21 @@
 import { useSettings } from '@/contexts/SettingsContext';
+import { useMemo } from 'react';
+import { 
+  ShoppingBag, 
+  Heart, 
+  Star, 
+  Gift, 
+  Sparkles, 
+  Crown, 
+  Gem, 
+  Package,
+  ShoppingCart,
+  Percent,
+  Tag,
+  Zap
+} from 'lucide-react';
+
+const ICONS = [ShoppingBag, Heart, Star, Gift, Sparkles, Crown, Gem, Package, ShoppingCart, Percent, Tag, Zap];
 
 const BackgroundPattern = () => {
   const { settings } = useSettings();
@@ -6,6 +23,19 @@ const BackgroundPattern = () => {
   const backgroundStyle = (settings as any)?.background_style || 'solid';
   const backgroundPattern = (settings as any)?.background_pattern || null;
   const backgroundImageUrl = (settings as any)?.background_image_url || null;
+
+  // Generate random icons positions (memoized to prevent re-rendering)
+  const randomIcons = useMemo(() => {
+    return [...Array(30)].map((_, i) => ({
+      Icon: ICONS[Math.floor(Math.random() * ICONS.length)],
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: 16 + Math.random() * 24,
+      rotation: Math.random() * 360,
+      delay: Math.random() * 5,
+      duration: 8 + Math.random() * 4,
+    }));
+  }, []);
 
   // Don't render anything for solid background
   if (backgroundStyle === 'solid') return null;
@@ -24,12 +54,26 @@ const BackgroundPattern = () => {
           />
         )}
         {backgroundPattern === 'lines' && (
-          <div 
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(90deg, currentColor 0px, currentColor 1px, transparent 1px, transparent 30px)',
-            }}
-          />
+          <div className="absolute inset-0">
+            {randomIcons.map((item, i) => {
+              const IconComponent = item.Icon;
+              return (
+                <div
+                  key={i}
+                  className="absolute text-primary/[0.06] animate-pulse"
+                  style={{
+                    left: `${item.left}%`,
+                    top: `${item.top}%`,
+                    transform: `rotate(${item.rotation}deg)`,
+                    animationDelay: `${item.delay}s`,
+                    animationDuration: `${item.duration}s`,
+                  }}
+                >
+                  <IconComponent size={item.size} strokeWidth={1.5} />
+                </div>
+              );
+            })}
+          </div>
         )}
         {backgroundPattern === 'bubbles' && (
           <div className="absolute inset-0">
