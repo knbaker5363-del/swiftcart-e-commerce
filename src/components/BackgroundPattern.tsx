@@ -138,7 +138,7 @@ const BackgroundPattern = () => {
               return (
                 <div
                   key={i}
-                  className="absolute text-primary/[0.30] animate-pulse"
+                  className="absolute text-primary/[0.20] animate-pulse"
                   style={{
                     left: `${item.left}%`,
                     top: `${item.top}%`,
