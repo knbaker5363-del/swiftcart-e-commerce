@@ -47,8 +47,16 @@ interface CategoriesSidebarProps {
 
 const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
   const { settings } = useSettings();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>(() => {
+    // Load from localStorage immediately
+    const cached = localStorage.getItem('cached_categories');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [brands, setBrands] = useState<Brand[]>(() => {
+    // Load from localStorage immediately
+    const cached = localStorage.getItem('cached_brands');
+    return cached ? JSON.parse(cached) : [];
+  });
 
   const getCategoryConfig = (): CategoryDisplayConfig => {
     try {
@@ -76,8 +84,14 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
         supabase.from('brands').select('*').order('name', { ascending: true })
       ]);
       
-      if (categoriesRes.data) setCategories(categoriesRes.data);
-      if (brandsRes.data) setBrands(brandsRes.data);
+      if (categoriesRes.data) {
+        setCategories(categoriesRes.data);
+        localStorage.setItem('cached_categories', JSON.stringify(categoriesRes.data));
+      }
+      if (brandsRes.data) {
+        setBrands(brandsRes.data);
+        localStorage.setItem('cached_brands', JSON.stringify(brandsRes.data));
+      }
     };
     fetchData();
   }, []);
