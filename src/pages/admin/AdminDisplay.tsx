@@ -20,7 +20,37 @@ import {
   Paintbrush,
   Image,
   X,
-  Upload
+  Upload,
+  Heart,
+  Star,
+  Crown,
+  Gem,
+  Percent,
+  Tag,
+  Zap,
+  Coffee,
+  Cookie,
+  Cake,
+  IceCream,
+  Pizza,
+  Apple,
+  Cherry,
+  Grape,
+  Sandwich,
+  Soup,
+  Salad,
+  UtensilsCrossed,
+  Dumbbell,
+  Trophy,
+  Medal,
+  Target,
+  Bike,
+  Timer,
+  Footprints,
+  Mountain,
+  Flame,
+  Award,
+  LucideIcon
 } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 import StorePreview from '@/components/admin/StorePreview';
@@ -95,7 +125,46 @@ const animationEffects = [
   { id: 'leaves', name: 'أوراق', icon: '🍃' },
 ];
 
-// Loading styles
+// Available background icons for selection
+const availableBackgroundIcons: { id: string; name: string; icon: LucideIcon }[] = [
+  // Shopping
+  { id: 'ShoppingBag', name: 'حقيبة تسوق', icon: ShoppingBag },
+  { id: 'ShoppingCart', name: 'عربة تسوق', icon: ShoppingCart },
+  { id: 'Heart', name: 'قلب', icon: Heart },
+  { id: 'Star', name: 'نجمة', icon: Star },
+  { id: 'Gift', name: 'هدية', icon: Gift },
+  { id: 'Crown', name: 'تاج', icon: Crown },
+  { id: 'Gem', name: 'الماس', icon: Gem },
+  { id: 'Sparkles', name: 'لمعان', icon: Sparkles },
+  { id: 'Percent', name: 'نسبة', icon: Percent },
+  { id: 'Tag', name: 'علامة', icon: Tag },
+  { id: 'Zap', name: 'برق', icon: Zap },
+  { id: 'Package', name: 'طرد', icon: Package },
+  // Food
+  { id: 'Coffee', name: 'قهوة', icon: Coffee },
+  { id: 'Cookie', name: 'بسكويت', icon: Cookie },
+  { id: 'Cake', name: 'كعكة', icon: Cake },
+  { id: 'IceCream', name: 'آيس كريم', icon: IceCream },
+  { id: 'Pizza', name: 'بيتزا', icon: Pizza },
+  { id: 'Apple', name: 'تفاحة', icon: Apple },
+  { id: 'Cherry', name: 'كرز', icon: Cherry },
+  { id: 'Grape', name: 'عنب', icon: Grape },
+  { id: 'Sandwich', name: 'ساندويتش', icon: Sandwich },
+  { id: 'Soup', name: 'شوربة', icon: Soup },
+  { id: 'Salad', name: 'سلطة', icon: Salad },
+  { id: 'UtensilsCrossed', name: 'أدوات طعام', icon: UtensilsCrossed },
+  // Sports
+  { id: 'Dumbbell', name: 'دمبل', icon: Dumbbell },
+  { id: 'Trophy', name: 'كأس', icon: Trophy },
+  { id: 'Medal', name: 'ميدالية', icon: Medal },
+  { id: 'Target', name: 'هدف', icon: Target },
+  { id: 'Bike', name: 'دراجة', icon: Bike },
+  { id: 'Timer', name: 'مؤقت', icon: Timer },
+  { id: 'Footprints', name: 'أقدام', icon: Footprints },
+  { id: 'Mountain', name: 'جبل', icon: Mountain },
+  { id: 'Flame', name: 'لهب', icon: Flame },
+  { id: 'Award', name: 'جائزة', icon: Award },
+];
 const loadingStyleOptions = [
   { id: 'spinner', name: 'دائري', icon: '🔄', description: 'شعار التحميل الكلاسيكي' },
   { id: 'bouncing', name: 'كرات', icon: '⚽', description: 'كرات ترتد' },
@@ -126,6 +195,7 @@ const AdminDisplay = () => {
   const [backgroundStyle, setBackgroundStyle] = useState('solid');
   const [backgroundPattern, setBackgroundPattern] = useState<string | null>(null);
   const [backgroundIconType, setBackgroundIconType] = useState('shopping');
+  const [backgroundSelectedIcons, setBackgroundSelectedIcons] = useState<string[]>(['ShoppingBag', 'Heart', 'Star']);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
 
@@ -169,6 +239,7 @@ const AdminDisplay = () => {
       setBackgroundStyle((settings as any)?.background_style || 'solid');
       setBackgroundPattern((settings as any)?.background_pattern || null);
       setBackgroundIconType((settings as any)?.background_icon_type || 'shopping');
+      setBackgroundSelectedIcons((settings as any)?.background_selected_icons || ['ShoppingBag', 'Heart', 'Star']);
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
       setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
       setLogoShape((settings as any)?.logo_shape || 'circle');
@@ -257,6 +328,7 @@ const AdminDisplay = () => {
           background_style: backgroundStyle,
           background_pattern: backgroundPattern,
           background_icon_type: backgroundIconType,
+          background_selected_icons: backgroundSelectedIcons,
           background_image_url: backgroundImageUrl,
           header_layout: headerLayout,
           logo_shape: logoShape,
@@ -921,28 +993,73 @@ const AdminDisplay = () => {
                 </div>
               </div>
 
-              {/* Icon type selection - only show for 'lines' (icons) pattern */}
+              {/* Icon selection - only show for 'lines' (icons) pattern */}
               {backgroundPattern === 'lines' && (
                 <div>
-                  <Label className="text-base font-medium mb-3 block">نوع الأيقونات</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { id: 'shopping', name: 'تسوق', icon: '🛍️' },
-                      { id: 'food', name: 'طعام', icon: '🍔' },
-                      { id: 'sports', name: 'رياضة', icon: '⚽' },
-                    ].map(iconType => (
-                      <button
-                        key={iconType.id}
-                        onClick={() => setBackgroundIconType(iconType.id)}
-                        className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
-                          backgroundIconType === iconType.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <div className="text-2xl mb-1">{iconType.icon}</div>
-                        <div className="text-xs font-medium">{iconType.name}</div>
-                      </button>
-                    ))}
+                  <Label className="text-base font-medium mb-3 block">
+                    اختر 3 أيقونات للخلفية
+                    <span className="text-muted-foreground text-sm mr-2">
+                      ({backgroundSelectedIcons.length}/3)
+                    </span>
+                  </Label>
+                  <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                    {availableBackgroundIcons.map((iconOption) => {
+                      const IconComp = iconOption.icon;
+                      const isSelected = backgroundSelectedIcons.includes(iconOption.id);
+                      return (
+                        <button
+                          key={iconOption.id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setBackgroundSelectedIcons(prev => prev.filter(i => i !== iconOption.id));
+                            } else if (backgroundSelectedIcons.length < 3) {
+                              setBackgroundSelectedIcons(prev => [...prev, iconOption.id]);
+                            }
+                          }}
+                          className={`p-2 rounded-lg border-2 flex flex-col items-center justify-center transition-all hover:scale-105 ${
+                            isSelected 
+                              ? 'border-primary bg-primary/20 shadow-md' 
+                              : backgroundSelectedIcons.length >= 3 
+                                ? 'border-border opacity-40 cursor-not-allowed' 
+                                : 'border-border hover:border-primary/50'
+                          }`}
+                          disabled={!isSelected && backgroundSelectedIcons.length >= 3}
+                          title={iconOption.name}
+                        >
+                          <IconComp className="h-5 w-5" />
+                          {isSelected && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                              <Check className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
+                  {backgroundSelectedIcons.length > 0 && (
+                    <div className="mt-3 p-2 bg-muted rounded-lg">
+                      <p className="text-xs text-muted-foreground mb-2">الأيقونات المختارة:</p>
+                      <div className="flex gap-2">
+                        {backgroundSelectedIcons.map(iconId => {
+                          const iconData = availableBackgroundIcons.find(i => i.id === iconId);
+                          if (!iconData) return null;
+                          const IconComp = iconData.icon;
+                          return (
+                            <div key={iconId} className="flex items-center gap-1 bg-background px-2 py-1 rounded border">
+                              <IconComp className="h-4 w-4" />
+                              <span className="text-xs">{iconData.name}</span>
+                              <button 
+                                onClick={() => setBackgroundSelectedIcons(prev => prev.filter(i => i !== iconId))}
+                                className="text-destructive hover:text-destructive/80"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
