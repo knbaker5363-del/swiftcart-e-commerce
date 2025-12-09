@@ -1,7 +1,7 @@
 import { HiSparkles } from 'react-icons/hi2';
 import { PiGiftFill, PiStarFourFill, PiFireFill, PiCrownFill } from 'react-icons/pi';
 import { IoSparkles, IoRibbonSharp } from 'react-icons/io5';
-import giftImage from '@/assets/gift-icon.png';
+import { GiftIcon } from '@/components/ui/gift-icon';
 
 interface GiftNotificationBannerProps {
   currentAmount: number;
@@ -33,23 +33,20 @@ export const GiftNotificationBanner = ({
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
 
       <div className="relative z-10 flex items-center gap-4">
-        {/* Gift Image */}
+        {/* Gift Icon */}
         <div 
           className={`
             relative transition-all duration-300 flex-shrink-0
             ${isEligible ? 'scale-110' : isClose ? 'scale-105' : 'scale-100'}
           `}
         >
-          <img 
-            src={giftImage} 
-            alt="هدية" 
-            className={`
-              w-16 h-16 object-contain drop-shadow-lg
-              ${isEligible ? 'animate-pulse' : ''}
-            `}
+          <GiftIcon 
+            size="md" 
+            animated={true}
+            glowColor={isEligible ? '#10B981' : isClose ? '#F97316' : '#EC4899'}
           />
           
-          {/* Sparkle effect around gift */}
+          {/* Extra sparkle effect when eligible */}
           {isEligible && (
             <div className="absolute -inset-2">
               <HiSparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400 animate-pulse" />
@@ -111,10 +108,10 @@ export const GiftNotificationBanner = ({
             {/* Gift icon at the end of progress */}
             {progress > 0 && (
               <div 
-                className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg z-10 border-2 border-primary overflow-hidden"
-                style={{ left: `calc(${Math.min(progress, 95)}% - 12px)` }}
+                className="absolute top-1/2 -translate-y-1/2 z-10"
+                style={{ left: `calc(${Math.min(progress, 92)}% - 10px)` }}
               >
-                <img src={giftImage} alt="" className="w-4 h-4 object-contain" />
+                <GiftIcon size="sm" animated={false} glowColor="transparent" />
               </div>
             )}
           </div>
