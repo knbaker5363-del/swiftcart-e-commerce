@@ -489,6 +489,7 @@ export type Database = {
           delivery_west_bank: number | null
           favicon_url: string | null
           font_family: string | null
+          gift_icon_style: string | null
           header_layout: string | null
           header_logo_position: string | null
           hero_banner_color: string | null
@@ -543,6 +544,7 @@ export type Database = {
           delivery_west_bank?: number | null
           favicon_url?: string | null
           font_family?: string | null
+          gift_icon_style?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hero_banner_color?: string | null
@@ -597,6 +599,7 @@ export type Database = {
           delivery_west_bank?: number | null
           favicon_url?: string | null
           font_family?: string | null
+          gift_icon_style?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hero_banner_color?: string | null
