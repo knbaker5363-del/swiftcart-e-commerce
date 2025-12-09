@@ -498,6 +498,8 @@ export type Database = {
           checkout_badges: Json | null
           checkout_badges_enabled: boolean | null
           created_at: string
+          deals_button_icon: string | null
+          deals_button_name: string | null
           delivery_inside: number | null
           delivery_jerusalem: number | null
           delivery_west_bank: number | null
@@ -521,14 +523,20 @@ export type Database = {
           location: string | null
           logo_shape: string | null
           logo_url: string | null
+          offers_button_icon: string | null
+          offers_button_link: string | null
+          offers_button_name: string | null
           og_image_url: string | null
           seo_description: string | null
           seo_keywords: string | null
           seo_title: string | null
           show_brands_button: boolean | null
+          show_brands_slider: boolean | null
+          show_deals_button: boolean | null
           show_header_logo: boolean | null
           show_header_store_name: boolean | null
           show_image_border: boolean | null
+          show_offers_button: boolean | null
           site_style: string | null
           social_facebook: string | null
           social_icon_style: string | null
@@ -581,6 +589,8 @@ export type Database = {
           checkout_badges?: Json | null
           checkout_badges_enabled?: boolean | null
           created_at?: string
+          deals_button_icon?: string | null
+          deals_button_name?: string | null
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
@@ -604,14 +614,20 @@ export type Database = {
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
+          offers_button_icon?: string | null
+          offers_button_link?: string | null
+          offers_button_name?: string | null
           og_image_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
           show_brands_button?: boolean | null
+          show_brands_slider?: boolean | null
+          show_deals_button?: boolean | null
           show_header_logo?: boolean | null
           show_header_store_name?: boolean | null
           show_image_border?: boolean | null
+          show_offers_button?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
           social_icon_style?: string | null
@@ -664,6 +680,8 @@ export type Database = {
           checkout_badges?: Json | null
           checkout_badges_enabled?: boolean | null
           created_at?: string
+          deals_button_icon?: string | null
+          deals_button_name?: string | null
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
@@ -687,14 +705,20 @@ export type Database = {
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
+          offers_button_icon?: string | null
+          offers_button_link?: string | null
+          offers_button_name?: string | null
           og_image_url?: string | null
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
           show_brands_button?: boolean | null
+          show_brands_slider?: boolean | null
+          show_deals_button?: boolean | null
           show_header_logo?: boolean | null
           show_header_store_name?: boolean | null
           show_image_border?: boolean | null
+          show_offers_button?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
           social_icon_style?: string | null

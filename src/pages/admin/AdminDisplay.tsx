@@ -292,6 +292,15 @@ const AdminDisplay = () => {
   const [storeNameImageUrl, setStoreNameImageUrl] = useState<string | null>(null);
   const [uploadingNameImage, setUploadingNameImage] = useState(false);
 
+  // Buttons customization
+  const [showBrandsSlider, setShowBrandsSlider] = useState(false);
+  const [showDealsButton, setShowDealsButton] = useState(true);
+  const [dealsButtonName, setDealsButtonName] = useState('كافة الخصومات');
+  const [dealsButtonIcon, setDealsButtonIcon] = useState('Percent');
+  const [showOffersButton, setShowOffersButton] = useState(true);
+  const [offersButtonName, setOffersButtonName] = useState('العروض الخاصة بنا');
+  const [offersButtonIcon, setOffersButtonIcon] = useState('Sparkles');
+
   // Load settings
   useEffect(() => {
     if (settings) {
@@ -329,6 +338,14 @@ const AdminDisplay = () => {
       setShowHeaderLogo((settings as any)?.show_header_logo !== false);
       setShowHeaderStoreName((settings as any)?.show_header_store_name !== false);
       setStoreNameImageUrl((settings as any)?.store_name_image_url || null);
+      // Button customization
+      setShowBrandsSlider((settings as any)?.show_brands_slider === true);
+      setShowDealsButton((settings as any)?.show_deals_button !== false);
+      setDealsButtonName((settings as any)?.deals_button_name || 'كافة الخصومات');
+      setDealsButtonIcon((settings as any)?.deals_button_icon || 'Percent');
+      setShowOffersButton((settings as any)?.show_offers_button !== false);
+      setOffersButtonName((settings as any)?.offers_button_name || 'العروض الخاصة بنا');
+      setOffersButtonIcon((settings as any)?.offers_button_icon || 'Sparkles');
     }
   }, [settings]);
 
@@ -428,6 +445,14 @@ const AdminDisplay = () => {
           layout_show_category_view_all: layoutShowViewAll,
           category_row_bg_color: categoryRowBgColor,
           category_row_transparent: categoryRowTransparent,
+          // Button customization
+          show_brands_slider: showBrandsSlider,
+          show_deals_button: showDealsButton,
+          deals_button_name: dealsButtonName,
+          deals_button_icon: dealsButtonIcon,
+          show_offers_button: showOffersButton,
+          offers_button_name: offersButtonName,
+          offers_button_icon: offersButtonIcon,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -625,7 +650,114 @@ const AdminDisplay = () => {
         </CardContent>
       </Card>
 
-      {/* Preview Panel - شاشة المعاينة */}
+      {/* Buttons Customization */}
+      <Card className="border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-500" />
+            تخصيص الأزرار الرئيسية
+          </CardTitle>
+          <CardDescription>تحكم بأزرار البراندات والعروض والخصومات</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Brands Slider Toggle */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
+            <div>
+              <Label className="text-base font-semibold">عرض سلايدر البراندات</Label>
+              <p className="text-sm text-muted-foreground">عرض شريط تمرير للبراندات أسفل زر البراندات</p>
+            </div>
+            <Switch
+              checked={showBrandsSlider}
+              onCheckedChange={setShowBrandsSlider}
+            />
+          </div>
+
+          {/* Deals Button */}
+          <div className="p-4 rounded-lg border bg-gradient-to-l from-red-500/10 to-transparent space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">زر الخصومات</Label>
+                <p className="text-sm text-muted-foreground">الزر الأحمر على اليمين</p>
+              </div>
+              <Switch
+                checked={showDealsButton}
+                onCheckedChange={setShowDealsButton}
+              />
+            </div>
+            {showDealsButton && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm">اسم الزر</Label>
+                  <Input
+                    value={dealsButtonName}
+                    onChange={(e) => setDealsButtonName(e.target.value)}
+                    placeholder="كافة الخصومات"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm">الأيقونة</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {['Percent', 'Tag', 'Sparkles', 'Gift', 'Flame', 'Star', 'Zap'].map((icon) => (
+                      <button
+                        key={icon}
+                        onClick={() => setDealsButtonIcon(icon)}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          dealsButtonIcon === icon ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <span className="text-sm">{icon}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Offers Button */}
+          <div className="p-4 rounded-lg border bg-gradient-to-l from-amber-500/10 to-transparent space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">زر العروض الخاصة</Label>
+                <p className="text-sm text-muted-foreground">الزر البرتقالي على اليسار</p>
+              </div>
+              <Switch
+                checked={showOffersButton}
+                onCheckedChange={setShowOffersButton}
+              />
+            </div>
+            {showOffersButton && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm">اسم الزر</Label>
+                  <Input
+                    value={offersButtonName}
+                    onChange={(e) => setOffersButtonName(e.target.value)}
+                    placeholder="العروض الخاصة بنا"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm">الأيقونة</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {['Sparkles', 'Gift', 'Flame', 'Star', 'Zap', 'Heart', 'Crown'].map((icon) => (
+                      <button
+                        key={icon}
+                        onClick={() => setOffersButtonIcon(icon)}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          offersButtonIcon === icon ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <span className="text-sm">{icon}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </CardContent>
+      </Card>
       <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
