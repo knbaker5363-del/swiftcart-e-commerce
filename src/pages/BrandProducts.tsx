@@ -7,7 +7,7 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Award, Heart, ArrowRight } from 'lucide-react';
+import { Award, Heart, ArrowRight, Home } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import ProductQuickView from '@/components/ProductQuickView';
@@ -103,14 +103,24 @@ const BrandProducts = () => {
         
         {/* Content */}
         <div className="container relative py-12 md:py-16">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)} 
-            className="gap-2 text-white hover:bg-white/20 mb-4"
-          >
-            <ArrowRight className="h-4 w-4" />
-            {backButtonText}
-          </Button>
+          <div className="flex items-center gap-2 mb-4">
+            <Button 
+              variant="secondary" 
+              onClick={() => navigate('/')} 
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
+            >
+              <Home className="h-4 w-4" />
+              الرئيسية
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)} 
+              className="gap-2 text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <ArrowRight className="h-4 w-4" />
+              {backButtonText}
+            </Button>
+          </div>
           
           <div className="flex items-center gap-4 animate-fade-in">
             {brand?.logo_url ? (
