@@ -137,6 +137,7 @@ const AdminDisplay = () => {
 
   // Header logo settings
   const [showHeaderLogo, setShowHeaderLogo] = useState(true);
+  const [showHeaderStoreName, setShowHeaderStoreName] = useState(true);
   const [storeNameImageUrl, setStoreNameImageUrl] = useState<string | null>(null);
   const [uploadingNameImage, setUploadingNameImage] = useState(false);
 
@@ -166,6 +167,7 @@ const AdminDisplay = () => {
       setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
       setGiftIconStyle((settings as any)?.gift_icon_style || 'pink-gold');
       setShowHeaderLogo((settings as any)?.show_header_logo !== false);
+      setShowHeaderStoreName((settings as any)?.show_header_store_name !== false);
       setStoreNameImageUrl((settings as any)?.store_name_image_url || null);
     }
   }, [settings]);
@@ -249,6 +251,7 @@ const AdminDisplay = () => {
           cards_per_row_desktop: cardsPerRowDesktop,
           gift_icon_style: giftIconStyle,
           show_header_logo: showHeaderLogo,
+          show_header_store_name: showHeaderStoreName,
           store_name_image_url: storeNameImageUrl,
           store_layout_style: storeLayoutStyle,
           layout_products_per_category_row: layoutProductsPerRow,
@@ -498,15 +501,27 @@ const AdminDisplay = () => {
           <CardDescription>تخصيص عناصر الهيدر والشعار</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Show/Hide Logo */}
+          {/* Show/Hide Logo Icon */}
           <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
             <div>
-              <Label className="text-base font-semibold">إظهار اللوجو</Label>
-              <p className="text-sm text-muted-foreground">إظهار أو إخفاء شعار المتجر في الهيدر</p>
+              <Label className="text-base font-semibold">إظهار أيقونة اللوجو</Label>
+              <p className="text-sm text-muted-foreground">إظهار أو إخفاء الأيقونة الدائرية/المربعة للشعار</p>
             </div>
             <Switch
               checked={showHeaderLogo}
               onCheckedChange={setShowHeaderLogo}
+            />
+          </div>
+
+          {/* Show/Hide Store Name */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
+            <div>
+              <Label className="text-base font-semibold">إظهار اسم المتجر</Label>
+              <p className="text-sm text-muted-foreground">إظهار أو إخفاء اسم المتجر النصي أو الصورة النصية</p>
+            </div>
+            <Switch
+              checked={showHeaderStoreName}
+              onCheckedChange={setShowHeaderStoreName}
             />
           </div>
 

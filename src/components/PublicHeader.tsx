@@ -69,36 +69,47 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const logoShape = (settings as any)?.logo_shape || 'circle';
   const logoShapeClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-lg';
   const showHeaderLogo = (settings as any)?.show_header_logo !== false;
+  const showHeaderStoreName = (settings as any)?.show_header_store_name !== false;
   const storeNameImageUrl = (settings as any)?.store_name_image_url;
 
   // Logo component for header
   const HeaderLogo = () => {
-    if (!showHeaderLogo) return null;
+    // If both are hidden, return null
+    if (!showHeaderLogo && !showHeaderStoreName) return null;
     
     return (
       <Link to="/" className="flex items-center gap-3 shrink-0">
-        {settings?.logo_url && (
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
-            <img src={settings.logo_url} alt={settings.store_name || 'شعار المتجر'} className="w-full h-full object-cover" />
-          </div>
+        {/* Logo icon - only show if showHeaderLogo is true */}
+        {showHeaderLogo && (
+          <>
+            {settings?.logo_url ? (
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
+                <img src={settings.logo_url} alt={settings.store_name || 'شعار المتجر'} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
+                <span className="text-base sm:text-xl font-bold text-primary-foreground">
+                  {settings?.store_name?.charAt(0) || 'م'}
+                </span>
+              </div>
+            )}
+          </>
         )}
-        {!settings?.logo_url && (
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
-            <span className="text-base sm:text-xl font-bold text-primary-foreground">
-              {settings?.store_name?.charAt(0) || 'م'}
-            </span>
-          </div>
-        )}
-        {storeNameImageUrl ? (
-          <img 
-            src={storeNameImageUrl} 
-            alt={settings?.store_name || 'اسم المتجر'} 
-            className="max-h-8 sm:max-h-10 object-contain"
-          />
-        ) : (
-          <h1 className={`text-lg sm:text-2xl font-bold truncate max-w-[140px] sm:max-w-none ${settings?.store_name_black ? 'text-foreground' : 'bg-gradient-primary bg-clip-text text-transparent'}`}>
-            {settings?.store_name || 'متجري'}
-          </h1>
+        {/* Store name/image - only show if showHeaderStoreName is true */}
+        {showHeaderStoreName && (
+          <>
+            {storeNameImageUrl ? (
+              <img 
+                src={storeNameImageUrl} 
+                alt={settings?.store_name || 'اسم المتجر'} 
+                className="max-h-12 sm:max-h-16 object-contain"
+              />
+            ) : (
+              <h1 className={`text-lg sm:text-2xl font-bold truncate max-w-[140px] sm:max-w-none ${settings?.store_name_black ? 'text-foreground' : 'bg-gradient-primary bg-clip-text text-transparent'}`}>
+                {settings?.store_name || 'متجري'}
+              </h1>
+            )}
+          </>
         )}
       </Link>
     );
