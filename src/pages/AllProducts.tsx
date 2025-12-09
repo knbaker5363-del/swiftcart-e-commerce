@@ -24,6 +24,7 @@ const AllProducts = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
+  const backButtonText = (settings as any)?.back_button_text || 'رجوع';
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['all-products'],
@@ -81,7 +82,7 @@ const AllProducts = () => {
             className="gap-2 text-white hover:bg-white/20 mb-4"
           >
             <ArrowRight className="h-4 w-4" />
-            رجوع
+            {backButtonText}
           </Button>
           
           <div className="flex flex-col items-center justify-center gap-4 animate-fade-in text-center">
