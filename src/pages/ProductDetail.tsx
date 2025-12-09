@@ -15,6 +15,7 @@ import { ArrowRight, ShoppingCart, Heart } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import SEOManager from '@/components/SEOManager';
 import ProductSchemaMarkup from '@/components/ProductSchemaMarkup';
+import Breadcrumb from '@/components/Breadcrumb';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -228,14 +229,13 @@ const ProductDetail = () => {
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <div className="container py-8">
-        <Button
-          variant="ghost"
-          className="mb-6"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowRight className="ml-2 h-4 w-4" />
-          رجوع
-        </Button>
+        <Breadcrumb 
+          items={[
+            ...(product?.categories?.name ? [{ label: product.categories.name, href: `/category/${product.category_id}` }] : []),
+            { label: product?.name || 'المنتج' }
+          ]} 
+          className="mb-6 [&_*]:text-foreground [&_svg]:text-muted-foreground"
+        />
 
         {isLoading ? (
           <div className="grid md:grid-cols-2 gap-8">

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
+import Breadcrumb from '@/components/Breadcrumb';
 
 interface Order {
   id: string;
@@ -115,6 +116,11 @@ const MyOrders = () => {
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <div className="container py-8 max-w-4xl">
+        <Breadcrumb 
+          items={[{ label: 'طلباتي' }]} 
+          className="mb-6 [&_*]:text-foreground [&_svg]:text-muted-foreground"
+        />
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">طلباتي</h1>
           <p className="text-muted-foreground">

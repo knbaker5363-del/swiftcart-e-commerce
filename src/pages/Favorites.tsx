@@ -11,6 +11,7 @@ import ProductQuickView from '@/components/ProductQuickView';
 import ProductGrid from '@/components/ProductGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSettings } from '@/contexts/SettingsContext';
+import Breadcrumb from '@/components/Breadcrumb';
 
 const Favorites = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -69,6 +70,11 @@ const Favorites = () => {
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <div className="container py-8">
+        <Breadcrumb 
+          items={[{ label: 'المفضلة' }]} 
+          className="mb-6 [&_*]:text-foreground [&_svg]:text-muted-foreground"
+        />
+        
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">المفضلة</h1>
           <p className="text-muted-foreground">
