@@ -493,6 +493,8 @@ export type Database = {
           cart_button_text: string | null
           cart_icon_style: string | null
           category_display_style: string | null
+          category_row_bg_color: string | null
+          category_row_transparent: boolean | null
           checkout_badges: Json | null
           checkout_badges_enabled: boolean | null
           created_at: string
@@ -573,6 +575,8 @@ export type Database = {
           cart_button_text?: string | null
           cart_icon_style?: string | null
           category_display_style?: string | null
+          category_row_bg_color?: string | null
+          category_row_transparent?: boolean | null
           checkout_badges?: Json | null
           checkout_badges_enabled?: boolean | null
           created_at?: string
@@ -653,6 +657,8 @@ export type Database = {
           cart_button_text?: string | null
           cart_icon_style?: string | null
           category_display_style?: string | null
+          category_row_bg_color?: string | null
+          category_row_transparent?: boolean | null
           checkout_badges?: Json | null
           checkout_badges_enabled?: boolean | null
           created_at?: string
