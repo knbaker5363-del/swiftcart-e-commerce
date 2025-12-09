@@ -6,6 +6,7 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import DealsBar from '@/components/DealsBar';
 import BrandsButton from '@/components/BrandsButton';
 import CategoriesSlider from '@/components/CategoriesSlider';
+import CategoriesSidebar from '@/components/CategoriesSidebar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -43,42 +44,57 @@ const CategoryRowsLayout = ({
     return { style: 'slider', shape: 'square', displayType: 'image', size: 'large' };
   };
   const categoryConfig = getCategoryDisplayConfig();
+  const isSidebarMode = categoryConfig.style === 'sidebar';
 
   return (
-    <div className="space-y-8">
-      {/* Categories Slider - Same style as Classic */}
-      <section className="py-4">
-        <h2 className="text-xl font-bold mb-4">التصنيفات</h2>
-        <CategoriesSlider
-          categories={categories}
-          isLoading={false}
-          displayStyle={categoryConfig.style as 'grid' | 'slider'}
-          settings={{
-            shape: categoryConfig.shape as 'square' | 'circle',
-            displayType: categoryConfig.displayType as 'image' | 'icon',
-            size: categoryConfig.size as 'small' | 'large'
-          }}
-        />
-      </section>
+    <div className="flex gap-6">
+      {/* Desktop Sidebar - Same as Classic */}
+      {isSidebarMode && (
+        <aside className="hidden lg:block w-64 flex-shrink-0">
+          <CategoriesSidebar />
+        </aside>
+      )}
 
-      {/* Deals Bar */}
-      <DealsBar />
+      {/* Main Content */}
+      <main className="flex-1 min-w-0 space-y-8">
+        {/* Categories Slider - Hidden on desktop if sidebar mode */}
+        <section className={`py-4 ${isSidebarMode ? 'lg:hidden' : ''}`}>
+          <h2 className="text-xl font-bold mb-4">التصنيفات</h2>
+          <CategoriesSlider
+            categories={categories}
+            isLoading={false}
+            displayStyle={categoryConfig.style === 'sidebar' ? 'slider' : categoryConfig.style as 'grid' | 'slider'}
+            settings={{
+              shape: categoryConfig.shape as 'square' | 'circle',
+              displayType: categoryConfig.displayType as 'image' | 'icon',
+              size: categoryConfig.size as 'small' | 'large'
+            }}
+          />
+        </section>
 
-      {/* Brands Button */}
-      {settings?.show_brands_button !== false && <BrandsButton />}
+        {/* Deals Bar - Hidden on desktop if sidebar mode */}
+        <div className={isSidebarMode ? 'lg:hidden' : ''}>
+          <DealsBar />
+        </div>
 
-      {/* Category Rows */}
-      {categories.map((category) => (
-        <CategoryRow
-          key={category.id}
-          category={category}
-          productsPerRow={productsPerRow}
-          isScrollable={isScrollable}
-          showViewAll={showViewAll}
-          onProductClick={onProductClick}
-          getColorValue={getColorValue}
-        />
-      ))}
+        {/* Brands Button - Hidden on desktop if sidebar mode */}
+        <div className={isSidebarMode ? 'lg:hidden' : ''}>
+          {settings?.show_brands_button !== false && <BrandsButton />}
+        </div>
+
+        {/* Category Rows */}
+        {categories.map((category) => (
+          <CategoryRow
+            key={category.id}
+            category={category}
+            productsPerRow={productsPerRow}
+            isScrollable={isScrollable}
+            showViewAll={showViewAll}
+            onProductClick={onProductClick}
+            getColorValue={getColorValue}
+          />
+        ))}
+      </main>
     </div>
   );
 };
