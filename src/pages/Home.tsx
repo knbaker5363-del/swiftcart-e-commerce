@@ -15,7 +15,7 @@ import SearchBar from '@/components/SearchBar';
 import SEOManager from '@/components/SEOManager';
 import HeroSection from '@/components/HeroSection';
 import AnnouncementBar from '@/components/AnnouncementBar';
-import { ClassicLayout, CategoryRowsLayout, PremiumLayout } from '@/components/layouts';
+import { ClassicLayout, CategoryRowsLayout } from '@/components/layouts';
 
 const Home = () => {
   useDocumentTitle();
@@ -85,15 +85,6 @@ const Home = () => {
         return (
           <CategoryRowsLayout
             categories={categories || []}
-            onProductClick={handleProductClick}
-            getColorValue={getColorValue}
-          />
-        );
-      case 'premium':
-        return (
-          <PremiumLayout
-            products={products?.data || []}
-            isLoadingProducts={productsLoading}
             onProductClick={handleProductClick}
             getColorValue={getColorValue}
           />

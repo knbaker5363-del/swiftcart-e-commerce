@@ -418,7 +418,6 @@ const AdminDisplay = () => {
           layout_products_per_category_row: layoutProductsPerRow,
           layout_category_row_scrollable: layoutScrollable,
           layout_show_category_view_all: layoutShowViewAll,
-          layout_enable_3d_effect: layoutEnable3D,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -458,7 +457,6 @@ const AdminDisplay = () => {
   const [layoutProductsPerRow, setLayoutProductsPerRow] = useState(6);
   const [layoutScrollable, setLayoutScrollable] = useState(true);
   const [layoutShowViewAll, setLayoutShowViewAll] = useState(true);
-  const [layoutEnable3D, setLayoutEnable3D] = useState(false);
 
   // Load layout settings
   useEffect(() => {
@@ -467,7 +465,6 @@ const AdminDisplay = () => {
       setLayoutProductsPerRow((settings as any)?.layout_products_per_category_row || 6);
       setLayoutScrollable((settings as any)?.layout_category_row_scrollable !== false);
       setLayoutShowViewAll((settings as any)?.layout_show_category_view_all !== false);
-      setLayoutEnable3D((settings as any)?.layout_enable_3d_effect || false);
     }
   }, [settings]);
 
@@ -557,23 +554,6 @@ const AdminDisplay = () => {
               </div>
             </button>
 
-            {/* Premium */}
-            <button
-              type="button"
-              onClick={() => setStoreLayoutStyle('premium')}
-              className={`p-4 rounded-xl border-2 text-right transition-all ${
-                storeLayoutStyle === 'premium' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50'
-              }`}
-            >
-              <div className="text-lg font-bold mb-2">✨ فاخر</div>
-              <p className="text-sm text-muted-foreground">بطاقات كبيرة مع تأثيرات 3D</p>
-              <div className="mt-3 p-2 bg-muted/50 rounded-lg text-xs">
-                <div className="h-10 bg-primary/20 rounded mb-2" />
-                <div className="grid grid-cols-2 gap-1">
-                  {[1,2].map(i => <div key={i} className="h-8 bg-muted rounded" />)}
-                </div>
-              </div>
-            </button>
           </div>
 
           {/* Layout-specific settings - Category Rows */}
@@ -597,16 +577,6 @@ const AdminDisplay = () => {
             </div>
           )}
 
-          {/* Layout-specific settings - Premium */}
-          {storeLayoutStyle === 'premium' && (
-            <div className="p-4 bg-muted/30 rounded-lg space-y-4">
-              <h4 className="font-bold">إعدادات النمط الفاخر</h4>
-              <div className="flex items-center gap-2">
-                <Switch checked={layoutEnable3D} onCheckedChange={setLayoutEnable3D} />
-                <Label>تفعيل تأثيرات 3D عند تمرير الماوس</Label>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
