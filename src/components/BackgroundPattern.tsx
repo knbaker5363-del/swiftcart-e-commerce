@@ -1,6 +1,7 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useMemo } from 'react';
 import { 
+  // Shopping icons
   ShoppingBag, 
   Heart, 
   Star, 
@@ -12,22 +13,57 @@ import {
   ShoppingCart,
   Percent,
   Tag,
-  Zap
+  Zap,
+  // Food icons
+  Coffee,
+  Cookie,
+  Cake,
+  IceCream,
+  Pizza,
+  Apple,
+  Cherry,
+  Grape,
+  Sandwich,
+  Soup,
+  Salad,
+  UtensilsCrossed,
+  // Sports icons
+  Dumbbell,
+  Trophy,
+  Medal,
+  Target,
+  Bike,
+  Volleyball,
+  Timer,
+  Footprints,
+  Mountain,
+  Flame,
+  Zap as Energy,
+  Award
 } from 'lucide-react';
 
-const ICONS = [ShoppingBag, Heart, Star, Gift, Sparkles, Crown, Gem, Package, ShoppingCart, Percent, Tag, Zap];
+// Icon sets by category
+const ICON_SETS = {
+  shopping: [ShoppingBag, Heart, Star, Gift, Sparkles, Crown, Gem, Package, ShoppingCart, Percent, Tag, Zap],
+  food: [Coffee, Cookie, Cake, IceCream, Pizza, Apple, Cherry, Grape, Sandwich, Soup, Salad, UtensilsCrossed],
+  sports: [Dumbbell, Trophy, Medal, Target, Bike, Volleyball, Timer, Footprints, Mountain, Flame, Energy, Award],
+};
 
 const BackgroundPattern = () => {
   const { settings } = useSettings();
   
   const backgroundStyle = (settings as any)?.background_style || 'solid';
   const backgroundPattern = (settings as any)?.background_pattern || null;
+  const backgroundIconType = (settings as any)?.background_icon_type || 'shopping';
   const backgroundImageUrl = (settings as any)?.background_image_url || null;
+
+  // Get icons based on selected type
+  const icons = ICON_SETS[backgroundIconType as keyof typeof ICON_SETS] || ICON_SETS.shopping;
 
   // Generate random icons positions (memoized to prevent re-rendering)
   const randomIcons = useMemo(() => {
     return [...Array(30)].map((_, i) => ({
-      Icon: ICONS[Math.floor(Math.random() * ICONS.length)],
+      Icon: icons[Math.floor(Math.random() * icons.length)],
       left: Math.random() * 100,
       top: Math.random() * 100,
       size: 16 + Math.random() * 24,
@@ -35,7 +71,7 @@ const BackgroundPattern = () => {
       delay: Math.random() * 5,
       duration: 8 + Math.random() * 4,
     }));
-  }, []);
+  }, [backgroundIconType]);
 
   // Don't render anything for solid background
   if (backgroundStyle === 'solid') return null;
@@ -60,7 +96,7 @@ const BackgroundPattern = () => {
               return (
                 <div
                   key={i}
-                  className="absolute text-primary/[0.06] animate-pulse"
+                  className="absolute text-primary/[0.08] animate-pulse"
                   style={{
                     left: `${item.left}%`,
                     top: `${item.top}%`,

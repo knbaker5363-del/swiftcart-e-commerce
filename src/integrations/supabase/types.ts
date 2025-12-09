@@ -477,6 +477,7 @@ export type Database = {
           announcement_messages: Json | null
           back_button_text: string | null
           background_animation_type: string | null
+          background_icon_type: string | null
           background_image_url: string | null
           background_pattern: string | null
           background_style: string | null
@@ -552,6 +553,7 @@ export type Database = {
           announcement_messages?: Json | null
           back_button_text?: string | null
           background_animation_type?: string | null
+          background_icon_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
           background_style?: string | null
@@ -627,6 +629,7 @@ export type Database = {
           announcement_messages?: Json | null
           back_button_text?: string | null
           background_animation_type?: string | null
+          background_icon_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
           background_style?: string | null
