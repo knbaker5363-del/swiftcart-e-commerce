@@ -508,6 +508,7 @@ export type Database = {
           layout_featured_product_id: string | null
           layout_products_per_category_row: number | null
           layout_show_category_view_all: boolean | null
+          loading_style: string | null
           location: string | null
           logo_shape: string | null
           logo_url: string | null
@@ -580,6 +581,7 @@ export type Database = {
           layout_featured_product_id?: string | null
           layout_products_per_category_row?: number | null
           layout_show_category_view_all?: boolean | null
+          loading_style?: string | null
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
@@ -652,6 +654,7 @@ export type Database = {
           layout_featured_product_id?: string | null
           layout_products_per_category_row?: number | null
           layout_show_category_view_all?: boolean | null
+          loading_style?: string | null
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null

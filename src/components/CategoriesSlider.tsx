@@ -192,7 +192,7 @@ const CategoriesSlider = ({
         {hasMore && (
           <div className="flex justify-center">
             <Link
-              to="/all-products"
+              to="/products"
               className="px-6 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors"
             >
               عرض جميع التصنيفات ({categories?.length})

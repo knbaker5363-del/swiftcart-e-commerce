@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Loader } from '@/components/ui/loading-styles';
 
 const LoadingScreen = () => {
   const { loading, settings } = useSettings();
@@ -65,6 +66,7 @@ const LoadingScreen = () => {
   if (!show) return null;
 
   const storeNameImageUrl = (settings as any)?.store_name_image_url;
+  const loadingStyle = (settings as any)?.loading_style || 'spinner';
 
   return (
     <div
@@ -102,10 +104,8 @@ const LoadingScreen = () => {
         </h1>
       )}
 
-      {/* Loading Spinner */}
-      <div className="relative">
-        <div className="w-14 h-14 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
+      {/* Loading Animation - Based on selected style */}
+      <Loader style={loadingStyle} />
 
       {/* Loading Text */}
       <p className="mt-6 text-muted-foreground text-sm">

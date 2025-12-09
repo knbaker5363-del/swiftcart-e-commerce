@@ -152,7 +152,7 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
         {/* Quick Links Section */}
         <div className="pt-3 mt-3 border-t border-border/30 space-y-2">
           <Link
-            to="/all-products"
+            to="/products"
             onClick={onItemClick}
             className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 group shadow-sm"
           >
