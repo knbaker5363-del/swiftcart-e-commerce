@@ -3,6 +3,8 @@ import CategoriesSlider from '@/components/CategoriesSlider';
 import CategoriesSidebar from '@/components/CategoriesSidebar';
 import DealsBar from '@/components/DealsBar';
 import BrandsButton from '@/components/BrandsButton';
+import BrandsSlider from '@/components/BrandsSlider';
+import OffersButton from '@/components/OffersButton';
 import ProductGrid from '@/components/ProductGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -67,11 +69,19 @@ const ClassicLayout = ({
           />
         </section>
 
-        {/* Deals Bar & Brands Button */}
-        <section className={`py-4 md:py-6 ${isSidebarMode ? 'lg:hidden' : ''}`}>
-          <div className="space-y-3">
+        {/* Brands Button - Full Width */}
+        <section className={`py-2 md:py-3 ${isSidebarMode ? 'lg:hidden' : ''}`}>
+          <BrandsButton visible={settings?.show_brands_button !== false} />
+        </section>
+
+        {/* Brands Slider */}
+        <BrandsSlider visible={(settings as any)?.show_brands_slider === true} />
+
+        {/* Deals & Offers Buttons - Side by Side */}
+        <section className={`py-2 md:py-3 ${isSidebarMode ? 'lg:hidden' : ''}`}>
+          <div className="flex gap-3">
             <DealsBar />
-            <BrandsButton visible={settings?.show_brands_button !== false} />
+            <OffersButton />
           </div>
         </section>
 

@@ -109,7 +109,53 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
-        {/* Categories */}
+        {/* Quick Links Section - At Top */}
+        <div className="space-y-2 pb-3 border-b border-border/30 mb-3">
+          <Link
+            to="/products"
+            onClick={onItemClick}
+            className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 group shadow-sm"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+              <Package className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-sm text-primary flex-1">عرض كل المنتجات</span>
+            <ChevronLeft className="h-4 w-4 text-primary/50 group-hover:-translate-x-1 transition-transform duration-200" />
+          </Link>
+
+          <Link
+            to="/deals"
+            onClick={onItemClick}
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-destructive/5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/25">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <span className="font-bold text-sm block">{(settings as any)?.offers_button_name || 'العروض الخاصة بنا'}</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/deals"
+            onClick={onItemClick}
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/25">
+              <Percent className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <span className="font-bold text-sm block">{(settings as any)?.deals_button_name || 'كافة الخصومات'}</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Categories Section */}
+        <div className="pb-3 mb-3 border-b border-border/30">
+          <div className="flex items-center gap-2 mb-2 px-2">
+            <Grid3X3 className="h-4 w-4 text-primary" />
+            <span className="font-bold text-sm text-foreground">التصنيفات</span>
+          </div>
         {categories.map((category, index) => {
           const shapeClass = categoryConfig.shape === 'circle' ? 'rounded-full' : 'rounded-xl';
           const sizeClass = categoryConfig.size === 'large' ? 'w-11 h-11' : 'w-9 h-9';
@@ -163,36 +209,6 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
           );
         })}
 
-        {/* Quick Links Section */}
-        <div className="pt-3 mt-3 border-t border-border/30 space-y-2">
-          <Link
-            to="/products"
-            onClick={onItemClick}
-            className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 transition-all duration-200 group shadow-sm"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-              <Package className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-sm text-primary flex-1">عرض كل المنتجات</span>
-            <ChevronLeft className="h-4 w-4 text-primary/50 group-hover:-translate-x-1 transition-transform duration-200" />
-          </Link>
-
-          <Link
-            to="/deals"
-            onClick={onItemClick}
-            className="flex items-center gap-3 p-3 rounded-xl hover:bg-destructive/5 transition-all duration-200 group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <Percent className="h-5 w-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <span className="font-bold text-sm block">العروض الخاصة</span>
-              <span className="text-xs text-muted-foreground">خصومات لفترة محدودة</span>
-            </div>
-            <div className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold animate-pulse">
-              HOT
-            </div>
-          </Link>
         </div>
 
         {/* Brands Section */}

@@ -1,32 +1,33 @@
 import { Link } from 'react-router-dom';
-import { Tag, Percent, ArrowLeft, Sparkles, Gift, Flame, Star, Zap } from 'lucide-react';
+import { ArrowLeft, Sparkles, Gift, Flame, Star, Zap, Heart, Crown } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const iconMap: Record<string, any> = {
-  Percent,
-  Tag,
   Sparkles,
   Gift,
   Flame,
   Star,
   Zap,
+  Heart,
+  Crown,
 };
 
-const DealsBar = () => {
+const OffersButton = () => {
   const { settings } = useSettings();
-  const showButton = (settings as any)?.show_deals_button !== false;
-  const buttonName = (settings as any)?.deals_button_name || 'كافة الخصومات';
-  const iconName = (settings as any)?.deals_button_icon || 'Percent';
+  const showButton = (settings as any)?.show_offers_button !== false;
+  const buttonName = (settings as any)?.offers_button_name || 'العروض الخاصة بنا';
+  const iconName = (settings as any)?.offers_button_icon || 'Sparkles';
+  const buttonLink = (settings as any)?.offers_button_link || '/deals';
 
   if (!showButton) return null;
 
-  const IconComponent = iconMap[iconName] || Percent;
+  const IconComponent = iconMap[iconName] || Sparkles;
 
   return (
-    <Link to="/deals" className="block flex-1">
-      <div className="relative bg-gradient-to-l from-red-500 to-rose-600 rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-lg border-2 border-red-400/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group overflow-hidden h-full">
+    <Link to={buttonLink} className="block flex-1">
+      <div className="relative bg-gradient-to-l from-amber-500 to-orange-500 rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-lg border-2 border-amber-400/30 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group overflow-hidden h-full">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-12 h-12 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full translate-x-1/2 -translate-y-1/2"></div>
         </div>
         
         <div className="relative flex items-center justify-between text-white h-full">
@@ -45,4 +46,4 @@ const DealsBar = () => {
   );
 };
 
-export default DealsBar;
+export default OffersButton;
