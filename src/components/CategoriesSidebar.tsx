@@ -98,15 +98,6 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-gradient-to-b from-card to-card/95 rounded-2xl border border-border/50 shadow-xl backdrop-blur-sm">
-      {/* Header */}
-      <div className="p-4 border-b border-border/30">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Grid3X3 className="h-4 w-4 text-primary" />
-          </div>
-          <h3 className="font-bold text-foreground">التصنيفات</h3>
-        </div>
-      </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {/* Quick Links Section - At Top */}
