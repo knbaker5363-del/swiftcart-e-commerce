@@ -744,6 +744,84 @@ export type Database = {
         }
         Relationships: []
       }
+      special_offer_products: {
+        Row: {
+          created_at: string
+          id: string
+          offer_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offer_id: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offer_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_offer_products_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "special_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "special_offer_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      special_offers: {
+        Row: {
+          condition_text: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price: number | null
+          size: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          condition_text?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price?: number | null
+          size?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          condition_text?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price?: number | null
+          size?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
