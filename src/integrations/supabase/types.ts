@@ -782,6 +782,8 @@ export type Database = {
       }
       special_offers: {
         Row: {
+          background_color: string | null
+          bundle_price: number | null
           condition_text: string | null
           created_at: string
           description: string | null
@@ -789,12 +791,17 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           name: string
+          offer_type: string | null
           price: number | null
+          required_quantity: number | null
           size: string
           sort_order: number | null
+          text_color: string | null
           updated_at: string
         }
         Insert: {
+          background_color?: string | null
+          bundle_price?: number | null
           condition_text?: string | null
           created_at?: string
           description?: string | null
@@ -802,12 +809,17 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name: string
+          offer_type?: string | null
           price?: number | null
+          required_quantity?: number | null
           size?: string
           sort_order?: number | null
+          text_color?: string | null
           updated_at?: string
         }
         Update: {
+          background_color?: string | null
+          bundle_price?: number | null
           condition_text?: string | null
           created_at?: string
           description?: string | null
@@ -815,9 +827,12 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name?: string
+          offer_type?: string | null
           price?: number | null
+          required_quantity?: number | null
           size?: string
           sort_order?: number | null
+          text_color?: string | null
           updated_at?: string
         }
         Relationships: []

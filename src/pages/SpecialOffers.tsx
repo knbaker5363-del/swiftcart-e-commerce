@@ -7,7 +7,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import Breadcrumb from '@/components/Breadcrumb';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Flame, Zap, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SpecialOffer {
@@ -19,6 +19,11 @@ interface SpecialOffer {
   price: number | null;
   condition_text: string | null;
   sort_order: number;
+  offer_type: string;
+  required_quantity: number;
+  bundle_price: number | null;
+  background_color: string;
+  text_color: string;
 }
 
 const SpecialOffers = () => {
@@ -53,6 +58,23 @@ const SpecialOffers = () => {
     }
   };
 
+  const getOfferBadge = (offer: SpecialOffer) => {
+    if (offer.offer_type === 'bundle' && offer.required_quantity) {
+      return (
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-bold shadow-lg animate-pulse">
+          <Flame className="h-4 w-4" />
+          اختر {offer.required_quantity}
+        </div>
+      );
+    }
+    return (
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-bold shadow-lg">
+        <Sparkles className="h-4 w-4" />
+        عرض خاص
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background relative" dir="rtl">
       <BackgroundPattern />
@@ -70,7 +92,9 @@ const SpecialOffers = () => {
             className="text-white/70 mb-4"
           />
           <div className="flex items-center gap-3 text-white">
-            <Sparkles className="h-8 w-8" />
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+              <Sparkles className="h-6 w-6" />
+            </div>
             <div>
               <h1 className="text-2xl md:text-4xl font-bold">العروض الخاصة بنا</h1>
               <p className="text-white/70 mt-1">اكتشف أفضل العروض والخصومات الحصرية</p>
@@ -93,44 +117,73 @@ const SpecialOffers = () => {
               <Link
                 key={offer.id}
                 to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] ${getSizeClasses(offer.size)} ${offer.size === 'circle' ? 'rounded-full' : ''}`}
+                className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${getSizeClasses(offer.size)} ${offer.size === 'circle' ? 'rounded-full' : ''}`}
+                style={{ 
+                  background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
+                }}
               >
-                {/* Background Image */}
+                {/* Offer Badge */}
+                {getOfferBadge(offer)}
+
+                {/* Background Image or Gradient */}
                 {offer.image_url ? (
                   <img
                     src={offer.image_url}
                     alt={offer.name}
-                    className={`w-full h-full object-cover ${offer.size === 'circle' ? 'rounded-full' : ''}`}
+                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${offer.size === 'circle' ? 'rounded-full' : ''}`}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                    <Sparkles className="h-16 w-16 text-white/50" />
+                  <div 
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ backgroundColor: offer.background_color }}
+                  >
+                    <Package className="h-20 w-20 opacity-30" style={{ color: offer.text_color }} />
                   </div>
                 )}
 
-                {/* Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/90 transition-all ${offer.size === 'circle' ? 'rounded-full' : ''}`}>
+                {/* Gradient Overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/95 transition-all duration-300 ${offer.size === 'circle' ? 'rounded-full' : ''}`}>
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h3 className="font-bold text-lg md:text-xl mb-1">{offer.name}</h3>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 drop-shadow-lg">{offer.name}</h3>
+                    
                     {offer.condition_text && (
-                      <p className="text-sm text-white/80 mb-2">{offer.condition_text}</p>
+                      <p className="text-sm text-white/80 mb-2 line-clamp-2">{offer.condition_text}</p>
                     )}
-                    {offer.price && (
-                      <div className="inline-block bg-primary px-3 py-1 rounded-full text-sm font-bold">
-                        {offer.price} ₪
-                      </div>
-                    )}
+                    
+                    {/* Price Display */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {offer.bundle_price ? (
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-1.5 rounded-full text-white font-bold shadow-lg">
+                          <Zap className="h-4 w-4" />
+                          {offer.required_quantity} بـ {offer.bundle_price}₪
+                        </div>
+                      ) : offer.price ? (
+                        <div className="inline-block bg-primary px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                          {offer.price}₪
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
 
-                {/* Hover Effect */}
-                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Hover Glow Effect */}
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
+                  style={{ backgroundColor: offer.background_color }}
+                />
+                
+                {/* Shine Effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                  <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000" />
+                </div>
               </Link>
             ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <Sparkles className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="h-10 w-10 text-muted-foreground/30" />
+            </div>
             <p className="text-muted-foreground text-lg">لا توجد عروض خاصة حالياً</p>
             <p className="text-muted-foreground/70 text-sm mt-2">تابعنا لمعرفة أحدث العروض</p>
           </div>

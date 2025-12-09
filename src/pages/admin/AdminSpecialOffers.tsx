@@ -10,7 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 
 interface SpecialOffer {
@@ -23,6 +24,11 @@ interface SpecialOffer {
   condition_text: string | null;
   sort_order: number;
   is_active: boolean;
+  offer_type: string;
+  required_quantity: number;
+  bundle_price: number | null;
+  background_color: string;
+  text_color: string;
 }
 
 interface Product {
@@ -36,6 +42,17 @@ const sizeOptions = [
   { id: '2x4', name: 'مستطيل 2×4', preview: '▬' },
   { id: '4x4', name: 'مربع كبير 4×4', preview: '⬛' },
   { id: 'circle', name: 'دائرة', preview: '⭕' },
+];
+
+const colorPresets = [
+  { bg: '#7c3aed', text: '#ffffff', name: 'بنفسجي' },
+  { bg: '#ef4444', text: '#ffffff', name: 'أحمر' },
+  { bg: '#f97316', text: '#ffffff', name: 'برتقالي' },
+  { bg: '#22c55e', text: '#ffffff', name: 'أخضر' },
+  { bg: '#3b82f6', text: '#ffffff', name: 'أزرق' },
+  { bg: '#ec4899', text: '#ffffff', name: 'وردي' },
+  { bg: '#1a1a2e', text: '#ffffff', name: 'داكن' },
+  { bg: '#fbbf24', text: '#000000', name: 'ذهبي' },
 ];
 
 const AdminSpecialOffers = () => {
@@ -56,6 +73,12 @@ const AdminSpecialOffers = () => {
   const [conditionText, setConditionText] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
+  // New fields
+  const [offerType, setOfferType] = useState('bundle');
+  const [requiredQuantity, setRequiredQuantity] = useState(3);
+  const [bundlePrice, setBundlePrice] = useState('');
+  const [backgroundColor, setBackgroundColor] = useState('#7c3aed');
+  const [textColor, setTextColor] = useState('#ffffff');
 
   const { data: offers, isLoading } = useQuery({
     queryKey: ['admin-special-offers'],
@@ -105,6 +128,11 @@ const AdminSpecialOffers = () => {
     setConditionText('');
     setSortOrder(0);
     setIsActive(true);
+    setOfferType('bundle');
+    setRequiredQuantity(3);
+    setBundlePrice('');
+    setBackgroundColor('#7c3aed');
+    setTextColor('#ffffff');
     setEditingOffer(null);
   };
 
@@ -118,6 +146,11 @@ const AdminSpecialOffers = () => {
     setConditionText(offer.condition_text || '');
     setSortOrder(offer.sort_order);
     setIsActive(offer.is_active);
+    setOfferType(offer.offer_type || 'bundle');
+    setRequiredQuantity(offer.required_quantity || 3);
+    setBundlePrice(offer.bundle_price?.toString() || '');
+    setBackgroundColor(offer.background_color || '#7c3aed');
+    setTextColor(offer.text_color || '#ffffff');
     setDialogOpen(true);
   };
 
@@ -152,6 +185,11 @@ const AdminSpecialOffers = () => {
         condition_text: conditionText || null,
         sort_order: sortOrder,
         is_active: isActive,
+        offer_type: offerType,
+        required_quantity: requiredQuantity,
+        bundle_price: bundlePrice ? parseFloat(bundlePrice) : null,
+        background_color: backgroundColor,
+        text_color: textColor,
       };
 
       if (editingOffer) {
@@ -216,7 +254,7 @@ const AdminSpecialOffers = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">العروض الخاصة</h1>
-          <p className="text-muted-foreground mt-1">إدارة بانرات العروض الخاصة</p>
+          <p className="text-muted-foreground mt-1">إدارة العروض الخاصة وباقات المنتجات</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
@@ -227,6 +265,35 @@ const AdminSpecialOffers = () => {
               <DialogTitle>{editingOffer ? 'تعديل العرض' : 'إضافة عرض جديد'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
+              {/* Offer Type Selection */}
+              <div>
+                <Label>نوع العرض</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setOfferType('bundle')}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${
+                      offerType === 'bundle' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <Flame className="h-8 w-8 mx-auto mb-2 text-orange-500" />
+                    <div className="font-bold">باقة منتجات</div>
+                    <p className="text-xs text-muted-foreground mt-1">اختر X منتجات بسعر Y</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOfferType('discount')}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${
+                      offerType === 'discount' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <Zap className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                    <div className="font-bold">عرض عادي</div>
+                    <p className="text-xs text-muted-foreground mt-1">خصم أو سعر ثابت</p>
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <Label>اسم العرض *</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="مثال: أي 3 منتجات بـ 100₪" />
@@ -242,14 +309,105 @@ const AdminSpecialOffers = () => {
                 <Input value={conditionText} onChange={(e) => setConditionText(e.target.value)} placeholder="مثال: اختر أي 3 منتجات من القائمة" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>السعر (₪)</Label>
-                  <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="100" />
+              {/* Bundle Options */}
+              {offerType === 'bundle' && (
+                <div className="grid grid-cols-2 gap-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                  <div>
+                    <Label className="text-orange-700 dark:text-orange-400">عدد المنتجات المطلوبة</Label>
+                    <Input 
+                      type="number" 
+                      value={requiredQuantity} 
+                      onChange={(e) => setRequiredQuantity(Number(e.target.value))} 
+                      min={1}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-orange-700 dark:text-orange-400">سعر الباقة (₪)</Label>
+                    <Input 
+                      type="number" 
+                      value={bundlePrice} 
+                      onChange={(e) => setBundlePrice(e.target.value)} 
+                      placeholder="100"
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label>ترتيب العرض</Label>
-                  <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
+              )}
+
+              {offerType === 'discount' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>السعر (₪)</Label>
+                    <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="100" />
+                  </div>
+                  <div>
+                    <Label>ترتيب العرض</Label>
+                    <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
+                  </div>
+                </div>
+              )}
+
+              {/* Color Selection */}
+              <div>
+                <Label className="flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  ألوان العرض
+                </Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {colorPresets.map((preset) => (
+                    <button
+                      key={preset.bg}
+                      type="button"
+                      onClick={() => { setBackgroundColor(preset.bg); setTextColor(preset.text); }}
+                      className={`p-3 rounded-lg border-2 text-center transition-all ${
+                        backgroundColor === preset.bg ? 'border-primary ring-2 ring-primary/30' : 'border-border hover:border-primary/50'
+                      }`}
+                      style={{ backgroundColor: preset.bg, color: preset.text }}
+                    >
+                      <span className="text-sm font-bold">{preset.name}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div>
+                    <Label className="text-xs">لون الخلفية</Label>
+                    <div className="flex gap-2 mt-1">
+                      <input 
+                        type="color" 
+                        value={backgroundColor} 
+                        onChange={(e) => setBackgroundColor(e.target.value)}
+                        className="w-10 h-10 rounded cursor-pointer"
+                      />
+                      <Input value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">لون النص</Label>
+                    <div className="flex gap-2 mt-1">
+                      <input 
+                        type="color" 
+                        value={textColor} 
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="w-10 h-10 rounded cursor-pointer"
+                      />
+                      <Input value={textColor} onChange={(e) => setTextColor(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div>
+                <Label>معاينة</Label>
+                <div 
+                  className="mt-2 p-4 rounded-xl text-center"
+                  style={{ backgroundColor, color: textColor }}
+                >
+                  <p className="font-bold text-lg">{name || 'اسم العرض'}</p>
+                  {offerType === 'bundle' && bundlePrice && (
+                    <p className="mt-1">{requiredQuantity} منتجات بـ {bundlePrice}₪</p>
+                  )}
                 </div>
               </div>
 
@@ -273,7 +431,7 @@ const AdminSpecialOffers = () => {
               </div>
 
               <div>
-                <Label>صورة العرض</Label>
+                <Label>صورة العرض (اختياري)</Label>
                 {imageUrl ? (
                   <div className="relative mt-2 inline-block">
                     <img src={imageUrl} alt="Preview" className="w-40 h-40 object-cover rounded-lg" />
@@ -319,17 +477,36 @@ const AdminSpecialOffers = () => {
       ) : offers && offers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {offers.map((offer) => (
-            <Card key={offer.id} className={`overflow-hidden ${!offer.is_active ? 'opacity-50' : ''}`}>
-              <div className="relative h-32">
+            <Card 
+              key={offer.id} 
+              className={`overflow-hidden ${!offer.is_active ? 'opacity-50' : ''}`}
+              style={{ borderColor: offer.background_color }}
+            >
+              <div 
+                className="relative h-32"
+                style={{ backgroundColor: offer.background_color }}
+              >
                 {offer.image_url ? (
                   <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <Sparkles className="h-12 w-12 text-primary/30" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    {offer.offer_type === 'bundle' ? (
+                      <Flame className="h-12 w-12" style={{ color: `${offer.text_color}50` }} />
+                    ) : (
+                      <Sparkles className="h-12 w-12" style={{ color: `${offer.text_color}50` }} />
+                    )}
                   </div>
                 )}
-                <div className="absolute top-2 left-2 bg-muted/90 px-2 py-1 rounded text-xs">
-                  {sizeOptions.find(s => s.id === offer.size)?.name || offer.size}
+                <div className="absolute top-2 left-2 flex gap-2">
+                  <span className="bg-muted/90 px-2 py-1 rounded text-xs">
+                    {sizeOptions.find(s => s.id === offer.size)?.name || offer.size}
+                  </span>
+                  {offer.offer_type === 'bundle' && (
+                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                      <Flame className="h-3 w-3" />
+                      باقة
+                    </span>
+                  )}
                 </div>
               </div>
               <CardContent className="p-4">
@@ -337,9 +514,14 @@ const AdminSpecialOffers = () => {
                 {offer.condition_text && (
                   <p className="text-sm text-muted-foreground mb-2">{offer.condition_text}</p>
                 )}
-                {offer.price && (
-                  <div className="text-primary font-bold">{offer.price} ₪</div>
-                )}
+                {offer.offer_type === 'bundle' && offer.bundle_price ? (
+                  <div className="text-orange-600 font-bold flex items-center gap-1">
+                    <Package className="h-4 w-4" />
+                    {offer.required_quantity} بـ {offer.bundle_price}₪
+                  </div>
+                ) : offer.price ? (
+                  <div className="text-primary font-bold">{offer.price}₪</div>
+                ) : null}
                 <div className="flex gap-2 mt-4">
                   <Button variant="outline" size="sm" onClick={() => openEditDialog(offer)}>
                     <Pencil className="h-4 w-4" />
@@ -387,6 +569,7 @@ const AdminSpecialOffers = () => {
           <DialogHeader>
             <DialogTitle>منتجات العرض</DialogTitle>
           </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">اختر المنتجات المتاحة للعميل ضمن هذا العرض</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
             {allProducts?.map((product) => {
               const isSelected = offerProducts?.includes(product.id);
