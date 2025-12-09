@@ -135,6 +135,11 @@ const AdminDisplay = () => {
   // Gift icon style
   const [giftIconStyle, setGiftIconStyle] = useState<GiftIconStyleType>('pink-gold');
 
+  // Header logo settings
+  const [showHeaderLogo, setShowHeaderLogo] = useState(true);
+  const [storeNameImageUrl, setStoreNameImageUrl] = useState<string | null>(null);
+  const [uploadingNameImage, setUploadingNameImage] = useState(false);
+
   // Load settings
   useEffect(() => {
     if (settings) {
@@ -160,6 +165,8 @@ const AdminDisplay = () => {
       setCardsPerRowMobile((settings as any)?.cards_per_row_mobile || 2);
       setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
       setGiftIconStyle((settings as any)?.gift_icon_style || 'pink-gold');
+      setShowHeaderLogo((settings as any)?.show_header_logo !== false);
+      setStoreNameImageUrl((settings as any)?.store_name_image_url || null);
     }
   }, [settings]);
 
@@ -193,6 +200,26 @@ const AdminDisplay = () => {
     }
   };
 
+  const handleStoreNameImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingNameImage(true);
+    try {
+      const compressedFile = await compressImageToFile(file, 600, 200, 0.9);
+      const fileName = `store-name-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setStoreNameImageUrl(publicUrl);
+      toast({ title: 'تم رفع صورة الشعار النصي بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+    } finally {
+      setUploadingNameImage(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -221,6 +248,8 @@ const AdminDisplay = () => {
           cards_per_row_mobile: cardsPerRowMobile,
           cards_per_row_desktop: cardsPerRowDesktop,
           gift_icon_style: giftIconStyle,
+          show_header_logo: showHeaderLogo,
+          store_name_image_url: storeNameImageUrl,
           store_layout_style: storeLayoutStyle,
           layout_products_per_category_row: layoutProductsPerRow,
           layout_category_row_scrollable: layoutScrollable,
@@ -455,6 +484,82 @@ const AdminDisplay = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Header Settings - NEW */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            إعدادات الهيدر
+          </CardTitle>
+          <CardDescription>تخصيص عناصر الهيدر والشعار</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Show/Hide Logo */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
+            <div>
+              <Label className="text-base font-semibold">إظهار اللوجو</Label>
+              <p className="text-sm text-muted-foreground">إظهار أو إخفاء شعار المتجر في الهيدر</p>
+            </div>
+            <Switch
+              checked={showHeaderLogo}
+              onCheckedChange={setShowHeaderLogo}
+            />
+          </div>
+
+          {/* Store Name Image Upload */}
+          <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
+            <div>
+              <Label className="text-base font-semibold">صورة الشعار النصي (اختياري)</Label>
+              <p className="text-sm text-muted-foreground">
+                إذا كان لديك شعار مكتوب بخط خاص، ارفعه كصورة PNG شفافة وسيظهر بدلاً من اسم المتجر النصي
+              </p>
+            </div>
+            
+            {storeNameImageUrl ? (
+              <div className="space-y-3">
+                <div className="relative inline-block bg-muted rounded-lg p-4 border-2 border-dashed border-primary/30">
+                  <img 
+                    src={storeNameImageUrl} 
+                    alt="شعار المتجر النصي" 
+                    className="max-h-16 object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setStoreNameImageUrl(null)}
+                    className="absolute -top-2 -left-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md hover:scale-110 transition-transform"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">انقر على X لحذف الصورة والعودة للنص العادي</p>
+              </div>
+            ) : (
+              <div>
+                <Label className="cursor-pointer">
+                  <div className="flex items-center gap-3 p-4 border-2 border-dashed border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
+                    <Upload className="h-6 w-6 text-primary" />
+                    <div>
+                      <p className="font-medium">اختر صورة الشعار النصي</p>
+                      <p className="text-xs text-muted-foreground">PNG شفاف أو WebP - حجم مناسب للهيدر</p>
+                    </div>
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleStoreNameImageUpload}
+                    disabled={uploadingNameImage}
+                  />
+                </Label>
+                {uploadingNameImage && (
+                  <p className="text-sm text-primary mt-2">جاري رفع الصورة...</p>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
