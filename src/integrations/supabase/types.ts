@@ -481,6 +481,7 @@ export type Database = {
           background_icon_size_mode: string | null
           background_icon_type: string | null
           background_image_url: string | null
+          background_line_thickness: number | null
           background_pattern: string | null
           background_selected_icons: Json | null
           background_style: string | null
@@ -560,6 +561,7 @@ export type Database = {
           background_icon_size_mode?: string | null
           background_icon_type?: string | null
           background_image_url?: string | null
+          background_line_thickness?: number | null
           background_pattern?: string | null
           background_selected_icons?: Json | null
           background_style?: string | null
@@ -639,6 +641,7 @@ export type Database = {
           background_icon_size_mode?: string | null
           background_icon_type?: string | null
           background_image_url?: string | null
+          background_line_thickness?: number | null
           background_pattern?: string | null
           background_selected_icons?: Json | null
           background_style?: string | null

@@ -86,6 +86,7 @@ const BackgroundPattern = () => {
   const backgroundImageUrl = (settings as any)?.background_image_url || null;
   const backgroundIconDensity = (settings as any)?.background_icon_density || 30;
   const backgroundIconSizeMode = (settings as any)?.background_icon_size_mode || 'random';
+  const backgroundLineThickness = (settings as any)?.background_line_thickness || 2;
 
   // Get selected icons
   const selectedIcons = useMemo(() => {
@@ -170,6 +171,36 @@ const BackgroundPattern = () => {
               />
             ))}
           </div>
+        )}
+        {backgroundPattern === 'stripes' && (
+          <div 
+            className="absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                90deg,
+                currentColor,
+                currentColor ${backgroundLineThickness}px,
+                transparent ${backgroundLineThickness}px,
+                transparent 25px
+              )`,
+            }}
+          />
+        )}
+        {backgroundPattern === 'waves' && (
+          <svg className="absolute inset-0 w-full h-full opacity-[0.08]" preserveAspectRatio="none">
+            <defs>
+              <pattern id="wave-pattern" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse">
+                <path 
+                  d="M0 10 Q 25 0, 50 10 T 100 10" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth={backgroundLineThickness}
+                  className="text-primary"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#wave-pattern)" />
+          </svg>
         )}
       </div>
     );
