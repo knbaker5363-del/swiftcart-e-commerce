@@ -117,8 +117,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
 
   return <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        {/* Left side - Categories button */}
-        <div className="flex items-center gap-1">
+        {/* Left side - Categories button (mobile/tablet only) */}
+        <div className="flex items-center gap-1 lg:hidden">
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
