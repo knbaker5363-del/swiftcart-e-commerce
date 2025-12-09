@@ -31,11 +31,20 @@ interface Settings {
   cart_button_text: string;
   font_family: string;
   gift_icon_style: string;
+  card_size: 'small' | 'medium' | 'large';
   // SEO settings
   seo_title: string | null;
   seo_description: string | null;
   seo_keywords: string | null;
   og_image_url: string | null;
+  // Store layout settings
+  store_layout_style: 'classic' | 'category-rows' | 'premium';
+  layout_products_per_category_row: number;
+  layout_category_row_scrollable: boolean;
+  layout_show_category_view_all: boolean;
+  layout_featured_product_id: string | null;
+  layout_enable_3d_effect: boolean;
+  layout_3d_effect_type: 'rotate' | 'hover' | 'parallax';
 }
 
 interface SettingsContextType {
