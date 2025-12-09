@@ -478,8 +478,35 @@ const AdminDisplay = () => {
         <p className="text-muted-foreground mt-2">تخصيص ثيم وألوان ومظهر الموقع</p>
       </div>
 
+      {/* Quick Navigation */}
+      <Card className="bg-muted/30">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-muted-foreground">انتقال سريع:</span>
+            {[
+              { id: 'layout', label: '🏪 نمط المتجر' },
+              { id: 'header', label: '📍 الهيدر' },
+              { id: 'colors', label: '🎨 الألوان' },
+              { id: 'cards', label: '🃏 البطاقات' },
+              { id: 'background', label: '✨ الخلفية' },
+              { id: 'loading', label: '⏳ التحميل' },
+            ].map(item => (
+              <Button
+                key={item.id}
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Store Layout Style - NEW */}
-      <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card id="layout" className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent scroll-mt-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -653,7 +680,7 @@ const AdminDisplay = () => {
       </Card>
 
       {/* Header Settings - ALL IN ONE PLACE */}
-      <Card>
+      <Card id="header" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Image className="h-5 w-5" />
@@ -864,7 +891,7 @@ const AdminDisplay = () => {
       </Card>
 
       {/* Theme Settings */}
-      <Card>
+      <Card id="colors" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
@@ -1004,7 +1031,7 @@ const AdminDisplay = () => {
       </Card>
 
       {/* Background Style */}
-      <Card>
+      <Card id="background" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -1225,7 +1252,7 @@ const AdminDisplay = () => {
           </div>
 
           {/* Loading Style */}
-          <div>
+          <div id="loading" className="scroll-mt-4">
             <Label className="text-base font-medium mb-3 block">نمط التحميل عند فتح الموقع</Label>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {loadingStyleOptions.map(style => (
@@ -1372,7 +1399,7 @@ const AdminDisplay = () => {
       </Card>
 
       {/* Card Display Settings */}
-      <Card>
+      <Card id="cards" className="scroll-mt-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
