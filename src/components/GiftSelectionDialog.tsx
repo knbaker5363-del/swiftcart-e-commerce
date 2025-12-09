@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Gift, Check, Sparkles, PartyPopper } from 'lucide-react';
+import { Check, Sparkles, PartyPopper } from 'lucide-react';
+import { GiftIcon, GiftIconStyleType } from '@/components/ui/gift-icon';
+import { useSettings } from '@/contexts/SettingsContext';
+import { HiSparkles } from 'react-icons/hi2';
+import { PiConfettiFill, PiStarFourFill } from 'react-icons/pi';
 
 interface GiftProduct {
   id: string;
@@ -29,6 +33,8 @@ export const GiftSelectionDialog = ({
   onSkip,
 }: GiftSelectionDialogProps) => {
   const [selectedGift, setSelectedGift] = useState<GiftProduct | null>(null);
+  const { settings } = useSettings();
+  const giftIconStyle = ((settings as any)?.gift_icon_style || 'pink-gold') as GiftIconStyleType;
 
   const handleConfirm = () => {
     if (selectedGift) {
@@ -45,26 +51,31 @@ export const GiftSelectionDialog = ({
           {/* Decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-4 left-4 animate-bounce">
-              <Sparkles className="h-6 w-6 text-primary-foreground/50" />
+              <HiSparkles className="h-6 w-6 text-primary-foreground/50" />
             </div>
-            <div className="absolute top-8 right-8 animate-bounce delay-100">
-              <PartyPopper className="h-8 w-8 text-primary-foreground/40" />
+            <div className="absolute top-8 right-8 animate-bounce" style={{ animationDelay: '0.1s' }}>
+              <PiConfettiFill className="h-8 w-8 text-primary-foreground/40" />
             </div>
             <div className="absolute bottom-4 left-1/4 animate-pulse">
-              <Gift className="h-5 w-5 text-primary-foreground/30" />
+              <GiftIcon size="sm" style={giftIconStyle} animated={false} glowColor="transparent" />
             </div>
-            <div className="absolute bottom-6 right-1/3 animate-bounce delay-200">
-              <Sparkles className="h-4 w-4 text-primary-foreground/40" />
+            <div className="absolute bottom-6 right-1/3 animate-bounce" style={{ animationDelay: '0.2s' }}>
+              <PiStarFourFill className="h-5 w-5 text-primary-foreground/40" />
+            </div>
+            <div className="absolute top-1/2 left-8 animate-pulse" style={{ animationDelay: '0.3s' }}>
+              <Sparkles className="h-4 w-4 text-primary-foreground/30" />
             </div>
           </div>
           
           <div className="relative z-10">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary-foreground/20 backdrop-blur-sm rounded-full flex items-center justify-center animate-scale-in">
-              <Gift className="h-10 w-10 text-primary-foreground" />
+            <div className="mx-auto mb-4 flex items-center justify-center animate-scale-in">
+              <GiftIcon size="lg" style={giftIconStyle} animated={true} />
             </div>
             <DialogHeader className="space-y-2">
-              <DialogTitle className="text-3xl font-bold text-primary-foreground">
-                🎉 مبروك! 🎉
+              <DialogTitle className="text-3xl font-bold text-primary-foreground flex items-center justify-center gap-3">
+                <HiSparkles className="h-7 w-7 text-yellow-300" />
+                مبروك!
+                <HiSparkles className="h-7 w-7 text-yellow-300" />
               </DialogTitle>
               <DialogDescription className="text-lg text-primary-foreground/90">
                 لقد حصلت على هدية مجانية!
@@ -80,7 +91,8 @@ export const GiftSelectionDialog = ({
 
         {/* Gift Selection Area */}
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-center mb-4 text-foreground">
+          <h3 className="text-lg font-semibold text-center mb-4 text-foreground flex items-center justify-center gap-2">
+            <GiftIcon size="sm" style={giftIconStyle} animated={false} glowColor="transparent" />
             اختر هديتك المفضلة
           </h3>
           
@@ -108,7 +120,7 @@ export const GiftSelectionDialog = ({
                     </div>
                   ) : (
                     <div className="w-full aspect-square bg-gradient-to-br from-muted to-muted/50 rounded-xl flex items-center justify-center">
-                      <Gift className="h-12 w-12 text-muted-foreground" />
+                      <GiftIcon size="md" style={giftIconStyle} animated={false} />
                     </div>
                   )}
                   
@@ -120,7 +132,8 @@ export const GiftSelectionDialog = ({
                   )}
                   
                   {/* Free badge */}
-                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <HiSparkles className="h-3 w-3" />
                     مجاني!
                   </div>
                 </div>
@@ -132,8 +145,9 @@ export const GiftSelectionDialog = ({
                   <p className="text-sm text-muted-foreground">
                     قيمتها: <span className="line-through">{product.price} ₪</span>
                   </p>
-                  <p className="text-primary font-bold text-lg">
-                    مجاناً 🎁
+                  <p className="text-primary font-bold text-lg flex items-center justify-center gap-1">
+                    مجاناً
+                    <GiftIcon size="sm" style={giftIconStyle} animated={false} glowColor="transparent" className="w-5 h-5" />
                   </p>
                 </div>
               </Card>
@@ -148,7 +162,7 @@ export const GiftSelectionDialog = ({
               size="lg"
               className="flex-1 gap-2 text-lg py-6 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
             >
-              <Gift className="h-5 w-5" />
+              <GiftIcon size="sm" style={giftIconStyle} animated={false} glowColor="transparent" className="w-5 h-5" />
               أريد هذه الهدية
             </Button>
             <Button 
