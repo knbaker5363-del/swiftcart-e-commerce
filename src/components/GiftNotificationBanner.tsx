@@ -1,4 +1,9 @@
-import { Gift, Sparkles, PartyPopper } from 'lucide-react';
+import { Gift, Sparkles } from 'lucide-react';
+import { HiGift, HiSparkles, HiFire, HiStar } from 'react-icons/hi2';
+import { PiConfettiFill, PiGiftFill, PiStarFourFill, PiFireFill, PiCrownFill } from 'react-icons/pi';
+import { BiSolidParty } from 'react-icons/bi';
+import { IoSparkles, IoGiftSharp, IoRibbonSharp } from 'react-icons/io5';
+import { RiVipCrownFill, RiStarSmileFill } from 'react-icons/ri';
 
 interface GiftNotificationBannerProps {
   currentAmount: number;
@@ -29,13 +34,22 @@ export const GiftNotificationBanner = ({
       {/* Animated background shimmer */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
       
-      {/* Confetti effect when eligible */}
+      {/* Decorative icons when eligible */}
       {isEligible && (
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-2 left-4 text-2xl animate-bounce" style={{ animationDelay: '0s' }}>🎊</div>
-          <div className="absolute top-3 right-6 text-xl animate-bounce" style={{ animationDelay: '0.2s' }}>✨</div>
-          <div className="absolute bottom-2 left-8 text-lg animate-bounce" style={{ animationDelay: '0.4s' }}>🎉</div>
-          <div className="absolute bottom-3 right-4 text-xl animate-bounce" style={{ animationDelay: '0.3s' }}>⭐</div>
+          <PiConfettiFill className="absolute top-2 left-4 text-2xl text-yellow-400 animate-bounce" style={{ animationDelay: '0s' }} />
+          <IoSparkles className="absolute top-3 right-6 text-xl text-amber-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+          <BiSolidParty className="absolute bottom-2 left-8 text-lg text-pink-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
+          <PiStarFourFill className="absolute bottom-3 right-4 text-xl text-cyan-400 animate-bounce" style={{ animationDelay: '0.3s' }} />
+          <RiStarSmileFill className="absolute top-1/2 left-1/4 text-lg text-orange-400 animate-pulse" />
+        </div>
+      )}
+
+      {/* Decorative icons when close to goal */}
+      {isClose && !isEligible && (
+        <div className="absolute inset-0 pointer-events-none">
+          <PiFireFill className="absolute top-2 right-4 text-xl text-orange-500 animate-pulse" />
+          <HiFire className="absolute bottom-2 left-4 text-lg text-red-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
         </div>
       )}
 
@@ -46,36 +60,44 @@ export const GiftNotificationBanner = ({
             relative p-4 rounded-2xl transition-all duration-300
             ${isEligible 
               ? 'bg-gradient-to-br from-emerald-400 to-green-500 shadow-[0_0_25px_rgba(16,185,129,0.5)]' 
-              : 'bg-gradient-to-br from-primary to-purple-600 shadow-[0_0_20px_rgba(var(--primary),0.4)]'
+              : isClose
+                ? 'bg-gradient-to-br from-orange-500 to-amber-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]'
+                : 'bg-gradient-to-br from-primary to-purple-600 shadow-[0_0_20px_rgba(var(--primary),0.4)]'
             }
           `}
         >
           {isEligible ? (
-            <PartyPopper className="h-7 w-7 text-white animate-bounce" />
+            <RiVipCrownFill className="h-8 w-8 text-white animate-bounce" />
+          ) : isClose ? (
+            <PiGiftFill className="h-8 w-8 text-white animate-pulse" />
           ) : (
-            <Gift className={`h-7 w-7 text-white ${isClose ? 'animate-pulse' : 'animate-bounce'}`} />
+            <IoGiftSharp className="h-8 w-8 text-white animate-bounce" />
           )}
           
           {/* Glow ring */}
           <div className={`
             absolute inset-0 rounded-2xl animate-ping opacity-30
-            ${isEligible ? 'bg-emerald-400' : 'bg-primary'}
+            ${isEligible ? 'bg-emerald-400' : isClose ? 'bg-orange-400' : 'bg-primary'}
           `} style={{ animationDuration: '2s' }} />
         </div>
 
         <div className="flex-1">
           {isEligible ? (
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-400 animate-pulse" />
+              <HiSparkles className="h-6 w-6 text-yellow-400 animate-pulse" />
               <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">
-                مبروك! يمكنك اختيار هدية مجانية 🎁
+                مبروك! يمكنك اختيار هدية مجانية
               </p>
+              <PiCrownFill className="h-5 w-5 text-yellow-500" />
             </div>
           ) : (
-            <p className="font-bold text-base text-foreground">
-              {isClose ? '🔥 ' : '🎁 '}
-              أضف منتجات بقيمة <span className="text-primary font-extrabold text-lg">{remainingAmount.toFixed(0)} ₪</span> للحصول على هدية!
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {isClose && <PiFireFill className="h-5 w-5 text-orange-500 animate-pulse" />}
+              <p className="font-bold text-base text-foreground">
+                أضف منتجات بقيمة <span className={`font-extrabold text-lg ${isClose ? 'text-orange-500' : 'text-primary'}`}>{remainingAmount.toFixed(0)} ₪</span> للحصول على هدية!
+              </p>
+              <HiGift className="h-5 w-5 text-primary" />
+            </div>
           )}
         </div>
       </div>
@@ -84,14 +106,17 @@ export const GiftNotificationBanner = ({
       {!isEligible && (
         <div className="relative mt-4">
           <div className="flex justify-between text-xs text-muted-foreground mb-2 font-semibold">
-            <span>{currentAmount.toFixed(0)} ₪</span>
             <span className="flex items-center gap-1">
-              <Gift className="h-3 w-3" />
+              <IoRibbonSharp className="h-3 w-3" />
+              {currentAmount.toFixed(0)} ₪
+            </span>
+            <span className="flex items-center gap-1">
+              <PiGiftFill className="h-4 w-4 text-primary" />
               {minimumAmount.toFixed(0)} ₪
             </span>
           </div>
           
-          <div className="relative h-3 bg-muted/50 rounded-full overflow-hidden border border-border/50">
+          <div className="relative h-4 bg-muted/50 rounded-full overflow-hidden border border-border/50">
             {/* Progress fill */}
             <div
               className={`
@@ -107,43 +132,52 @@ export const GiftNotificationBanner = ({
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
             </div>
             
-            {/* Milestone markers */}
-            <div className="absolute inset-0 flex justify-between px-1">
-              {[25, 50, 75].map((milestone) => (
-                <div 
-                  key={milestone}
-                  className={`w-0.5 h-full ${progress >= milestone ? 'bg-white/50' : 'bg-muted-foreground/20'}`}
-                  style={{ marginRight: `${milestone}%` }}
-                />
-              ))}
-            </div>
+            {/* Gift icon at the end of progress */}
+            {progress > 0 && (
+              <div 
+                className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg z-10 border-2 border-primary"
+                style={{ left: `calc(${Math.min(progress, 95)}% - 12px)` }}
+              >
+                <IoGiftSharp className={`h-3 w-3 ${isClose ? 'text-orange-500' : 'text-primary'}`} />
+              </div>
+            )}
           </div>
           
           {/* Progress percentage */}
-          <div className="text-center mt-2">
+          <div className="text-center mt-3">
             <span className={`
-              text-sm font-bold px-3 py-1 rounded-full
+              inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full
               ${isClose 
-                ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400' 
-                : 'bg-primary/20 text-primary'
+                ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border border-orange-400/30' 
+                : 'bg-primary/10 text-primary border border-primary/20'
               }
             `}>
-              {progress.toFixed(0)}% {isClose ? '🔥 قريب جداً!' : 'من الهدف'}
+              {isClose ? <PiFireFill className="h-4 w-4" /> : <HiStar className="h-4 w-4" />}
+              {progress.toFixed(0)}% {isClose ? 'قريب جداً!' : 'من الهدف'}
             </span>
           </div>
         </div>
       )}
       
       {/* Achievement message */}
-      <p className={`
-        relative z-10 text-sm mt-3 text-center font-medium
+      <div className={`
+        relative z-10 flex items-center justify-center gap-2 mt-3 text-sm font-medium
         ${isEligible ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}
       `}>
-        {isEligible 
-          ? '✨ ستظهر لك قائمة الهدايا عند إتمام الطلب ✨'
-          : `💫 اشترِ بـ ${minimumAmount} ₪ واحصل على هدية مجانية`
-        }
-      </p>
+        {isEligible ? (
+          <>
+            <IoSparkles className="h-4 w-4 text-yellow-400" />
+            <span>ستظهر لك قائمة الهدايا عند إتمام الطلب</span>
+            <IoSparkles className="h-4 w-4 text-yellow-400" />
+          </>
+        ) : (
+          <>
+            <PiStarFourFill className="h-4 w-4 text-primary" />
+            <span>اشترِ بـ {minimumAmount} ₪ واحصل على هدية مجانية</span>
+            <PiGiftFill className="h-4 w-4 text-primary" />
+          </>
+        )}
+      </div>
     </div>
   );
 };
