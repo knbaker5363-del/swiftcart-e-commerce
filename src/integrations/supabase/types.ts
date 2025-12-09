@@ -531,6 +531,7 @@ export type Database = {
           show_image_border: boolean | null
           site_style: string | null
           social_facebook: string | null
+          social_icon_style: string | null
           social_instagram: string | null
           social_media_position: string | null
           social_snapchat: string | null
@@ -613,6 +614,7 @@ export type Database = {
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
+          social_icon_style?: string | null
           social_instagram?: string | null
           social_media_position?: string | null
           social_snapchat?: string | null
@@ -695,6 +697,7 @@ export type Database = {
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
+          social_icon_style?: string | null
           social_instagram?: string | null
           social_media_position?: string | null
           social_snapchat?: string | null

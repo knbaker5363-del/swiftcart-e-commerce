@@ -11,6 +11,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { usePageView } from '@/hooks/useAnalytics';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import SocialFooter from '@/components/SocialFooter';
+import DeveloperFooter from '@/components/DeveloperFooter';
 import SearchBar from '@/components/SearchBar';
 import SEOManager from '@/components/SEOManager';
 import HeroSection from '@/components/HeroSection';
@@ -143,6 +144,7 @@ const Home = () => {
       )}
 
       <SocialFooter />
+      <DeveloperFooter />
     </div>
   );
 };

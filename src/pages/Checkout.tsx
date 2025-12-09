@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift, AlertCircle, ShoppingBag, Truck, Clock, Shield, CheckCircle2, Sparkles, HelpCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { SiTiktok, SiSnapchat } from 'react-icons/si';
+import OrderSuccessSocialLinks from '@/components/OrderSuccessSocialLinks';
 import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
 import { GiftProductsDisplay } from '@/components/GiftProductsDisplay';
@@ -615,7 +616,7 @@ const Checkout = () => {
         setShowOrderDialog(open);
         if (!open) setDialogStep('copy');
       }}>
-        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-0 animate-in zoom-in-95 duration-300" dir="rtl">
+        <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 animate-in zoom-in-95 duration-300" dir="rtl">
           {/* Success Header with Animation */}
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center text-white relative overflow-hidden">
             {/* Sparkle decorations */}
@@ -643,11 +644,20 @@ const Checkout = () => {
                 <p className="text-muted-foreground text-center mb-4">
                   اضغط على الزر أدناه للتواصل معنا عبر واتساب لإتمام الطلب
                 </p>
-                <div className="bg-muted/50 p-4 rounded-xl whitespace-pre-wrap text-foreground font-arabic text-sm leading-relaxed max-h-[300px] overflow-y-auto border">
+                <div className="bg-muted/50 p-4 rounded-xl whitespace-pre-wrap text-foreground font-arabic text-sm leading-relaxed max-h-[200px] overflow-y-auto border">
                   {orderMessage}
                 </div>
               </div>
             </AlertDialogDescription>
+
+            {/* قسم التواصل مع السوشل ميديا */}
+            <OrderSuccessSocialLinks
+              socialMedia={socialMedia}
+              whatsappNumber={whatsappNumber}
+              whatsappCountryCode={whatsappCountryCode}
+              iconStyle={((settings as any)?.social_icon_style || 'rounded') as 'rounded' | 'square' | 'minimal'}
+              storeName={settings?.store_name}
+            />
           </div>
           
           <AlertDialogFooter className="p-6 pt-0">
@@ -658,7 +668,7 @@ const Checkout = () => {
                 className="w-full gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-lg py-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
               >
                 <MessageCircle className="h-6 w-6" />
-                تواصل عبر واتساب
+                إغلاق والعودة للرئيسية
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
