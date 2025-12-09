@@ -509,6 +509,7 @@ export type Database = {
           seo_keywords: string | null
           seo_title: string | null
           show_brands_button: boolean | null
+          show_header_logo: boolean | null
           show_image_border: boolean | null
           site_style: string | null
           social_facebook: string | null
@@ -520,6 +521,7 @@ export type Database = {
           store_layout_style: string | null
           store_name: string
           store_name_black: boolean | null
+          store_name_image_url: string | null
           store_phone: string | null
           telegram_bot_password: string | null
           telegram_bot_token: string | null
@@ -571,6 +573,7 @@ export type Database = {
           seo_keywords?: string | null
           seo_title?: string | null
           show_brands_button?: boolean | null
+          show_header_logo?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
@@ -582,6 +585,7 @@ export type Database = {
           store_layout_style?: string | null
           store_name?: string
           store_name_black?: boolean | null
+          store_name_image_url?: string | null
           store_phone?: string | null
           telegram_bot_password?: string | null
           telegram_bot_token?: string | null
@@ -633,6 +637,7 @@ export type Database = {
           seo_keywords?: string | null
           seo_title?: string | null
           show_brands_button?: boolean | null
+          show_header_logo?: boolean | null
           show_image_border?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
@@ -644,6 +649,7 @@ export type Database = {
           store_layout_style?: string | null
           store_name?: string
           store_name_black?: boolean | null
+          store_name_image_url?: string | null
           store_phone?: string | null
           telegram_bot_password?: string | null
           telegram_bot_token?: string | null
