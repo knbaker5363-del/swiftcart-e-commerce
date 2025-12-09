@@ -50,6 +50,26 @@ import {
   Mountain,
   Flame,
   Award,
+  Shirt,
+  Wallet,
+  Gamepad2,
+  Headphones,
+  Smartphone,
+  Laptop,
+  Monitor,
+  Keyboard,
+  Mouse,
+  PartyPopper,
+  Watch,
+  Glasses,
+  Music,
+  Camera,
+  Tv,
+  Radio,
+  Dice1,
+  TreePine,
+  Candy,
+  Drumstick,
   LucideIcon
 } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
@@ -140,6 +160,11 @@ const availableBackgroundIcons: { id: string; name: string; icon: LucideIcon }[]
   { id: 'Tag', name: 'علامة', icon: Tag },
   { id: 'Zap', name: 'برق', icon: Zap },
   { id: 'Package', name: 'طرد', icon: Package },
+  // Fashion & Accessories
+  { id: 'Shirt', name: 'قميص', icon: Shirt },
+  { id: 'Wallet', name: 'محفظة', icon: Wallet },
+  { id: 'Watch', name: 'ساعة', icon: Watch },
+  { id: 'Glasses', name: 'نظارات', icon: Glasses },
   // Food
   { id: 'Coffee', name: 'قهوة', icon: Coffee },
   { id: 'Cookie', name: 'بسكويت', icon: Cookie },
@@ -153,6 +178,8 @@ const availableBackgroundIcons: { id: string; name: string; icon: LucideIcon }[]
   { id: 'Soup', name: 'شوربة', icon: Soup },
   { id: 'Salad', name: 'سلطة', icon: Salad },
   { id: 'UtensilsCrossed', name: 'أدوات طعام', icon: UtensilsCrossed },
+  { id: 'Candy', name: 'حلوى', icon: Candy },
+  { id: 'Drumstick', name: 'دجاج', icon: Drumstick },
   // Sports
   { id: 'Dumbbell', name: 'دمبل', icon: Dumbbell },
   { id: 'Trophy', name: 'كأس', icon: Trophy },
@@ -164,6 +191,22 @@ const availableBackgroundIcons: { id: string; name: string; icon: LucideIcon }[]
   { id: 'Mountain', name: 'جبل', icon: Mountain },
   { id: 'Flame', name: 'لهب', icon: Flame },
   { id: 'Award', name: 'جائزة', icon: Award },
+  // Tech & Gaming
+  { id: 'Gamepad2', name: 'ألعاب', icon: Gamepad2 },
+  { id: 'Headphones', name: 'سماعات', icon: Headphones },
+  { id: 'Smartphone', name: 'هاتف', icon: Smartphone },
+  { id: 'Laptop', name: 'لابتوب', icon: Laptop },
+  { id: 'Monitor', name: 'شاشة', icon: Monitor },
+  { id: 'Keyboard', name: 'لوحة مفاتيح', icon: Keyboard },
+  { id: 'Mouse', name: 'ماوس', icon: Mouse },
+  { id: 'Tv', name: 'تلفاز', icon: Tv },
+  { id: 'Radio', name: 'راديو', icon: Radio },
+  { id: 'Camera', name: 'كاميرا', icon: Camera },
+  // Celebration & Entertainment
+  { id: 'PartyPopper', name: 'احتفال', icon: PartyPopper },
+  { id: 'Music', name: 'موسيقى', icon: Music },
+  { id: 'Dice1', name: 'نرد', icon: Dice1 },
+  { id: 'TreePine', name: 'شجرة', icon: TreePine },
 ];
 const loadingStyleOptions = [
   { id: 'spinner', name: 'دائري', icon: '🔄', description: 'شعار التحميل الكلاسيكي' },

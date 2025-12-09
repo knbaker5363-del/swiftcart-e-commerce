@@ -35,6 +35,26 @@ import {
   Mountain,
   Flame,
   Award,
+  Shirt,
+  Wallet,
+  Gamepad2,
+  Headphones,
+  Smartphone,
+  Laptop,
+  Monitor,
+  Keyboard,
+  Mouse,
+  PartyPopper,
+  Watch,
+  Glasses,
+  Music,
+  Camera,
+  Tv,
+  Radio,
+  Dice1,
+  TreePine,
+  Candy,
+  Drumstick,
   LucideIcon
 } from 'lucide-react';
 
@@ -43,6 +63,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ShoppingBag, Heart, Star, Gift, Sparkles, Crown, Gem, Package, ShoppingCart, Percent, Tag, Zap,
   Coffee, Cookie, Cake, IceCream, Pizza, Apple, Cherry, Grape, Sandwich, Soup, Salad, UtensilsCrossed,
   Dumbbell, Trophy, Medal, Target, Bike, Timer, Footprints, Mountain, Flame, Award,
+  Shirt, Wallet, Gamepad2, Headphones, Smartphone, Laptop, Monitor, Keyboard, Mouse,
+  PartyPopper, Watch, Glasses, Music, Camera, Tv, Radio, Dice1, TreePine, Candy, Drumstick,
 };
 
 const BackgroundPattern = () => {
