@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { SiTiktok, SiSnapchat } from 'react-icons/si';
 import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
+import { GiftProductsDisplay } from '@/components/GiftProductsDisplay';
 import { checkOrderRateLimit, recordOrderAttempt } from '@/lib/rateLimiter';
 import { cn } from '@/lib/utils';
 import { BouncingBalls } from '@/components/ui/bouncing-balls';
@@ -25,6 +26,7 @@ import { ConfettiEffect } from '@/components/ui/confetti-effect';
 import { FloatingParticles } from '@/components/ui/floating-particles';
 import { GlowingCard } from '@/components/ui/glowing-card';
 import { SlideToUnlock } from '@/components/ui/slide-to-unlock';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const CITIES_DATA = {
   palestine: {
@@ -136,37 +138,61 @@ const CheckoutProgress = ({ currentStep }: { currentStep: number }) => {
   );
 };
 
-// Feature badges component with enhanced animations
-const FeatureBadges = () => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-    {[
-      { icon: Truck, label: 'توصيل سريع', color: 'text-blue-500', bg: 'bg-blue-500/10 hover:bg-blue-500/20' },
-      { icon: Shield, label: 'دفع آمن', color: 'text-green-500', bg: 'bg-green-500/10 hover:bg-green-500/20' },
-      { icon: Clock, label: '24/7 دعم', color: 'text-orange-500', bg: 'bg-orange-500/10 hover:bg-orange-500/20' },
-      { icon: Gift, label: 'هدايا مجانية', color: 'text-pink-500', bg: 'bg-pink-500/10 hover:bg-pink-500/20' },
-    ].map((feature, i) => (
-      <div 
-        key={i} 
-        className={cn(
-          "flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 group cursor-pointer",
-          "hover:shadow-lg hover:-translate-y-1",
-          feature.bg
-        )}
-        style={{ animationDelay: `${i * 100}ms` }}
-      >
-        <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center shadow-inner">
-          <feature.icon className={cn("h-4 w-4 transition-all group-hover:scale-125", feature.color)} />
-        </div>
-        <span className="text-xs font-bold">{feature.label}</span>
-      </div>
-    ))}
-  </div>
-);
+// Feature badges component with enhanced animations - now dynamic
+const FeatureBadges = ({ badges, enabled }: { badges?: any[]; enabled?: boolean }) => {
+  if (enabled === false) return null;
+  
+  const defaultBadges = [
+    { icon: 'truck', label: 'توصيل سريع', enabled: true },
+    { icon: 'shield', label: 'دفع آمن', enabled: true },
+    { icon: 'clock', label: '24/7 دعم', enabled: true },
+    { icon: 'gift', label: 'هدايا مجانية', enabled: true },
+  ];
+  
+  const badgeList = badges || defaultBadges;
+  const activeBadges = badgeList.filter(b => b.enabled !== false);
+  
+  const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+    truck: { icon: Truck, color: 'text-blue-500', bg: 'bg-blue-500/10 hover:bg-blue-500/20' },
+    shield: { icon: Shield, color: 'text-green-500', bg: 'bg-green-500/10 hover:bg-green-500/20' },
+    clock: { icon: Clock, color: 'text-orange-500', bg: 'bg-orange-500/10 hover:bg-orange-500/20' },
+    gift: { icon: Gift, color: 'text-pink-500', bg: 'bg-pink-500/10 hover:bg-pink-500/20' },
+  };
+  
+  if (activeBadges.length === 0) return null;
+  
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      {activeBadges.map((feature, i) => {
+        const iconInfo = iconMap[feature.icon] || iconMap.gift;
+        const IconComponent = iconInfo.icon;
+        
+        return (
+          <div 
+            key={i} 
+            className={cn(
+              "flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 group cursor-pointer",
+              "hover:shadow-lg hover:-translate-y-1",
+              iconInfo.bg
+            )}
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center shadow-inner">
+              <IconComponent className={cn("h-4 w-4 transition-all group-hover:scale-125", iconInfo.color)} />
+            </div>
+            <span className="text-xs font-bold">{feature.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
   const { toast } = useToast();
+  const { settings } = useSettings();
   const [loading, setLoading] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -695,7 +721,10 @@ const Checkout = () => {
             <CheckoutProgress currentStep={1} />
             
             {/* Feature Badges */}
-            <FeatureBadges />
+            <FeatureBadges 
+              badges={(settings as any)?.checkout_badges} 
+              enabled={(settings as any)?.checkout_badges_enabled !== false} 
+            />
             
             <div className="grid lg:grid-cols-5 gap-8">
               <GlowingCard className="lg:col-span-3" borderGlow hoverEffect>
@@ -757,18 +786,31 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {/* Show gift button if eligible but not selected */}
+                {/* Show gifts based on display mode */}
                 {isEligibleForGift && !selectedGift && !giftSkipped && giftProducts && giftProducts.length > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full mb-4 gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 group"
-                    onClick={() => setShowGiftDialog(true)}
-                  >
-                    <Gift className="h-4 w-4 transition-transform group-hover:scale-110" />
-                    اختر هديتك المجانية
-                    <Sparkles className="h-4 w-4 animate-pulse" />
-                  </Button>
+                  (settings as any)?.gift_display_mode === 'inline' ? (
+                    <GiftProductsDisplay
+                      products={giftProducts}
+                      selectedGift={selectedGift}
+                      onSelectGift={(gift) => {
+                        setSelectedGift(gift);
+                        toast({ title: '🎁 تم اختيار الهدية', description: `تمت إضافة "${gift.name}" كهدية مجانية` });
+                      }}
+                      minimumAmount={activeGiftOffer?.minimum_amount || 0}
+                      currentAmount={total}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full mb-4 gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 group"
+                      onClick={() => setShowGiftDialog(true)}
+                    >
+                      <Gift className="h-4 w-4 transition-transform group-hover:scale-110" />
+                      اختر هديتك المجانية
+                      <Sparkles className="h-4 w-4 animate-pulse" />
+                    </Button>
+                  )
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">

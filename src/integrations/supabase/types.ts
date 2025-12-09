@@ -472,6 +472,10 @@ export type Database = {
         Row: {
           accent_color: string | null
           animation_effect: string | null
+          announcement_bg_color: string | null
+          announcement_enabled: boolean | null
+          announcement_messages: Json | null
+          background_animation_type: string | null
           background_image_url: string | null
           background_pattern: string | null
           background_style: string | null
@@ -483,12 +487,15 @@ export type Database = {
           cart_button_text: string | null
           cart_icon_style: string | null
           category_display_style: string | null
+          checkout_badges: Json | null
+          checkout_badges_enabled: boolean | null
           created_at: string
           delivery_inside: number | null
           delivery_jerusalem: number | null
           delivery_west_bank: number | null
           favicon_url: string | null
           font_family: string | null
+          gift_display_mode: string | null
           gift_icon_style: string | null
           header_layout: string | null
           header_logo_position: string | null
@@ -536,6 +543,10 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           animation_effect?: string | null
+          announcement_bg_color?: string | null
+          announcement_enabled?: boolean | null
+          announcement_messages?: Json | null
+          background_animation_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
           background_style?: string | null
@@ -547,12 +558,15 @@ export type Database = {
           cart_button_text?: string | null
           cart_icon_style?: string | null
           category_display_style?: string | null
+          checkout_badges?: Json | null
+          checkout_badges_enabled?: boolean | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
           font_family?: string | null
+          gift_display_mode?: string | null
           gift_icon_style?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
@@ -600,6 +614,10 @@ export type Database = {
         Update: {
           accent_color?: string | null
           animation_effect?: string | null
+          announcement_bg_color?: string | null
+          announcement_enabled?: boolean | null
+          announcement_messages?: Json | null
+          background_animation_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
           background_style?: string | null
@@ -611,12 +629,15 @@ export type Database = {
           cart_button_text?: string | null
           cart_icon_style?: string | null
           category_display_style?: string | null
+          checkout_badges?: Json | null
+          checkout_badges_enabled?: boolean | null
           created_at?: string
           delivery_inside?: number | null
           delivery_jerusalem?: number | null
           delivery_west_bank?: number | null
           favicon_url?: string | null
           font_family?: string | null
+          gift_display_mode?: string | null
           gift_icon_style?: string | null
           header_layout?: string | null
           header_logo_position?: string | null

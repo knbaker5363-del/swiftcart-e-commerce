@@ -3,7 +3,7 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { NavLink } from '@/components/NavLink';
-import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, X, Tag, Gift, BarChart3, Layout, Settings2, Sparkles } from 'lucide-react';
+import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, X, Tag, Gift, BarChart3, Layout, Settings2, Sparkles, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -70,6 +70,10 @@ const AdminLayout = () => {
     to: '/admin/effects',
     icon: Sparkles,
     label: 'التأثيرات البصرية'
+  }, {
+    to: '/admin/announcement',
+    icon: Megaphone,
+    label: 'شريط الإعلانات'
   }, {
     to: '/admin/settings',
     icon: Settings,
