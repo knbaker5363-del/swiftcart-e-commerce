@@ -5,6 +5,7 @@ import { useVisualEffects } from '@/hooks/useVisualEffects';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import DealsBar from '@/components/DealsBar';
 import BrandsButton from '@/components/BrandsButton';
+import CategoriesSlider from '@/components/CategoriesSlider';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,7 +13,6 @@ import { Heart, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import CartButton from '@/components/CartButton';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface CategoryRowsLayoutProps {
   categories: any[];
@@ -30,9 +30,37 @@ const CategoryRowsLayout = ({
   const productsPerRow = (settings as any)?.layout_products_per_category_row || 6;
   const isScrollable = (settings as any)?.layout_category_row_scrollable !== false;
   const showViewAll = (settings as any)?.layout_show_category_view_all !== false;
+  
+  // Get category display config (same as Classic layout)
+  const categoryDisplayStyle = (settings?.category_display_style || 'slider') as string;
+  const getCategoryDisplayConfig = () => {
+    try {
+      const parsed = JSON.parse(categoryDisplayStyle);
+      if (typeof parsed === 'object') {
+        return { style: parsed.style || 'slider', shape: parsed.shape || 'square', displayType: parsed.displayType || 'image', size: parsed.size || 'large' };
+      }
+    } catch {}
+    return { style: 'slider', shape: 'square', displayType: 'image', size: 'large' };
+  };
+  const categoryConfig = getCategoryDisplayConfig();
 
   return (
     <div className="space-y-8">
+      {/* Categories Slider - Same style as Classic */}
+      <section className="py-4">
+        <h2 className="text-xl font-bold mb-4">التصنيفات</h2>
+        <CategoriesSlider
+          categories={categories}
+          isLoading={false}
+          displayStyle={categoryConfig.style as 'grid' | 'slider'}
+          settings={{
+            shape: categoryConfig.shape as 'square' | 'circle',
+            displayType: categoryConfig.displayType as 'image' | 'icon',
+            size: categoryConfig.size as 'small' | 'large'
+          }}
+        />
+      </section>
+
       {/* Deals Bar */}
       <DealsBar />
 

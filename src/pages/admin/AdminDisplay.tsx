@@ -356,7 +356,7 @@ const AdminDisplay = () => {
             </button>
           </div>
 
-          {/* Layout-specific settings */}
+          {/* Layout-specific settings - Category Rows */}
           {storeLayoutStyle === 'category-rows' && (
             <div className="p-4 bg-muted/30 rounded-lg space-y-4">
               <h4 className="font-bold">إعدادات صفوف التصنيفات</h4>
@@ -377,6 +377,7 @@ const AdminDisplay = () => {
             </div>
           )}
 
+          {/* Layout-specific settings - Premium */}
           {storeLayoutStyle === 'premium' && (
             <div className="p-4 bg-muted/30 rounded-lg space-y-4">
               <h4 className="font-bold">إعدادات النمط الفاخر</h4>
