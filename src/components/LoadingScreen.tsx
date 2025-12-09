@@ -65,7 +65,6 @@ const LoadingScreen = () => {
 
   if (!show) return null;
 
-  const storeNameImageUrl = (settings as any)?.store_name_image_url;
   const loadingStyle = (settings as any)?.loading_style || 'spinner';
   const loadingShowLogo = (settings as any)?.loading_show_logo !== false;
 
@@ -75,38 +74,15 @@ const LoadingScreen = () => {
         fadeOut ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      {/* Logo or Store Name - Only show if loadingShowLogo is true */}
-      {loadingShowLogo && (
-        <>
-          <div className="mb-8 animate-pulse">
-            {settings?.logo_url ? (
-              <img
-                src={settings.logo_url}
-                alt="Loading..."
-                className="w-28 h-28 object-contain rounded-full shadow-lg"
-              />
-            ) : (
-              <div className="w-28 h-28 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-5xl font-bold text-primary-foreground">
-                  {settings?.store_name?.charAt(0) || 'م'}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Store Name Image or Text */}
-          {storeNameImageUrl ? (
-            <img 
-              src={storeNameImageUrl} 
-              alt={settings?.store_name || 'المتجر'} 
-              className="max-h-12 object-contain mb-6 animate-fade-in"
-            />
-          ) : settings?.store_name && (
-            <h1 className="text-2xl font-bold text-foreground mb-6 animate-fade-in">
-              {settings.store_name}
-            </h1>
-          )}
-        </>
+      {/* Logo Only - Only show if loadingShowLogo is true */}
+      {loadingShowLogo && settings?.logo_url && (
+        <div className="mb-8 animate-pulse">
+          <img
+            src={settings.logo_url}
+            alt="Loading..."
+            className="w-28 h-28 object-contain rounded-full shadow-lg"
+          />
+        </div>
       )}
 
       {/* Loading Animation - Based on selected style */}
