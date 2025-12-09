@@ -141,29 +141,25 @@ const SpecialOffers = () => {
                   </div>
                 )}
 
-                {/* Gradient Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/95 transition-all duration-300 ${offer.size === 'circle' ? 'rounded-full' : ''}`}>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h3 className="font-bold text-lg md:text-xl mb-1 drop-shadow-lg">{offer.name}</h3>
-                    
-                    {offer.condition_text && (
-                      <p className="text-sm text-white/80 mb-2 line-clamp-2">{offer.condition_text}</p>
-                    )}
-                    
-                    {/* Price Display */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {offer.bundle_price ? (
-                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-1.5 rounded-full text-white font-bold shadow-lg">
-                          <Zap className="h-4 w-4" />
-                          {offer.required_quantity} بـ {offer.bundle_price}₪
-                        </div>
-                      ) : offer.price ? (
-                        <div className="inline-block bg-primary px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                          {offer.price}₪
-                        </div>
-                      ) : null}
+                {/* Gradient Overlay - Centered Content */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:via-black/60 transition-all duration-300 flex flex-col items-center justify-center text-center p-4 ${offer.size === 'circle' ? 'rounded-full' : ''}`}>
+                  <h3 className="font-bold text-xl md:text-2xl mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white">{offer.name}</h3>
+                  
+                  {offer.condition_text && (
+                    <p className="text-sm text-white/90 mb-3 line-clamp-2 drop-shadow-lg max-w-[90%]">{offer.condition_text}</p>
+                  )}
+                  
+                  {/* Price Display */}
+                  {offer.bundle_price ? (
+                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-2 rounded-full text-white font-bold shadow-xl text-lg">
+                      <Zap className="h-5 w-5" />
+                      {offer.required_quantity} بـ {offer.bundle_price}₪
                     </div>
-                  </div>
+                  ) : offer.price ? (
+                    <div className="inline-block bg-primary px-5 py-2 rounded-full font-bold shadow-xl text-lg text-white">
+                      {offer.price}₪
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* Hover Glow Effect */}
