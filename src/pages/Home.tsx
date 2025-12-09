@@ -14,6 +14,7 @@ import SocialFooter from '@/components/SocialFooter';
 import SearchBar from '@/components/SearchBar';
 import SEOManager from '@/components/SEOManager';
 import HeroSection from '@/components/HeroSection';
+import AnnouncementBar from '@/components/AnnouncementBar';
 import { ClassicLayout, CategoryRowsLayout, PremiumLayout } from '@/components/layouts';
 
 const Home = () => {
@@ -119,6 +120,7 @@ const Home = () => {
     <div className="min-h-screen bg-background relative" dir="rtl">
       <SEOManager />
       <BackgroundPattern />
+      <AnnouncementBar />
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 

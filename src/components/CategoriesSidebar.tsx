@@ -83,7 +83,7 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col bg-gradient-to-b from-card to-card/95 rounded-2xl border border-border/50 shadow-xl backdrop-blur-sm">
+    <div className="flex flex-col h-full overflow-hidden bg-gradient-to-b from-card to-card/95 rounded-2xl border border-border/50 shadow-xl backdrop-blur-sm">
       {/* Header */}
       <div className="p-4 border-b border-border/30">
         <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
         </div>
       </div>
 
-      <div className="p-3 space-y-1">
+      <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {/* Categories */}
         {categories.map((category, index) => {
           const shapeClass = categoryConfig.shape === 'circle' ? 'rounded-full' : 'rounded-xl';
