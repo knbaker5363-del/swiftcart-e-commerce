@@ -262,6 +262,7 @@ const AdminDisplay = () => {
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
   const [backgroundIconDensity, setBackgroundIconDensity] = useState(30);
   const [backgroundIconSizeMode, setBackgroundIconSizeMode] = useState('random');
+  const [backgroundLineThickness, setBackgroundLineThickness] = useState(2);
 
   // Layout settings
   const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
@@ -307,6 +308,7 @@ const AdminDisplay = () => {
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
       setBackgroundIconDensity((settings as any)?.background_icon_density || 30);
       setBackgroundIconSizeMode((settings as any)?.background_icon_size_mode || 'random');
+      setBackgroundLineThickness((settings as any)?.background_line_thickness || 2);
       setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
       setLogoShape((settings as any)?.logo_shape || 'circle');
       setHeaderLogoPosition((settings as any)?.header_logo_position || 'right');
@@ -398,6 +400,7 @@ const AdminDisplay = () => {
           background_image_url: backgroundImageUrl,
           background_icon_density: backgroundIconDensity,
           background_icon_size_mode: backgroundIconSizeMode,
+          background_line_thickness: backgroundLineThickness,
           header_layout: headerLayout,
           logo_shape: logoShape,
           header_logo_position: headerLogoPosition,
@@ -1043,6 +1046,8 @@ const AdminDisplay = () => {
                     { id: 'dots', name: 'نقاط', icon: '•••' },
                     { id: 'lines', name: 'أيقونات', icon: '🎨' },
                     { id: 'bubbles', name: 'فقاعات', icon: '○○○' },
+                    { id: 'stripes', name: 'خطوط', icon: '|||' },
+                    { id: 'waves', name: 'متعرجة', icon: '∿∿∿' },
                   ].map(pattern => (
                     <button
                       key={pattern.id}
@@ -1169,6 +1174,26 @@ const AdminDisplay = () => {
                         <div className="text-xs font-medium">أحجام متشابهة</div>
                       </button>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Stripes/Waves thickness control */}
+              {(backgroundPattern === 'stripes' || backgroundPattern === 'waves') && (
+                <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+                  <Label className="text-sm font-medium">سماكة الخطوط: {backgroundLineThickness}px</Label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="6"
+                    step="0.5"
+                    value={backgroundLineThickness}
+                    onChange={(e) => setBackgroundLineThickness(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>رفيع</span>
+                    <span>سميك</span>
                   </div>
                 </div>
               )}
