@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 
 interface SpecialOffer {
@@ -249,6 +249,27 @@ const AdminSpecialOffers = () => {
     }
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async ({ offerId, direction }: { offerId: string; direction: 'up' | 'down' }) => {
+      if (!offers) return;
+      const currentIndex = offers.findIndex(o => o.id === offerId);
+      if (currentIndex === -1) return;
+      
+      const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (swapIndex < 0 || swapIndex >= offers.length) return;
+      
+      const currentOffer = offers[currentIndex];
+      const swapOffer = offers[swapIndex];
+      
+      // Swap sort_order values
+      await supabase.from('special_offers').update({ sort_order: swapOffer.sort_order }).eq('id', currentOffer.id);
+      await supabase.from('special_offers').update({ sort_order: currentOffer.sort_order }).eq('id', swapOffer.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] });
+    }
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -475,81 +496,110 @@ const AdminSpecialOffers = () => {
           ))}
         </div>
       ) : offers && offers.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {offers.map((offer) => (
+        <div className="space-y-3">
+          {offers.map((offer, index) => (
             <Card 
               key={offer.id} 
               className={`overflow-hidden ${!offer.is_active ? 'opacity-50' : ''}`}
               style={{ borderColor: offer.background_color }}
             >
-              <div 
-                className="relative h-32"
-                style={{ backgroundColor: offer.background_color }}
-              >
-                {offer.image_url ? (
-                  <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    {offer.offer_type === 'bundle' ? (
-                      <Flame className="h-12 w-12" style={{ color: `${offer.text_color}50` }} />
-                    ) : (
-                      <Sparkles className="h-12 w-12" style={{ color: `${offer.text_color}50` }} />
-                    )}
+              <div className="flex items-stretch">
+                {/* Order Controls */}
+                <div className="flex flex-col items-center justify-center gap-1 p-2 bg-muted/50 border-l">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    disabled={index === 0}
+                    onClick={() => reorderMutation.mutate({ offerId: offer.id, direction: 'up' })}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                    {index + 1}
                   </div>
-                )}
-                <div className="absolute top-2 left-2 flex gap-2">
-                  <span className="bg-muted/90 px-2 py-1 rounded text-xs">
-                    {sizeOptions.find(s => s.id === offer.size)?.name || offer.size}
-                  </span>
-                  {offer.offer_type === 'bundle' && (
-                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                      <Flame className="h-3 w-3" />
-                      باقة
-                    </span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    disabled={index === offers.length - 1}
+                    onClick={() => reorderMutation.mutate({ offerId: offer.id, direction: 'down' })}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Offer Preview */}
+                <div 
+                  className="w-28 h-28 flex-shrink-0 flex items-center justify-center"
+                  style={{ backgroundColor: offer.background_color }}
+                >
+                  {offer.image_url ? (
+                    <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
+                  ) : (
+                    offer.offer_type === 'bundle' ? (
+                      <Flame className="h-10 w-10" style={{ color: `${offer.text_color}50` }} />
+                    ) : (
+                      <Sparkles className="h-10 w-10" style={{ color: `${offer.text_color}50` }} />
+                    )
                   )}
                 </div>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-1">{offer.name}</h3>
-                {offer.condition_text && (
-                  <p className="text-sm text-muted-foreground mb-2">{offer.condition_text}</p>
-                )}
-                {offer.offer_type === 'bundle' && offer.bundle_price ? (
-                  <div className="text-orange-600 font-bold flex items-center gap-1">
-                    <Package className="h-4 w-4" />
-                    {offer.required_quantity} بـ {offer.bundle_price}₪
+
+                {/* Offer Info */}
+                <CardContent className="flex-1 p-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg truncate">{offer.name}</h3>
+                      {offer.offer_type === 'bundle' && (
+                        <span className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs flex items-center gap-1 flex-shrink-0">
+                          <Flame className="h-3 w-3" />
+                          باقة
+                        </span>
+                      )}
+                    </div>
+                    {offer.condition_text && (
+                      <p className="text-sm text-muted-foreground mb-2 truncate">{offer.condition_text}</p>
+                    )}
+                    {offer.offer_type === 'bundle' && offer.bundle_price ? (
+                      <div className="text-orange-600 font-bold flex items-center gap-1">
+                        <Package className="h-4 w-4" />
+                        {offer.required_quantity} بـ {offer.bundle_price}₪
+                      </div>
+                    ) : offer.price ? (
+                      <div className="text-primary font-bold">{offer.price}₪</div>
+                    ) : null}
                   </div>
-                ) : offer.price ? (
-                  <div className="text-primary font-bold">{offer.price}₪</div>
-                ) : null}
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" size="sm" onClick={() => openEditDialog(offer)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => { setSelectedOfferId(offer.id); setProductsDialogOpen(true); }}
-                  >
-                    <Package className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>حذف العرض؟</AlertDialogTitle>
-                        <AlertDialogDescription>سيتم حذف العرض نهائياً</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteMutation.mutate(offer.id)}>حذف</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardContent>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(offer)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => { setSelectedOfferId(offer.id); setProductsDialogOpen(true); }}
+                    >
+                      <Package className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm"><Trash2 className="h-4 w-4" /></Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>حذف العرض؟</AlertDialogTitle>
+                          <AlertDialogDescription>سيتم حذف العرض نهائياً</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteMutation.mutate(offer.id)}>حذف</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
+              </div>
             </Card>
           ))}
         </div>
