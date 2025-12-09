@@ -24,6 +24,7 @@ const BrandProducts = () => {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { settings } = useSettings();
   const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
+  const backButtonText = (settings as any)?.back_button_text || 'رجوع';
 
   const { data: brand, isLoading: brandLoading } = useQuery({
     queryKey: ['brand', id],
@@ -108,7 +109,7 @@ const BrandProducts = () => {
             className="gap-2 text-white hover:bg-white/20 mb-4"
           >
             <ArrowRight className="h-4 w-4" />
-            رجوع
+            {backButtonText}
           </Button>
           
           <div className="flex items-center gap-4 animate-fade-in">

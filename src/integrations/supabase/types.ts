@@ -475,6 +475,7 @@ export type Database = {
           announcement_bg_color: string | null
           announcement_enabled: boolean | null
           announcement_messages: Json | null
+          back_button_text: string | null
           background_animation_type: string | null
           background_image_url: string | null
           background_pattern: string | null
@@ -508,6 +509,7 @@ export type Database = {
           layout_featured_product_id: string | null
           layout_products_per_category_row: number | null
           layout_show_category_view_all: boolean | null
+          loading_show_logo: boolean | null
           loading_style: string | null
           location: string | null
           logo_shape: string | null
@@ -548,6 +550,7 @@ export type Database = {
           announcement_bg_color?: string | null
           announcement_enabled?: boolean | null
           announcement_messages?: Json | null
+          back_button_text?: string | null
           background_animation_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
@@ -581,6 +584,7 @@ export type Database = {
           layout_featured_product_id?: string | null
           layout_products_per_category_row?: number | null
           layout_show_category_view_all?: boolean | null
+          loading_show_logo?: boolean | null
           loading_style?: string | null
           location?: string | null
           logo_shape?: string | null
@@ -621,6 +625,7 @@ export type Database = {
           announcement_bg_color?: string | null
           announcement_enabled?: boolean | null
           announcement_messages?: Json | null
+          back_button_text?: string | null
           background_animation_type?: string | null
           background_image_url?: string | null
           background_pattern?: string | null
@@ -654,6 +659,7 @@ export type Database = {
           layout_featured_product_id?: string | null
           layout_products_per_category_row?: number | null
           layout_show_category_view_all?: boolean | null
+          loading_show_logo?: boolean | null
           loading_style?: string | null
           location?: string | null
           logo_shape?: string | null

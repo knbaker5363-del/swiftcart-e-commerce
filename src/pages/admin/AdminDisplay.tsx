@@ -119,6 +119,8 @@ const AdminDisplay = () => {
   const [accentColor, setAccentColor] = useState('default');
   const [animationEffect, setAnimationEffect] = useState('none');
   const [loadingStyle, setLoadingStyle] = useState('spinner');
+  const [loadingShowLogo, setLoadingShowLogo] = useState(true);
+  const [backButtonText, setBackButtonText] = useState('رجوع');
 
   // Background settings
   const [backgroundStyle, setBackgroundStyle] = useState('solid');
@@ -161,6 +163,8 @@ const AdminDisplay = () => {
       setAccentColor((settings as any)?.accent_color || 'default');
       setAnimationEffect((settings as any)?.animation_effect || 'none');
       setLoadingStyle((settings as any)?.loading_style || 'spinner');
+      setLoadingShowLogo((settings as any)?.loading_show_logo !== false);
+      setBackButtonText((settings as any)?.back_button_text || 'رجوع');
       setBackgroundStyle((settings as any)?.background_style || 'solid');
       setBackgroundPattern((settings as any)?.background_pattern || null);
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
@@ -246,6 +250,8 @@ const AdminDisplay = () => {
           accent_color: accentColor === 'default' ? null : accentColor,
           animation_effect: animationEffect === 'none' ? null : animationEffect,
           loading_style: loadingStyle,
+          loading_show_logo: loadingShowLogo,
+          back_button_text: backButtonText,
           background_style: backgroundStyle,
           background_pattern: backgroundPattern,
           background_image_url: backgroundImageUrl,
@@ -887,6 +893,33 @@ const AdminDisplay = () => {
                   <div className="text-2xl mb-2">{style.icon}</div>
                   <div className="font-medium text-sm">{style.name}</div>
                   <div className="text-[10px] text-muted-foreground mt-1">{style.description}</div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Loading show logo toggle */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg mt-4">
+              <div>
+                <Label className="text-base font-medium">إظهار اللوجو أثناء التحميل</Label>
+                <p className="text-sm text-muted-foreground">عند الإيقاف، ستظهر عجلة التحميل فقط</p>
+              </div>
+              <Switch checked={loadingShowLogo} onCheckedChange={setLoadingShowLogo} />
+            </div>
+          </div>
+
+          {/* Back Button Text */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">نص زر الرجوع</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {['رجوع', 'عودة', 'الخلف'].map(text => (
+                <button
+                  key={text}
+                  onClick={() => setBackButtonText(text)}
+                  className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                    backButtonText === text ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-medium">{text}</div>
                 </button>
               ))}
             </div>
