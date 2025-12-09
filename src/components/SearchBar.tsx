@@ -15,7 +15,63 @@ const SearchBar = ({ className }: SearchBarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [placeholder, setPlaceholder] = useState('');
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Fetch categories and products for typewriter effect
+  const { data: typewriterItems } = useQuery({
+    queryKey: ['typewriter-items'],
+    queryFn: async () => {
+      const [categoriesRes, productsRes] = await Promise.all([
+        supabase.from('categories').select('name').limit(10),
+        supabase.from('products').select('name').eq('is_active', true).limit(10)
+      ]);
+      
+      const items: string[] = [];
+      if (categoriesRes.data) {
+        items.push(...categoriesRes.data.map(c => c.name));
+      }
+      if (productsRes.data) {
+        items.push(...productsRes.data.map(p => p.name));
+      }
+      // Shuffle items
+      return items.sort(() => Math.random() - 0.5);
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Typewriter effect
+  useEffect(() => {
+    if (!typewriterItems || typewriterItems.length === 0) return;
+    
+    const currentWord = typewriterItems[placeholderIndex % typewriterItems.length];
+    const typingSpeed = isDeleting ? 50 : 100;
+    const pauseTime = isDeleting ? 500 : 2000;
+
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        if (charIndex < currentWord.length) {
+          setPlaceholder(currentWord.substring(0, charIndex + 1));
+          setCharIndex(charIndex + 1);
+        } else {
+          setTimeout(() => setIsDeleting(true), pauseTime);
+        }
+      } else {
+        if (charIndex > 0) {
+          setPlaceholder(currentWord.substring(0, charIndex - 1));
+          setCharIndex(charIndex - 1);
+        } else {
+          setIsDeleting(false);
+          setPlaceholderIndex((prev) => (prev + 1) % typewriterItems.length);
+        }
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [charIndex, isDeleting, placeholderIndex, typewriterItems]);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['search-products', query],
@@ -70,7 +126,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="ابحث عن منتج..."
+          placeholder={`ابحث عن ${placeholder || 'منتج'}...`}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
