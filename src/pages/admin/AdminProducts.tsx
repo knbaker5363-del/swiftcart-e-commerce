@@ -443,14 +443,14 @@ const AdminProducts = () => {
               <div>
                 <Label>العلامة التجارية</Label>
                 <Select
-                  value={formData.brand_id}
-                  onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
+                  value={formData.brand_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, brand_id: value === "none" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر العلامة التجارية (اختياري)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">بدون علامة تجارية</SelectItem>
+                    <SelectItem value="none">بدون علامة تجارية</SelectItem>
                     {brands?.map((brand) => (
                       <SelectItem key={brand.id} value={brand.id}>
                         {brand.name}
