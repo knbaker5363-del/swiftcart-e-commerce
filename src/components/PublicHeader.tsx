@@ -70,15 +70,15 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const logoShapeClass = logoShape === 'circle' ? 'rounded-full' : 'rounded-lg';
 
   // Logo component for header
-  const HeaderLogo = () => <Link to="/" className="flex items-center gap-2 shrink-0">
-      {settings?.logo_url ? <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
+  const HeaderLogo = () => <Link to="/" className="flex items-center gap-3 shrink-0">
+      {settings?.logo_url ? <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} overflow-hidden border-2 border-primary/20 shrink-0`}>
           <img src={settings.logo_url} alt={settings.store_name || 'شعار المتجر'} className="w-full h-full object-cover" />
-        </div> : <div className={`w-8 h-8 sm:w-10 sm:h-10 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
-          <span className="text-sm sm:text-lg font-bold text-primary-foreground">
+        </div> : <div className={`w-10 h-10 sm:w-12 sm:h-12 ${logoShapeClass} bg-primary flex items-center justify-center shrink-0`}>
+          <span className="text-base sm:text-xl font-bold text-primary-foreground">
             {settings?.store_name?.charAt(0) || 'م'}
           </span>
         </div>}
-      <h1 className={`text-base sm:text-xl font-bold truncate max-w-[120px] sm:max-w-none ${settings?.store_name_black ? 'text-foreground' : 'bg-gradient-primary bg-clip-text text-transparent'}`}>
+      <h1 className={`text-lg sm:text-2xl font-bold truncate max-w-[140px] sm:max-w-none ${settings?.store_name_black ? 'text-foreground' : 'bg-gradient-primary bg-clip-text text-transparent'}`}>
         {settings?.store_name || 'متجري'}
       </h1>
     </Link>;
@@ -90,7 +90,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] p-0 bg-background">
@@ -116,7 +116,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             user ? <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
+                    <User className="h-6 w-6" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-background border">
@@ -141,7 +141,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           
           <Link to="/favorites">
             <Button variant="ghost" size="icon" className="relative overflow-visible">
-              <Heart className="h-5 w-5" />
+              <Heart className="h-6 w-6" />
               {favoritesCount > 0 && (
                 <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center z-10">
                   {favoritesCount}
@@ -150,7 +150,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             </Button>
           </Link>
           <Button variant="outline" size="icon" className="relative overflow-visible" onClick={onCartOpen}>
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (
               <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center z-10">
                 {itemCount}
