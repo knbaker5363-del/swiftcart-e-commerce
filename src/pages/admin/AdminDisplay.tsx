@@ -509,14 +509,14 @@ const AdminDisplay = () => {
         </CardContent>
       </Card>
 
-      {/* Header Settings - NEW */}
+      {/* Header Settings - ALL IN ONE PLACE */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Image className="h-5 w-5" />
             إعدادات الهيدر
           </CardTitle>
-          <CardDescription>تخصيص عناصر الهيدر والشعار</CardDescription>
+          <CardDescription>جميع إعدادات الهيدر والشعار في مكان واحد</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Show/Hide Logo Icon */}
@@ -542,6 +542,92 @@ const AdminDisplay = () => {
               onCheckedChange={setShowHeaderStoreName}
             />
           </div>
+
+          {/* Logo Shape */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">شكل اللوجو</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: 'circle', name: 'دائري', icon: '⭕' },
+                { id: 'square', name: 'مربع', icon: '⬜' },
+              ].map(shape => (
+                <button
+                  key={shape.id}
+                  onClick={() => setLogoShape(shape.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    logoShape === shape.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{shape.icon}</div>
+                  <div className="font-medium text-sm">{shape.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Header logo position */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: 'right', name: 'على اليمين', icon: '➡️' },
+                { id: 'center', name: 'في المنتصف', icon: '⬛' },
+              ].map(pos => (
+                <button
+                  key={pos.id}
+                  onClick={() => setHeaderLogoPosition(pos.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{pos.icon}</div>
+                  <div className="font-medium text-sm">{pos.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Store name color toggle */}
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div>
+              <Label className="text-base font-medium">إبقاء اسم المتجر أسود</Label>
+              <p className="text-sm text-muted-foreground">عند التفعيل، سيظهر اسم المتجر باللون الأسود</p>
+            </div>
+            <Switch checked={storeNameBlack} onCheckedChange={setStoreNameBlack} />
+          </div>
+
+          {/* Hide store info box toggle */}
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div>
+              <Label className="text-base font-medium">إخفاء بوكس معلومات المتجر</Label>
+              <p className="text-sm text-muted-foreground">إخفاء اللوجو واسم المتجر من الصفحة الرئيسية</p>
+            </div>
+            <Switch checked={hideHeaderStoreInfo} onCheckedChange={setHideHeaderStoreInfo} />
+          </div>
+
+          {/* Social media position */}
+          {!hideHeaderStoreInfo && (
+            <div>
+              <Label className="text-base font-medium mb-3 block">مكان السوشل ميديا</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'hero', name: 'في البوكس', icon: '📍' },
+                  { id: 'footer', name: 'نهاية الموقع', icon: '⬇️' },
+                ].map(pos => (
+                  <button
+                    key={pos.id}
+                    onClick={() => setSocialMediaPosition(pos.id)}
+                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                      socialMediaPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">{pos.icon}</div>
+                    <div className="font-medium text-sm">{pos.name}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Store Name Image Upload */}
           <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
@@ -925,74 +1011,6 @@ const AdminDisplay = () => {
             </div>
           </div>
 
-          {/* Logo and header layout */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">شكل اللوجو</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { id: 'circle', name: 'دائري', icon: '⭕' },
-                { id: 'square', name: 'مربع', icon: '⬜' },
-              ].map(shape => (
-                <button
-                  key={shape.id}
-                  onClick={() => setLogoShape(shape.id)}
-                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
-                    logoShape === shape.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{shape.icon}</div>
-                  <div className="font-medium text-sm">{shape.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Header logo position - Only right and center */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">موضع اللوجو في الهيدر</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { id: 'right', name: 'على اليمين', icon: '➡️' },
-                { id: 'center', name: 'في المنتصف', icon: '⬛' },
-              ].map(pos => (
-                <button
-                  key={pos.id}
-                  onClick={() => setHeaderLogoPosition(pos.id)}
-                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
-                    headerLogoPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{pos.icon}</div>
-                  <div className="font-medium text-sm">{pos.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Social media position */}
-          {!hideHeaderStoreInfo && (
-            <div>
-              <Label className="text-base font-medium mb-3 block">مكان السوشل ميديا</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { id: 'hero', name: 'في البوكس', icon: '📍' },
-                  { id: 'footer', name: 'نهاية الموقع', icon: '⬇️' },
-                ].map(pos => (
-                  <button
-                    key={pos.id}
-                    onClick={() => setSocialMediaPosition(pos.id)}
-                    className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
-                      socialMediaPosition === pos.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="text-3xl mb-2">{pos.icon}</div>
-                    <div className="font-medium text-sm">{pos.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Toggles */}
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -1001,22 +1019,6 @@ const AdminDisplay = () => {
                 <p className="text-sm text-muted-foreground">عند التفعيل، ستظهر الصور داخل إطار</p>
               </div>
               <Switch checked={showImageBorder} onCheckedChange={setShowImageBorder} />
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div>
-                <Label className="text-base font-medium">إبقاء اسم المتجر أسود</Label>
-                <p className="text-sm text-muted-foreground">عند التفعيل، سيظهر اسم المتجر باللون الأسود</p>
-              </div>
-              <Switch checked={storeNameBlack} onCheckedChange={setStoreNameBlack} />
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div>
-                <Label className="text-base font-medium">إخفاء بوكس معلومات المتجر</Label>
-                <p className="text-sm text-muted-foreground">إخفاء اللوجو واسم المتجر من الصفحة الرئيسية</p>
-              </div>
-              <Switch checked={hideHeaderStoreInfo} onCheckedChange={setHideHeaderStoreInfo} />
             </div>
           </div>
         </CardContent>
