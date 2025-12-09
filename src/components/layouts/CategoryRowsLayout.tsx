@@ -125,6 +125,7 @@ const CategoryRow = ({
 
     const mainImage = product.image_url || '/placeholder.svg';
     const additionalImages = Array.isArray(product.additional_images) ? product.additional_images : [];
+    const options = product.options as { sizes?: any[]; colors?: string[] } | null;
 
     return (
       <Card
@@ -181,6 +182,37 @@ const CategoryRow = ({
             )}
           </div>
 
+          {/* Sizes */}
+          {options?.sizes && options.sizes.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1">
+              {options.sizes.map((size: any, idx: number) => {
+                const sizeName = typeof size === 'string' ? size : size.name;
+                return (
+                  <span
+                    key={idx}
+                    className="text-[8px] px-1.5 py-0.5 border border-border rounded bg-background"
+                  >
+                    {sizeName}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Colors */}
+          {options?.colors && options.colors.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1">
+              {options.colors.map((color, idx) => (
+                <div
+                  key={idx}
+                  className="w-4 h-4 rounded-full border border-border"
+                  style={{ backgroundColor: getColorValue(color) }}
+                  title={color}
+                />
+              ))}
+            </div>
+          )}
+
           <CartButton onClick={(e) => e.stopPropagation()} />
         </div>
       </Card>
@@ -213,14 +245,13 @@ const CategoryRow = ({
 
       {/* Products Row */}
       {isScrollable ? (
-        <ScrollArea className="w-full whitespace-nowrap" dir="rtl">
-          <div className="flex gap-4 pb-4 flex-row-reverse">
+        <div className="overflow-x-auto" dir="rtl">
+          <div className="flex gap-4 pb-4" style={{ direction: 'rtl' }}>
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" dir="rtl">
           {products.slice(0, productsPerRow).map((product) => (
