@@ -55,6 +55,15 @@ import {
   TreePine,
   Candy,
   Drumstick,
+  Flower,
+  Flower2,
+  Ribbon,
+  Scissors,
+  Palette,
+  Brush,
+  Feather,
+  Baby,
+  Smile,
   LucideIcon
 } from 'lucide-react';
 
@@ -65,6 +74,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Dumbbell, Trophy, Medal, Target, Bike, Timer, Footprints, Mountain, Flame, Award,
   Shirt, Wallet, Gamepad2, Headphones, Smartphone, Laptop, Monitor, Keyboard, Mouse,
   PartyPopper, Watch, Glasses, Music, Camera, Tv, Radio, Dice1, TreePine, Candy, Drumstick,
+  Flower, Flower2, Ribbon, Scissors, Palette, Brush, Feather, Baby, Smile,
 };
 
 const BackgroundPattern = () => {
@@ -74,6 +84,8 @@ const BackgroundPattern = () => {
   const backgroundPattern = (settings as any)?.background_pattern || null;
   const backgroundSelectedIcons = (settings as any)?.background_selected_icons || ['ShoppingBag', 'Heart', 'Star'];
   const backgroundImageUrl = (settings as any)?.background_image_url || null;
+  const backgroundIconDensity = (settings as any)?.background_icon_density || 30;
+  const backgroundIconSizeMode = (settings as any)?.background_icon_size_mode || 'random';
 
   // Get selected icons
   const selectedIcons = useMemo(() => {
@@ -91,16 +103,17 @@ const BackgroundPattern = () => {
 
   // Generate random icons positions (memoized to prevent re-rendering)
   const randomIcons = useMemo(() => {
-    return [...Array(30)].map((_, i) => ({
+    const uniformSize = 20; // Fixed size for uniform mode
+    return [...Array(backgroundIconDensity)].map((_, i) => ({
       Icon: selectedIcons[i % selectedIcons.length],
       left: Math.random() * 100,
       top: Math.random() * 100,
-      size: 16 + Math.random() * 24,
+      size: backgroundIconSizeMode === 'uniform' ? uniformSize : (16 + Math.random() * 24),
       rotation: Math.random() * 360,
       delay: Math.random() * 5,
       duration: 8 + Math.random() * 4,
     }));
-  }, [selectedIcons]);
+  }, [selectedIcons, backgroundIconDensity, backgroundIconSizeMode]);
 
   // Don't render anything for solid background
   if (backgroundStyle === 'solid') return null;

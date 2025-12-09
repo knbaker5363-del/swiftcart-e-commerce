@@ -70,6 +70,15 @@ import {
   TreePine,
   Candy,
   Drumstick,
+  Flower,
+  Flower2,
+  Ribbon,
+  Scissors,
+  Palette as PaletteIcon,
+  Brush,
+  Feather,
+  Baby,
+  Smile,
   LucideIcon
 } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
@@ -160,6 +169,16 @@ const availableBackgroundIcons: { id: string; name: string; icon: LucideIcon }[]
   { id: 'Tag', name: 'علامة', icon: Tag },
   { id: 'Zap', name: 'برق', icon: Zap },
   { id: 'Package', name: 'طرد', icon: Package },
+  // Feminine & Beauty
+  { id: 'Flower', name: 'وردة', icon: Flower },
+  { id: 'Flower2', name: 'زهرة', icon: Flower2 },
+  { id: 'Ribbon', name: 'شريطة', icon: Ribbon },
+  { id: 'Scissors', name: 'مقص', icon: Scissors },
+  { id: 'Palette', name: 'ألوان', icon: PaletteIcon },
+  { id: 'Brush', name: 'فرشاة', icon: Brush },
+  { id: 'Feather', name: 'ريشة', icon: Feather },
+  { id: 'Baby', name: 'طفل', icon: Baby },
+  { id: 'Smile', name: 'ابتسامة', icon: Smile },
   // Fashion & Accessories
   { id: 'Shirt', name: 'قميص', icon: Shirt },
   { id: 'Wallet', name: 'محفظة', icon: Wallet },
@@ -241,6 +260,8 @@ const AdminDisplay = () => {
   const [backgroundSelectedIcons, setBackgroundSelectedIcons] = useState<string[]>(['ShoppingBag', 'Heart', 'Star']);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
+  const [backgroundIconDensity, setBackgroundIconDensity] = useState(30);
+  const [backgroundIconSizeMode, setBackgroundIconSizeMode] = useState('random');
 
   // Layout settings
   const [headerLayout, setHeaderLayout] = useState('logo-right-social-below');
@@ -284,6 +305,8 @@ const AdminDisplay = () => {
       setBackgroundIconType((settings as any)?.background_icon_type || 'shopping');
       setBackgroundSelectedIcons((settings as any)?.background_selected_icons || ['ShoppingBag', 'Heart', 'Star']);
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
+      setBackgroundIconDensity((settings as any)?.background_icon_density || 30);
+      setBackgroundIconSizeMode((settings as any)?.background_icon_size_mode || 'random');
       setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
       setLogoShape((settings as any)?.logo_shape || 'circle');
       setHeaderLogoPosition((settings as any)?.header_logo_position || 'right');
@@ -373,6 +396,8 @@ const AdminDisplay = () => {
           background_icon_type: backgroundIconType,
           background_selected_icons: backgroundSelectedIcons,
           background_image_url: backgroundImageUrl,
+          background_icon_density: backgroundIconDensity,
+          background_icon_size_mode: backgroundIconSizeMode,
           header_layout: headerLayout,
           logo_shape: logoShape,
           header_logo_position: headerLogoPosition,
@@ -1103,6 +1128,51 @@ const AdminDisplay = () => {
                       </div>
                     </div>
                   )}
+                  {/* Icon density slider */}
+                  <div className="mt-4 space-y-2">
+                    <Label className="text-sm">كثافة الأيقونات: {backgroundIconDensity}</Label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="60"
+                      value={backgroundIconDensity}
+                      onChange={(e) => setBackgroundIconDensity(parseInt(e.target.value))}
+                      className="w-full accent-primary"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>قليلة (10)</span>
+                      <span>كثيرة (60)</span>
+                    </div>
+                  </div>
+
+                  {/* Icon size mode */}
+                  <div className="mt-4 space-y-2">
+                    <Label className="text-sm">حجم الأيقونات</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setBackgroundIconSizeMode('random')}
+                        className={`p-3 rounded-lg border-2 text-center transition-all ${
+                          backgroundIconSizeMode === 'random' 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="text-lg mb-1">📐</div>
+                        <div className="text-xs font-medium">أحجام مختلفة</div>
+                      </button>
+                      <button
+                        onClick={() => setBackgroundIconSizeMode('uniform')}
+                        className={`p-3 rounded-lg border-2 text-center transition-all ${
+                          backgroundIconSizeMode === 'uniform' 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="text-lg mb-1">⬜</div>
+                        <div className="text-xs font-medium">أحجام متشابهة</div>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
