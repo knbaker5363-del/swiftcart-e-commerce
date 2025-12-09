@@ -373,6 +373,7 @@ const AdminAnalytics = () => {
             <Calendar className="h-5 w-5" />
             إحصائيات كل يوم
           </CardTitle>
+          <CardDescription>انقر على زر الحذف لتصفير إحصائيات يوم محدد</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -385,6 +386,7 @@ const AdminAnalytics = () => {
                   <th className="text-center p-3 font-medium">المشاهدات</th>
                   <th className="text-center p-3 font-medium">الطلبات</th>
                   <th className="text-center p-3 font-medium">المبيعات</th>
+                  <th className="text-center p-3 font-medium">إجراء</th>
                 </tr>
               </thead>
               <tbody>
@@ -412,6 +414,58 @@ const AdminAnalytics = () => {
                     </td>
                     <td className="p-3 text-center font-bold text-green-600">
                       {day.revenue > 0 ? `${formatNumber(day.revenue)} ₪` : '-'}
+                    </td>
+                    <td className="p-3 text-center">
+                      {(day.visitors > 0 || day.productViews > 0) && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent dir="rtl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>حذف إحصائيات {day.dayName}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                هل أنت متأكد من حذف إحصائيات الزيارات ليوم {day.formattedDate}؟
+                                <br />
+                                سيتم حذف {day.visitors} زائر و {day.productViews} مشاهدة.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex-row-reverse gap-2">
+                              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={async () => {
+                                  try {
+                                    const startDate = startOfDay(day.date).toISOString();
+                                    const endDate = endOfDay(day.date).toISOString();
+                                    
+                                    await supabase.from('page_views').delete()
+                                      .gte('created_at', startDate)
+                                      .lte('created_at', endDate);
+                                    
+                                    await supabase.from('product_views').delete()
+                                      .gte('created_at', startDate)
+                                      .lte('created_at', endDate);
+                                    
+                                    queryClient.invalidateQueries({ queryKey: ['analytics-daily-stats'] });
+                                    queryClient.invalidateQueries({ queryKey: ['analytics-today-visitors'] });
+                                    queryClient.invalidateQueries({ queryKey: ['analytics-weekly-visitors'] });
+                                    queryClient.invalidateQueries({ queryKey: ['analytics-daily-visitors'] });
+                                    
+                                    toast.success(`تم حذف إحصائيات ${day.dayName}`);
+                                  } catch (error) {
+                                    toast.error('حدث خطأ أثناء الحذف');
+                                  }
+                                }}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                حذف
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </td>
                   </tr>
                 ))}
