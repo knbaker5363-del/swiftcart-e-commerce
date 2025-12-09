@@ -95,6 +95,15 @@ const animationEffects = [
   { id: 'leaves', name: 'أوراق', icon: '🍃' },
 ];
 
+// Loading styles
+const loadingStyleOptions = [
+  { id: 'spinner', name: 'دائري', icon: '🔄', description: 'شعار التحميل الكلاسيكي' },
+  { id: 'bouncing', name: 'كرات', icon: '⚽', description: 'كرات ترتد' },
+  { id: 'pulse', name: 'نبض', icon: '💫', description: 'دوائر نابضة' },
+  { id: 'dots', name: 'نقاط', icon: '✨', description: 'نقاط دوارة' },
+  { id: 'wave', name: 'موجة', icon: '🌊', description: 'أعمدة متموجة' },
+];
+
 const AdminDisplay = () => {
   const { settings, refreshSettings, applyTheme, applyAccentColor } = useSettings();
   const { toast } = useToast();
@@ -109,6 +118,7 @@ const AdminDisplay = () => {
   const [selectedTheme, setSelectedTheme] = useState('default');
   const [accentColor, setAccentColor] = useState('default');
   const [animationEffect, setAnimationEffect] = useState('none');
+  const [loadingStyle, setLoadingStyle] = useState('spinner');
 
   // Background settings
   const [backgroundStyle, setBackgroundStyle] = useState('solid');
@@ -150,6 +160,7 @@ const AdminDisplay = () => {
       setSelectedTheme(settings.theme || 'default');
       setAccentColor((settings as any)?.accent_color || 'default');
       setAnimationEffect((settings as any)?.animation_effect || 'none');
+      setLoadingStyle((settings as any)?.loading_style || 'spinner');
       setBackgroundStyle((settings as any)?.background_style || 'solid');
       setBackgroundPattern((settings as any)?.background_pattern || null);
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
@@ -234,6 +245,7 @@ const AdminDisplay = () => {
           theme: selectedTheme,
           accent_color: accentColor === 'default' ? null : accentColor,
           animation_effect: animationEffect === 'none' ? null : animationEffect,
+          loading_style: loadingStyle,
           background_style: backgroundStyle,
           background_pattern: backgroundPattern,
           background_image_url: backgroundImageUrl,
@@ -855,6 +867,26 @@ const AdminDisplay = () => {
                 >
                   <div className="text-2xl mb-1">{effect.icon}</div>
                   <div className="text-xs font-medium">{effect.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Loading Style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">نمط التحميل عند فتح الموقع</Label>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {loadingStyleOptions.map(style => (
+                <button
+                  key={style.id}
+                  onClick={() => setLoadingStyle(style.id)}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                    loadingStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">{style.icon}</div>
+                  <div className="font-medium text-sm">{style.name}</div>
+                  <div className="text-[10px] text-muted-foreground mt-1">{style.description}</div>
                 </button>
               ))}
             </div>
