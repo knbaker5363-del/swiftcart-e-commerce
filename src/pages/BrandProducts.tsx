@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
@@ -7,7 +7,7 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Award, Heart } from 'lucide-react';
+import { Award, Heart, ArrowRight } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import ProductQuickView from '@/components/ProductQuickView';
@@ -17,6 +17,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 
 const BrandProducts = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
@@ -101,6 +102,15 @@ const BrandProducts = () => {
         
         {/* Content */}
         <div className="container relative py-12 md:py-16">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="gap-2 text-white hover:bg-white/20 mb-4"
+          >
+            <ArrowRight className="h-4 w-4" />
+            رجوع
+          </Button>
+          
           <div className="flex items-center gap-4 animate-fade-in">
             {brand?.logo_url ? (
               <div className="p-3 bg-white rounded-xl shadow-lg">

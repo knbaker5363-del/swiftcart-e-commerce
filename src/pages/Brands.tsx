@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
-import { Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Award, ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const Brands = () => {
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
   const { settings } = useSettings();
   const heroBannerColor = (settings as any)?.hero_banner_color || '#000000';
@@ -45,6 +48,15 @@ const Brands = () => {
         
         {/* Content */}
         <div className="container relative py-12 md:py-16">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="gap-2 text-white hover:bg-white/20 mb-4"
+          >
+            <ArrowRight className="h-4 w-4" />
+            رجوع
+          </Button>
+          
           <div className="flex flex-col items-center justify-center gap-4 animate-fade-in text-center">
             <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
               <Award className="h-12 w-12 text-white" />
