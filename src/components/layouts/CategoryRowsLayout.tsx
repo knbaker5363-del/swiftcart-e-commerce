@@ -119,6 +119,9 @@ const CategoryRow = ({
   const { settings } = useSettings();
   const { isEnabled } = useVisualEffects();
   const { toggleFavorite, isFavorite } = useFavorites();
+  
+  const bgColor = (settings as any)?.category_row_bg_color || '#ffffff';
+  const isTransparent = (settings as any)?.category_row_transparent !== false;
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['category-products', category.id, productsPerRow],
@@ -264,7 +267,12 @@ const CategoryRow = ({
   };
 
   return (
-    <Card className="p-4 bg-card border border-border rounded-xl shadow-sm">
+    <Card 
+      className={`p-4 border border-border rounded-xl shadow-sm ${
+        isTransparent ? 'bg-card/70 backdrop-blur-sm' : ''
+      }`}
+      style={!isTransparent ? { backgroundColor: bgColor } : undefined}
+    >
       {/* Category Header */}
       <div className="flex items-center justify-between mb-4" dir="rtl">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">

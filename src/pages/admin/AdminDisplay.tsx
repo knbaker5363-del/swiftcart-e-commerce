@@ -421,6 +421,8 @@ const AdminDisplay = () => {
           layout_products_per_category_row: layoutProductsPerRow,
           layout_category_row_scrollable: layoutScrollable,
           layout_show_category_view_all: layoutShowViewAll,
+          category_row_bg_color: categoryRowBgColor,
+          category_row_transparent: categoryRowTransparent,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -460,6 +462,8 @@ const AdminDisplay = () => {
   const [layoutProductsPerRow, setLayoutProductsPerRow] = useState(6);
   const [layoutScrollable, setLayoutScrollable] = useState(true);
   const [layoutShowViewAll, setLayoutShowViewAll] = useState(true);
+  const [categoryRowBgColor, setCategoryRowBgColor] = useState('#ffffff');
+  const [categoryRowTransparent, setCategoryRowTransparent] = useState(true);
 
   // Load layout settings
   useEffect(() => {
@@ -468,6 +472,8 @@ const AdminDisplay = () => {
       setLayoutProductsPerRow((settings as any)?.layout_products_per_category_row || 6);
       setLayoutScrollable((settings as any)?.layout_category_row_scrollable !== false);
       setLayoutShowViewAll((settings as any)?.layout_show_category_view_all !== false);
+      setCategoryRowBgColor((settings as any)?.category_row_bg_color || '#ffffff');
+      setCategoryRowTransparent((settings as any)?.category_row_transparent !== false);
     }
   }, [settings]);
 
@@ -575,6 +581,37 @@ const AdminDisplay = () => {
                 <div className="flex items-center gap-2">
                   <Switch checked={layoutShowViewAll} onCheckedChange={setLayoutShowViewAll} />
                   <Label>إظهار "عرض الكل"</Label>
+                </div>
+              </div>
+              
+              {/* Card Background Settings */}
+              <div className="mt-4 p-3 bg-muted/30 rounded-lg space-y-3">
+                <Label className="text-sm font-medium">خلفية صندوق التصنيف</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={categoryRowTransparent} 
+                      onCheckedChange={setCategoryRowTransparent} 
+                    />
+                    <Label className="text-sm">شفاف</Label>
+                  </div>
+                  {!categoryRowTransparent && (
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm">اللون:</Label>
+                      <input
+                        type="color"
+                        value={categoryRowBgColor}
+                        onChange={(e) => setCategoryRowBgColor(e.target.value)}
+                        className="w-8 h-8 rounded border cursor-pointer"
+                      />
+                      <Input
+                        value={categoryRowBgColor}
+                        onChange={(e) => setCategoryRowBgColor(e.target.value)}
+                        className="w-24 text-xs"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
