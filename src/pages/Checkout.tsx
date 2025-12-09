@@ -191,7 +191,7 @@ const FeatureBadges = ({ badges, enabled }: { badges?: any[]; enabled?: boolean 
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, specialOffers, regularItems } = useCart();
   const { toast } = useToast();
   const { settings } = useSettings();
   const [loading, setLoading] = useState(false);
@@ -507,13 +507,30 @@ const Checkout = () => {
       message += `🏙️ المدينة: ${formData.city}\n`;
       message += `📍 العنوان: ${formData.address}\n\n`;
       
-      message += `📦 المنتجات:\n`;
-      items.forEach((item) => {
-        message += `• ${item.name}`;
-        if (item.selected_options.size) message += ` (مقاس: ${item.selected_options.size})`;
-        if (item.selected_options.color) message += ` (لون: ${item.selected_options.color})`;
-        message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
-      });
+      // Special Offers
+      if (specialOffers.length > 0) {
+        message += `🎯 العروض الخاصة:\n`;
+        specialOffers.forEach((item) => {
+          message += `• ${item.name}`;
+          if (item.special_offer?.products) {
+            message += ` (${item.special_offer.products.map(p => p.name).join(' + ')})`;
+          }
+          message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
+        });
+        message += `\n`;
+      }
+      
+      // Regular Products
+      if (regularItems.length > 0) {
+        message += `📦 المنتجات:\n`;
+        regularItems.forEach((item) => {
+          message += `• ${item.name}`;
+          if (item.selected_options.size) message += ` (مقاس: ${item.selected_options.size})`;
+          if (item.selected_options.color) message += ` (لون: ${item.selected_options.color})`;
+          message += ` × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ₪\n`;
+        });
+      }
+      
       if (selectedGift) {
         message += `\n🎁 هدية مجانية: ${selectedGift.name}\n`;
       }
@@ -1166,11 +1183,46 @@ const Checkout = () => {
                     </h2>
                     
                     <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                      {items.map((item, index) => (
+                      {/* Special Offers Section */}
+                      {specialOffers.length > 0 && (
+                        <div className="space-y-2">
+                          {specialOffers.map((item, index) => (
+                            <div 
+                              key={item.id} 
+                              className="rounded-xl p-3 animate-in fade-in slide-in-from-right-2"
+                              style={{ 
+                                backgroundColor: item.special_offer?.background_color || '#7c3aed',
+                                color: item.special_offer?.text_color || '#ffffff',
+                                animationDelay: `${index * 50}ms` 
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                                  <Sparkles className="h-5 w-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-bold text-sm">🎯 {item.name}</p>
+                                  {item.special_offer?.products && (
+                                    <p className="text-xs opacity-80 mt-0.5">
+                                      {item.special_offer.products.map(p => p.name).join(' • ')}
+                                    </p>
+                                  )}
+                                </div>
+                                <p className="font-bold text-sm whitespace-nowrap">
+                                  {(item.price * item.quantity).toFixed(2)} ₪
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Regular Items */}
+                      {regularItems.map((item, index) => (
                         <div 
                           key={item.id} 
                           className="flex gap-3 pb-3 border-b last:border-0 animate-in fade-in slide-in-from-right-2"
-                          style={{ animationDelay: `${index * 50}ms` }}
+                          style={{ animationDelay: `${(specialOffers.length + index) * 50}ms` }}
                         >
                           {item.image_url && (
                             <img 
