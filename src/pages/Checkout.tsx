@@ -12,12 +12,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift, AlertCircle } from 'lucide-react';
+import { ArrowRight, Phone, Copy, MessageCircle, Tag, Instagram, Facebook, Gift, AlertCircle, ShoppingBag, Truck, Clock, Shield, CheckCircle2, Sparkles, HelpCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { SiTiktok, SiSnapchat } from 'react-icons/si';
 import { GiftSelectionDialog } from '@/components/GiftSelectionDialog';
 import { GiftNotificationBanner } from '@/components/GiftNotificationBanner';
 import { checkOrderRateLimit, recordOrderAttempt } from '@/lib/rateLimiter';
+import { cn } from '@/lib/utils';
 
 const CITIES_DATA = {
   palestine: {
@@ -96,6 +97,59 @@ const checkoutSchema = z.object({
   address: z.string().trim().min(10, { message: 'العنوان يجب أن يكون 10 أحرف على الأقل' }).max(500),
 });
 
+// Progress steps component
+const CheckoutProgress = ({ currentStep }: { currentStep: number }) => {
+  const steps = [
+    { label: 'السلة', icon: ShoppingBag },
+    { label: 'المعلومات', icon: Phone },
+    { label: 'التأكيد', icon: CheckCircle2 },
+  ];
+
+  return (
+    <div className="flex items-center justify-center gap-2 mb-8">
+      {steps.map((step, index) => (
+        <div key={index} className="flex items-center">
+          <div className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300",
+            index <= currentStep 
+              ? "bg-primary text-primary-foreground shadow-lg" 
+              : "bg-muted text-muted-foreground"
+          )}>
+            <step.icon className="h-4 w-4" />
+            <span className="text-sm font-medium hidden sm:inline">{step.label}</span>
+          </div>
+          {index < steps.length - 1 && (
+            <div className={cn(
+              "w-8 h-1 mx-2 rounded-full transition-all duration-500",
+              index < currentStep ? "bg-primary" : "bg-muted"
+            )} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Feature badges component
+const FeatureBadges = () => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    {[
+      { icon: Truck, label: 'توصيل سريع', color: 'text-blue-500' },
+      { icon: Shield, label: 'دفع آمن', color: 'text-green-500' },
+      { icon: Clock, label: '24/7 دعم', color: 'text-orange-500' },
+      { icon: Gift, label: 'هدايا مجانية', color: 'text-pink-500' },
+    ].map((feature, i) => (
+      <div 
+        key={i} 
+        className="flex items-center gap-2 p-3 bg-muted/50 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted transition-all duration-300 group"
+      >
+        <feature.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", feature.color)} />
+        <span className="text-xs font-medium">{feature.label}</span>
+      </div>
+    ))}
+  </div>
+);
+
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
@@ -119,6 +173,7 @@ const Checkout = () => {
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [orderMessage, setOrderMessage] = useState('');
   const [dialogStep, setDialogStep] = useState<'copy' | 'contact'>('copy');
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('970');
@@ -141,6 +196,15 @@ const Checkout = () => {
   const [showGiftDialog, setShowGiftDialog] = useState(false);
   const [selectedGift, setSelectedGift] = useState<{ id: string; name: string; image_url: string | null; price: number } | null>(null);
   const [giftSkipped, setGiftSkipped] = useState(false);
+
+  // Track scroll for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch active gift offers
   const { data: activeGiftOffer } = useQuery({
@@ -269,7 +333,7 @@ const Checkout = () => {
         discount: data.discount_percentage,
       });
       toast({
-        title: 'تم تطبيق الكود',
+        title: '✓ تم تطبيق الكود',
         description: `خصم ${data.discount_percentage}% على طلبك`,
       });
     } catch (error) {
@@ -439,7 +503,7 @@ const Checkout = () => {
       localStorage.setItem('my_orders', JSON.stringify(myOrders));
       
       toast({
-        title: 'تم حفظ الطلب بنجاح',
+        title: '✓ تم حفظ الطلب بنجاح',
         description: 'الآن يمكنك الاتصال لإتمام الطلب',
       });
     } catch (error: any) {
@@ -458,7 +522,7 @@ const Checkout = () => {
   const handleCopyAndContinue = () => {
     navigator.clipboard.writeText(orderMessage);
     toast({
-      title: 'تم النسخ',
+      title: '✓ تم النسخ',
       description: 'تم نسخ تفاصيل الطلب',
     });
     setDialogStep('contact');
@@ -478,22 +542,43 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" dir="rtl">
-      <PublicHeader onCartOpen={() => {}} />
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30" dir="rtl">
+      {/* Sticky Header */}
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        isScrolled ? "bg-background/95 backdrop-blur-md shadow-md" : "bg-transparent"
+      )}>
+        <PublicHeader onCartOpen={() => {}} />
+      </div>
       
+      {/* Spacer for fixed header */}
+      <div className="h-16" />
+      
+      {/* Success Dialog with Confetti Animation */}
       <AlertDialog open={showOrderDialog} onOpenChange={(open) => {
         setShowOrderDialog(open);
         if (!open) setDialogStep('copy');
       }}>
-        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-0" dir="rtl">
-          {/* Success Header */}
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center text-white">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <MessageCircle className="h-8 w-8" />
+        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-0 animate-in zoom-in-95 duration-300" dir="rtl">
+          {/* Success Header with Animation */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center text-white relative overflow-hidden">
+            {/* Sparkle decorations */}
+            <div className="absolute top-2 left-4 animate-pulse">
+              <Sparkles className="h-6 w-6 text-white/50" />
+            </div>
+            <div className="absolute bottom-2 right-4 animate-pulse delay-150">
+              <Sparkles className="h-5 w-5 text-white/40" />
+            </div>
+            
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <CheckCircle2 className="h-10 w-10" />
             </div>
             <AlertDialogTitle className="text-2xl font-bold text-white">
               ✓ تم حفظ طلبك بنجاح!
             </AlertDialogTitle>
+            <p className="text-white/80 mt-2 text-sm">
+              شكراً لثقتك بنا 💚
+            </p>
           </div>
           
           <div className="p-6">
@@ -514,7 +599,7 @@ const Checkout = () => {
               <Button
                 onClick={handleContactAndFinish}
                 size="lg"
-                className="w-full gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-lg py-6"
+                className="w-full gap-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-lg py-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
               >
                 <MessageCircle className="h-6 w-6" />
                 تواصل عبر واتساب
@@ -525,29 +610,39 @@ const Checkout = () => {
       </AlertDialog>
 
       <div className="container py-8 max-w-5xl">
-        <Button variant="ghost" className="mb-6 hover:bg-muted" onClick={() => navigate(-1)}>
-          <ArrowRight className="ml-2 h-4 w-4" />
+        {/* Back Button with animation */}
+        <Button 
+          variant="ghost" 
+          className="mb-6 hover:bg-muted group transition-all duration-300" 
+          onClick={() => navigate(-1)}
+        >
+          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           رجوع للسلة
         </Button>
 
-        {/* Settings Loading State */}
+        {/* Settings Loading State with improved animation */}
         {settingsLoading && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="text-center py-16 animate-in fade-in duration-500">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
             </div>
             <p className="text-muted-foreground text-lg">جاري تحميل الإعدادات...</p>
+            <p className="text-muted-foreground/60 text-sm mt-2">يرجى الانتظار لحظات</p>
           </div>
         )}
 
         {/* Settings Error State */}
         {settingsError && !settingsLoading && (
-          <div className="text-center py-16">
-            <div className="bg-destructive/10 text-destructive p-8 rounded-2xl max-w-md mx-auto">
+          <div className="text-center py-16 animate-in fade-in duration-500">
+            <div className="bg-destructive/10 text-destructive p-8 rounded-2xl max-w-md mx-auto border border-destructive/20">
               <AlertCircle className="h-12 w-12 mx-auto mb-4" />
               <p className="font-bold text-xl mb-2">خطأ في التحميل</p>
               <p className="mb-6">{settingsError}</p>
-              <Button size="lg" onClick={() => window.location.reload()}>
+              <Button 
+                size="lg" 
+                onClick={() => window.location.reload()}
+                className="transition-all duration-300 hover:scale-105"
+              >
                 تحديث الصفحة
               </Button>
             </div>
@@ -556,406 +651,517 @@ const Checkout = () => {
 
         {/* Main Content - only show when settings loaded successfully */}
         {!settingsLoading && !settingsError && (
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* Checkout Form - Takes more space */}
-          <div className="lg:col-span-3">
-            <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8 border">
-              <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Phone className="h-5 w-5 text-primary" />
-                </div>
-                إتمام الطلب
-              </h1>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Progress Steps */}
+            <CheckoutProgress currentStep={1} />
             
-            {/* Gift Notification Banner */}
-            {activeGiftOffer && giftProducts && giftProducts.length > 0 && (
-              <GiftNotificationBanner
-                currentAmount={total}
-                minimumAmount={activeGiftOffer.minimum_amount}
-                remainingAmount={remainingForGift}
-              />
-            )}
-
-            {/* Gift Selection Dialog */}
-            <GiftSelectionDialog
-              open={showGiftDialog}
-              onOpenChange={setShowGiftDialog}
-              giftProducts={giftProducts || []}
-              minimumAmount={activeGiftOffer?.minimum_amount || 0}
-              onSelectGift={(gift) => {
-                setSelectedGift(gift);
-                setShowGiftDialog(false);
-              }}
-              onSkip={() => {
-                setGiftSkipped(true);
-                setShowGiftDialog(false);
-              }}
-            />
-
-            {/* Selected Gift Display */}
-            {selectedGift && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                <Gift className="h-5 w-5 text-green-600" />
-                <div className="flex-1">
-                  <p className="font-semibold text-green-700">هديتك: {selectedGift.name}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowGiftDialog(true)}
-                  className="text-green-600"
-                >
-                  تغيير
-                </Button>
-              </div>
-            )}
-
-            {/* Show gift button if eligible but not selected */}
-            {isEligibleForGift && !selectedGift && !giftSkipped && giftProducts && giftProducts.length > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full mb-4 gap-2 border-primary text-primary"
-                onClick={() => setShowGiftDialog(true)}
-              >
-                <Gift className="h-4 w-4" />
-                اختر هديتك المجانية
-              </Button>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">الاسم الكامل *</Label>
-                <Input
-                  id="name"
-                  placeholder="أدخل اسمك الكامل"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  maxLength={100}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">رقم الهاتف *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="05xxxxxxxx"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
-                  maxLength={20}
-                />
-              </div>
-              <div>
-                <Label htmlFor="city">المدينة / البلد *</Label>
-                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
-                  <SelectTrigger id="city" className="w-full">
-                    <SelectValue placeholder="اختر المدينة" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border max-h-[300px]">
-                    {/* Palestine */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base">{CITIES_DATA.palestine.label}</SelectLabel>
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.west_bank.label}</SelectLabel>
-                      {CITIES_DATA.palestine.regions.west_bank.cities.map((city) => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.jerusalem.label}</SelectLabel>
-                      {CITIES_DATA.palestine.regions.jerusalem.cities.map((city) => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.inside.label}</SelectLabel>
-                      {CITIES_DATA.palestine.regions.inside.cities.map((city) => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    
-                    {/* Egypt */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.egypt.label}</SelectLabel>
-                      {CITIES_DATA.egypt.cities.map((city) => (
-                        <SelectItem key={`eg-${city}`} value={`مصر - ${city}`}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    
-                    {/* Saudi Arabia */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.saudi.label}</SelectLabel>
-                      {CITIES_DATA.saudi.cities.map((city) => (
-                        <SelectItem key={`sa-${city}`} value={`السعودية - ${city}`}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    
-                    {/* Jordan */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.jordan.label}</SelectLabel>
-                      {CITIES_DATA.jordan.cities.map((city) => (
-                        <SelectItem key={`jo-${city}`} value={`الأردن - ${city}`}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    
-                    {/* UAE */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.uae.label}</SelectLabel>
-                      {CITIES_DATA.uae.cities.map((city) => (
-                        <SelectItem key={`ae-${city}`} value={`الإمارات - ${city}`}>{city}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                    
-                    {/* Other */}
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.other.label}</SelectLabel>
-                      <SelectItem value="دولة أخرى">أخرى (سأكتب في العنوان)</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="address">عنوان التوصيل التفصيلي *</Label>
-                <Textarea
-                  id="address"
-                  placeholder="أدخل الحي، الشارع، رقم المنزل، أو أي تفاصيل إضافية"
-                  rows={4}
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  required
-                  maxLength={500}
-                />
-              </div>
-              
-              <div>
-                <Label>منطقة التوصيل *</Label>
-                <div className="grid grid-cols-1 gap-3 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDelivery('west_bank')}
-                    className={`p-4 rounded-lg border-2 text-right transition-all ${
-                      selectedDelivery === 'west_bank'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">الضفة الغربية</span>
-                      <span className="text-primary font-bold">{deliveryPrices.west_bank.toFixed(2)} ₪</span>
+            {/* Feature Badges */}
+            <FeatureBadges />
+            
+            <div className="grid lg:grid-cols-5 gap-8">
+              {/* Checkout Form - Takes more space */}
+              <div className="lg:col-span-3">
+                <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8 border transition-all duration-300 hover:shadow-xl">
+                  <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <Phone className="h-6 w-6 text-primary" />
                     </div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDelivery('jerusalem')}
-                    className={`p-4 rounded-lg border-2 text-right transition-all ${
-                      selectedDelivery === 'jerusalem'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">القدس</span>
-                      <span className="text-primary font-bold">{deliveryPrices.jerusalem.toFixed(2)} ₪</span>
+                    إتمام الطلب
+                  </h1>
+                
+                {/* Gift Notification Banner */}
+                {activeGiftOffer && giftProducts && giftProducts.length > 0 && (
+                  <GiftNotificationBanner
+                    currentAmount={total}
+                    minimumAmount={activeGiftOffer.minimum_amount}
+                    remainingAmount={remainingForGift}
+                  />
+                )}
+
+                {/* Gift Selection Dialog */}
+                <GiftSelectionDialog
+                  open={showGiftDialog}
+                  onOpenChange={setShowGiftDialog}
+                  giftProducts={giftProducts || []}
+                  minimumAmount={activeGiftOffer?.minimum_amount || 0}
+                  onSelectGift={(gift) => {
+                    setSelectedGift(gift);
+                    setShowGiftDialog(false);
+                    toast({
+                      title: '🎁 تم اختيار الهدية',
+                      description: `تمت إضافة "${gift.name}" كهدية مجانية`,
+                    });
+                  }}
+                  onSkip={() => {
+                    setGiftSkipped(true);
+                    setShowGiftDialog(false);
+                  }}
+                />
+
+                {/* Selected Gift Display with animation */}
+                {selectedGift && (
+                  <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
+                      <Gift className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDelivery('inside')}
-                    className={`p-4 rounded-lg border-2 text-right transition-all ${
-                      selectedDelivery === 'inside'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">الداخل (48)</span>
-                      <span className="text-primary font-bold">{deliveryPrices.inside.toFixed(2)} ₪</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Promo Code */}
-              <div className="space-y-2">
-                <Label>كود الخصم</Label>
-                {appliedPromo ? (
-                  <div className="flex items-center justify-between p-3 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700">
-                    <div className="flex items-center gap-2">
-                      <Tag className="h-4 w-4 text-green-600" />
-                      <span className="font-medium text-green-700 dark:text-green-400">
-                        {appliedPromo.code} (-{appliedPromo.discount}%)
-                      </span>
+                    <div className="flex-1">
+                      <p className="font-semibold text-green-700 dark:text-green-400">هديتك: {selectedGift.name}</p>
+                      <p className="text-xs text-green-600/70 dark:text-green-500/70">ستضاف مجاناً مع طلبك</p>
                     </div>
                     <Button
-                      type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={removePromoCode}
-                      className="text-red-500 hover:text-red-700"
+                      onClick={() => setShowGiftDialog(true)}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-800"
                     >
-                      إزالة
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="أدخل كود الخصم"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={applyPromoCode}
-                      disabled={promoLoading || !promoCode.trim()}
-                    >
-                      {promoLoading ? 'جاري...' : 'تطبيق'}
+                      تغيير
                     </Button>
                   </div>
                 )}
-              </div>
-              
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={loading}
-              >
-                <Phone className="ml-2 h-5 w-5" />
-                {loading ? 'جاري الحفظ...' : 'إتمام الطلب'}
-              </Button>
-              
-              {/* Social Media Links */}
-              <div className="flex items-center justify-center gap-3 pt-4 border-t flex-wrap">
-                {whatsappNumber && (
-                  <a
-                    href={`https://wa.me/${whatsappCountryCode}${whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
-                  >
-                    <MessageCircle className="h-6 w-6" />
-                  </a>
-                )}
-                {socialMedia.instagram && (
-                  <a
-                    href={`https://instagram.com/${socialMedia.instagram}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 text-white transition-opacity"
-                  >
-                    <Instagram className="h-6 w-6" />
-                  </a>
-                )}
-                {socialMedia.facebook && (
-                  <a
-                    href={`https://facebook.com/${socialMedia.facebook}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                  >
-                    <Facebook className="h-6 w-6" />
-                  </a>
-                )}
-                {socialMedia.tiktok && (
-                  <a
-                    href={`https://tiktok.com/@${socialMedia.tiktok}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-black hover:bg-gray-800 text-white transition-colors"
-                  >
-                    <SiTiktok className="h-6 w-6" />
-                  </a>
-                )}
-                {socialMedia.snapchat && (
-                  <a
-                    href={`https://snapchat.com/add/${socialMedia.snapchat}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
-                  >
-                    <SiSnapchat className="h-6 w-6" />
-                  </a>
-                )}
-              </div>
-            </form>
-            </div>
-          </div>
 
-          {/* Order Summary - Sticky on desktop */}
-          <div className="lg:col-span-2">
-            <div className="lg:sticky lg:top-24">
-              <div className="bg-card rounded-2xl shadow-lg p-6 border">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-primary" />
-                  ملخص الطلب
-                </h2>
-                
-                <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0">
-                      {item.image_url && (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name}
-                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.selected_options.size && `${item.selected_options.size}`}
-                          {item.selected_options.size && item.selected_options.color && ' • '}
-                          {item.selected_options.color && `${item.selected_options.color}`}
-                          {' × '}{item.quantity}
-                        </p>
+                {/* Show gift button if eligible but not selected */}
+                {isEligibleForGift && !selectedGift && !giftSkipped && giftProducts && giftProducts.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full mb-4 gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 group"
+                    onClick={() => setShowGiftDialog(true)}
+                  >
+                    <Gift className="h-4 w-4 transition-transform group-hover:scale-110" />
+                    اختر هديتك المجانية
+                    <Sparkles className="h-4 w-4 animate-pulse" />
+                  </Button>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Name Field */}
+                  <div className="space-y-2 group">
+                    <Label htmlFor="name" className="flex items-center gap-2">
+                      الاسم الكامل *
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="أدخل اسمك الكامل"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                      maxLength={100}
+                      className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                    />
+                  </div>
+                  
+                  {/* Phone Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">رقم الهاتف *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="05xxxxxxxx"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      required
+                      maxLength={20}
+                      className="h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                    />
+                  </div>
+                  
+                  {/* City Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="city">المدينة / البلد *</Label>
+                    <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                      <SelectTrigger id="city" className="w-full h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 hover:border-primary/50">
+                        <SelectValue placeholder="اختر المدينة" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border-border max-h-[300px]">
+                        {/* Palestine */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base">{CITIES_DATA.palestine.label}</SelectLabel>
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.west_bank.label}</SelectLabel>
+                          {CITIES_DATA.palestine.regions.west_bank.cities.map((city) => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.jerusalem.label}</SelectLabel>
+                          {CITIES_DATA.palestine.regions.jerusalem.cities.map((city) => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.inside.label}</SelectLabel>
+                          {CITIES_DATA.palestine.regions.inside.cities.map((city) => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        
+                        {/* Egypt */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.egypt.label}</SelectLabel>
+                          {CITIES_DATA.egypt.cities.map((city) => (
+                            <SelectItem key={`eg-${city}`} value={`مصر - ${city}`}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        
+                        {/* Saudi Arabia */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.saudi.label}</SelectLabel>
+                          {CITIES_DATA.saudi.cities.map((city) => (
+                            <SelectItem key={`sa-${city}`} value={`السعودية - ${city}`}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        
+                        {/* Jordan */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.jordan.label}</SelectLabel>
+                          {CITIES_DATA.jordan.cities.map((city) => (
+                            <SelectItem key={`jo-${city}`} value={`الأردن - ${city}`}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        
+                        {/* UAE */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.uae.label}</SelectLabel>
+                          {CITIES_DATA.uae.cities.map((city) => (
+                            <SelectItem key={`ae-${city}`} value={`الإمارات - ${city}`}>{city}</SelectItem>
+                          ))}
+                        </SelectGroup>
+                        
+                        {/* Other */}
+                        <SelectGroup>
+                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.other.label}</SelectLabel>
+                          <SelectItem value="دولة أخرى">أخرى (سأكتب في العنوان)</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Address Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="address">عنوان التوصيل التفصيلي *</Label>
+                    <Textarea
+                      id="address"
+                      placeholder="أدخل الحي، الشارع، رقم المنزل، أو أي تفاصيل إضافية"
+                      rows={4}
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      required
+                      maxLength={500}
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50 resize-none"
+                    />
+                  </div>
+                  
+                  {/* Delivery Zone Selection with enhanced styling */}
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-muted-foreground" />
+                      منطقة التوصيل *
+                    </Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[
+                        { key: 'west_bank', label: 'الضفة الغربية', price: deliveryPrices.west_bank },
+                        { key: 'jerusalem', label: 'القدس', price: deliveryPrices.jerusalem },
+                        { key: 'inside', label: 'الداخل (48)', price: deliveryPrices.inside },
+                      ].map((zone) => (
+                        <button
+                          key={zone.key}
+                          type="button"
+                          onClick={() => setSelectedDelivery(zone.key as 'west_bank' | 'jerusalem' | 'inside')}
+                          className={cn(
+                            "p-4 rounded-xl border-2 text-right transition-all duration-300 group",
+                            selectedDelivery === zone.key
+                              ? "border-primary bg-primary/5 shadow-md"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          )}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                selectedDelivery === zone.key 
+                                  ? "border-primary bg-primary" 
+                                  : "border-muted-foreground"
+                              )}>
+                                {selectedDelivery === zone.key && (
+                                  <CheckCircle2 className="h-3 w-3 text-primary-foreground" />
+                                )}
+                              </div>
+                              <span className="font-semibold">{zone.label}</span>
+                            </div>
+                            <span className={cn(
+                              "font-bold px-3 py-1 rounded-full text-sm transition-all",
+                              selectedDelivery === zone.key
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
+                            )}>
+                              {zone.price.toFixed(2)} ₪
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Estimated delivery time */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                      <Clock className="h-4 w-4" />
+                      <span>وقت التوصيل المتوقع: 2-5 أيام عمل</span>
+                    </div>
+                  </div>
+                  
+                  {/* Promo Code with enhanced styling */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      كود الخصم
+                    </Label>
+                    {appliedPromo ? (
+                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl border border-green-300 dark:border-green-700 animate-in fade-in duration-300">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                            <CheckCircle2 className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-green-700 dark:text-green-400">
+                              {appliedPromo.code}
+                            </span>
+                            <span className="text-green-600 dark:text-green-500 text-sm mr-2">
+                              (-{appliedPromo.discount}%)
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={removePromoCode}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          إزالة
+                        </Button>
                       </div>
-                      <p className="font-semibold text-sm whitespace-nowrap">
-                        {(item.price * item.quantity).toFixed(2)} ₪
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="space-y-2 pt-4 mt-4 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">المجموع الفرعي</span>
-                    <span>{total.toFixed(2)} ₪</span>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="أدخل كود الخصم"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                          className="flex-1 h-12 transition-all duration-300 focus:ring-2 focus:ring-primary/20 hover:border-primary/50"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={applyPromoCode}
+                          disabled={promoLoading || !promoCode.trim()}
+                          className="h-12 px-6 transition-all duration-300 hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                        >
+                          {promoLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'تطبيق'
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  {appliedPromo && (
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span>الخصم ({appliedPromo.discount}%)</span>
-                      <span>-{discountAmount.toFixed(2)} ₪</span>
+                  
+                  {/* Submit Button with enhanced styling */}
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full h-14 text-lg font-bold transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                        جاري الحفظ...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="ml-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                        إتمام الطلب
+                      </>
+                    )}
+                  </Button>
+                  
+                  {/* Social Media Links with enhanced styling */}
+                  <div className="pt-6 border-t">
+                    <p className="text-center text-sm text-muted-foreground mb-4">
+                      تواصل معنا عبر
+                    </p>
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      {whatsappNumber && (
+                        <a
+                          href={`https://wa.me/${whatsappCountryCode}${whatsappNumber}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-green-500 hover:bg-green-600 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                        >
+                          <MessageCircle className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialMedia.instagram && (
+                        <a
+                          href={`https://instagram.com/${socialMedia.instagram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:opacity-90 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                        >
+                          <Instagram className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialMedia.facebook && (
+                        <a
+                          href={`https://facebook.com/${socialMedia.facebook}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                        >
+                          <Facebook className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialMedia.tiktok && (
+                        <a
+                          href={`https://tiktok.com/@${socialMedia.tiktok}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-black hover:bg-gray-800 text-white transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                        >
+                          <SiTiktok className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialMedia.snapchat && (
+                        <a
+                          href={`https://snapchat.com/add/${socialMedia.snapchat}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                        >
+                          <SiSnapchat className="h-6 w-6" />
+                        </a>
+                      )}
                     </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">التوصيل</span>
-                    <span>{deliveryPrices[selectedDelivery].toFixed(2)} ₪</span>
                   </div>
+                  
+                  {/* Help Link */}
+                  <div className="text-center pt-4">
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                      onClick={() => {
+                        if (whatsappNumber) {
+                          window.open(`https://wa.me/${whatsappCountryCode}${whatsappNumber}?text=${encodeURIComponent('مرحباً، لدي استفسار حول الطلب')}`, '_blank');
+                        }
+                      }}
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                      هل تحتاج مساعدة؟
+                    </button>
+                  </div>
+                </form>
                 </div>
-                
-                <div className="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-primary/20">
-                  <span>المجموع الكلي</span>
-                  <span className="text-primary text-xl">{(totalAfterDiscount + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
-                </div>
-                
-                {/* Secure checkout badge */}
-                <div className="mt-4 pt-4 border-t text-center">
-                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                    <span className="inline-block w-4 h-4">🔒</span>
-                    طلب آمن ومحمي
-                  </p>
+              </div>
+
+              {/* Order Summary - Sticky on desktop */}
+              <div className="lg:col-span-2">
+                <div className="lg:sticky lg:top-24">
+                  <div className="bg-card rounded-2xl shadow-lg p-6 border transition-all duration-300 hover:shadow-xl">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <ShoppingBag className="h-5 w-5 text-primary" />
+                      ملخص الطلب
+                      <span className="text-sm font-normal text-muted-foreground mr-auto">
+                        ({items.length} منتج)
+                      </span>
+                    </h2>
+                    
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                      {items.map((item, index) => (
+                        <div 
+                          key={item.id} 
+                          className="flex gap-3 pb-3 border-b last:border-0 animate-in fade-in slide-in-from-right-2"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          {item.image_url && (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.name}
+                              className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.selected_options.size && `${item.selected_options.size}`}
+                              {item.selected_options.size && item.selected_options.color && ' • '}
+                              {item.selected_options.color && `${item.selected_options.color}`}
+                              {' × '}{item.quantity}
+                            </p>
+                          </div>
+                          <p className="font-semibold text-sm whitespace-nowrap">
+                            {(item.price * item.quantity).toFixed(2)} ₪
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Selected Gift in Summary */}
+                    {selectedGift && (
+                      <div className="mt-3 pt-3 border-t flex items-center gap-2 text-green-600 dark:text-green-400">
+                        <Gift className="h-4 w-4" />
+                        <span className="text-sm font-medium">🎁 {selectedGift.name}</span>
+                        <span className="text-xs mr-auto">مجاناً</span>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-2 pt-4 mt-4 border-t">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">المجموع الفرعي</span>
+                        <span>{total.toFixed(2)} ₪</span>
+                      </div>
+                      {appliedPromo && (
+                        <div className="flex justify-between text-sm text-green-600 animate-in fade-in duration-300">
+                          <span className="flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            الخصم ({appliedPromo.discount}%)
+                          </span>
+                          <span>-{discountAmount.toFixed(2)} ₪</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Truck className="h-3 w-3" />
+                          التوصيل
+                        </span>
+                        <span>{deliveryPrices[selectedDelivery].toFixed(2)} ₪</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between text-lg font-bold pt-4 mt-4 border-t-2 border-primary/20">
+                      <span>المجموع الكلي</span>
+                      <span className="text-primary text-xl">{(totalAfterDiscount + deliveryPrices[selectedDelivery]).toFixed(2)} ₪</span>
+                    </div>
+                    
+                    {/* Trust badges */}
+                    <div className="mt-6 pt-4 border-t space-y-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Shield className="h-4 w-4 text-green-500" />
+                        <span>طلب آمن ومحمي 100%</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Truck className="h-4 w-4 text-blue-500" />
+                        <span>توصيل سريع لجميع المناطق</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4 text-orange-500" />
+                        <span>دعم على مدار الساعة</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
     </div>
