@@ -34,55 +34,47 @@ const AdminLayout = () => {
   if (!user) {
     return null;
   }
-  const navItems = [{
-    to: '/admin/analytics',
-    icon: BarChart3,
-    label: 'الإحصائيات'
-  }, {
-    to: '/admin/products',
-    icon: Package,
-    label: 'المنتجات'
-  }, {
-    to: '/admin/categories',
-    icon: FolderOpen,
-    label: 'التصنيفات'
-  }, {
-    to: '/admin/brands',
-    icon: Award,
-    label: 'العلامات التجارية'
-  }, {
-    to: '/admin/orders',
-    icon: ShoppingBag,
-    label: 'الطلبات'
-  }, {
-    to: '/admin/promo-codes',
-    icon: Tag,
-    label: 'أكواد الخصم'
-  }, {
-    to: '/admin/gifts',
-    icon: Gift,
-    label: 'الهدايا والعروض'
-  }, {
-    to: '/admin/display',
-    icon: Layout,
-    label: 'إعدادات العرض'
-  }, {
-    to: '/admin/effects',
-    icon: Sparkles,
-    label: 'التأثيرات البصرية'
-  }, {
-    to: '/admin/announcement',
-    icon: Megaphone,
-    label: 'شريط الإعلانات'
-  }, {
-    to: '/admin/settings',
-    icon: Settings,
-    label: 'الإعدادات'
-  }, {
-    to: '/admin/advanced',
-    icon: Settings2,
-    label: 'إعدادات متقدمة'
-  }];
+  // Navigation items grouped by category
+  const navGroups = [
+    {
+      title: 'الرئيسية',
+      items: [
+        { to: '/admin/analytics', icon: BarChart3, label: 'الإحصائيات' },
+        { to: '/admin/orders', icon: ShoppingBag, label: 'الطلبات' },
+      ]
+    },
+    {
+      title: 'إدارة المتجر',
+      items: [
+        { to: '/admin/products', icon: Package, label: 'المنتجات' },
+        { to: '/admin/categories', icon: FolderOpen, label: 'التصنيفات' },
+        { to: '/admin/brands', icon: Award, label: 'العلامات التجارية' },
+      ]
+    },
+    {
+      title: 'العروض والتسويق',
+      items: [
+        { to: '/admin/promo-codes', icon: Tag, label: 'أكواد الخصم' },
+        { to: '/admin/gifts', icon: Gift, label: 'الهدايا والعروض' },
+        { to: '/admin/announcement', icon: Megaphone, label: 'شريط الإعلانات' },
+      ]
+    },
+    {
+      title: 'المظهر والتخصيص',
+      items: [
+        { to: '/admin/display', icon: Layout, label: 'إعدادات العرض' },
+        { to: '/admin/effects', icon: Sparkles, label: 'التأثيرات البصرية' },
+      ]
+    },
+    {
+      title: 'الإعدادات',
+      items: [
+        { to: '/admin/settings', icon: Settings, label: 'الإعدادات العامة' },
+        { to: '/admin/advanced', icon: Settings2, label: 'إعدادات متقدمة' },
+      ]
+    },
+  ];
+
   const SidebarContent = () => <>
       <div className="p-4 flex items-center justify-between border-b">
         <div>
@@ -93,11 +85,31 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      <nav className="px-2 py-2 space-y-1 flex-1 overflow-y-auto">
-        {navItems.map(item => <NavLink key={item.to} to={item.to} className={cn('flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm', 'hover:bg-muted')} activeClassName="bg-primary text-primary-foreground hover:bg-primary" onClick={() => isMobile && setSidebarOpen(false)}>
-            <item.icon className="h-4 w-4 flex-shrink-0" />
-            <span className="font-medium">{item.label}</span>
-          </NavLink>)}
+      <nav className="px-2 py-2 flex-1 overflow-y-auto">
+        {navGroups.map((group, groupIndex) => (
+          <div key={group.title} className={cn(groupIndex > 0 && 'mt-4')}>
+            <h3 className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {group.title}
+            </h3>
+            <div className="space-y-0.5">
+              {group.items.map(item => (
+                <NavLink 
+                  key={item.to} 
+                  to={item.to} 
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm',
+                    'hover:bg-muted'
+                  )} 
+                  activeClassName="bg-primary text-primary-foreground hover:bg-primary" 
+                  onClick={() => isMobile && setSidebarOpen(false)}
+                >
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="font-medium">{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="p-3 border-t space-y-1.5">
