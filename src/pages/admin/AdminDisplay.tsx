@@ -221,6 +221,11 @@ const AdminDisplay = () => {
           cards_per_row_mobile: cardsPerRowMobile,
           cards_per_row_desktop: cardsPerRowDesktop,
           gift_icon_style: giftIconStyle,
+          store_layout_style: storeLayoutStyle,
+          layout_products_per_category_row: layoutProductsPerRow,
+          layout_category_row_scrollable: layoutScrollable,
+          layout_show_category_view_all: layoutShowViewAll,
+          layout_enable_3d_effect: layoutEnable3D,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -255,12 +260,134 @@ const AdminDisplay = () => {
     }
   };
 
+  // Store layout settings
+  const [storeLayoutStyle, setStoreLayoutStyle] = useState('classic');
+  const [layoutProductsPerRow, setLayoutProductsPerRow] = useState(6);
+  const [layoutScrollable, setLayoutScrollable] = useState(true);
+  const [layoutShowViewAll, setLayoutShowViewAll] = useState(true);
+  const [layoutEnable3D, setLayoutEnable3D] = useState(false);
+
+  // Load layout settings
+  useEffect(() => {
+    if (settings) {
+      setStoreLayoutStyle((settings as any)?.store_layout_style || 'classic');
+      setLayoutProductsPerRow((settings as any)?.layout_products_per_category_row || 6);
+      setLayoutScrollable((settings as any)?.layout_category_row_scrollable !== false);
+      setLayoutShowViewAll((settings as any)?.layout_show_category_view_all !== false);
+      setLayoutEnable3D((settings as any)?.layout_enable_3d_effect || false);
+    }
+  }, [settings]);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">إعدادات المظهر</h1>
         <p className="text-muted-foreground mt-2">تخصيص ثيم وألوان ومظهر الموقع</p>
       </div>
+
+      {/* Store Layout Style - NEW */}
+      <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            نمط المتجر
+          </CardTitle>
+          <CardDescription>اختر التخطيط العام للصفحة الرئيسية</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Layout Options */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Classic */}
+            <button
+              type="button"
+              onClick={() => setStoreLayoutStyle('classic')}
+              className={`p-4 rounded-xl border-2 text-right transition-all ${
+                storeLayoutStyle === 'classic' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className="text-lg font-bold mb-2">🏪 كلاسيكي</div>
+              <p className="text-sm text-muted-foreground">التصنيفات في الأعلى ثم جميع المنتجات بالأسفل</p>
+              <div className="mt-3 p-2 bg-muted/50 rounded-lg text-xs">
+                <div className="h-2 bg-muted rounded mb-1" />
+                <div className="grid grid-cols-4 gap-1">
+                  {[1,2,3,4].map(i => <div key={i} className="h-6 bg-muted rounded" />)}
+                </div>
+              </div>
+            </button>
+
+            {/* Category Rows */}
+            <button
+              type="button"
+              onClick={() => setStoreLayoutStyle('category-rows')}
+              className={`p-4 rounded-xl border-2 text-right transition-all ${
+                storeLayoutStyle === 'category-rows' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className="text-lg font-bold mb-2">📑 صفوف التصنيفات</div>
+              <p className="text-sm text-muted-foreground">كل تصنيف في صف منفصل مع منتجاته</p>
+              <div className="mt-3 p-2 bg-muted/50 rounded-lg text-xs space-y-2">
+                {[1,2].map(i => (
+                  <div key={i}>
+                    <div className="h-2 w-16 bg-primary/30 rounded mb-1" />
+                    <div className="flex gap-1">
+                      {[1,2,3].map(j => <div key={j} className="h-5 w-8 bg-muted rounded" />)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </button>
+
+            {/* Premium */}
+            <button
+              type="button"
+              onClick={() => setStoreLayoutStyle('premium')}
+              className={`p-4 rounded-xl border-2 text-right transition-all ${
+                storeLayoutStyle === 'premium' ? 'border-primary bg-primary/10 shadow-lg' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <div className="text-lg font-bold mb-2">✨ فاخر</div>
+              <p className="text-sm text-muted-foreground">بطاقات كبيرة مع تأثيرات 3D</p>
+              <div className="mt-3 p-2 bg-muted/50 rounded-lg text-xs">
+                <div className="h-10 bg-primary/20 rounded mb-2" />
+                <div className="grid grid-cols-2 gap-1">
+                  {[1,2].map(i => <div key={i} className="h-8 bg-muted rounded" />)}
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Layout-specific settings */}
+          {storeLayoutStyle === 'category-rows' && (
+            <div className="p-4 bg-muted/30 rounded-lg space-y-4">
+              <h4 className="font-bold">إعدادات صفوف التصنيفات</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>عدد المنتجات لكل صف</Label>
+                  <Input type="number" min={2} max={10} value={layoutProductsPerRow} onChange={(e) => setLayoutProductsPerRow(Number(e.target.value))} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={layoutScrollable} onCheckedChange={setLayoutScrollable} />
+                  <Label>تمرير أفقي</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={layoutShowViewAll} onCheckedChange={setLayoutShowViewAll} />
+                  <Label>إظهار "عرض الكل"</Label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {storeLayoutStyle === 'premium' && (
+            <div className="p-4 bg-muted/30 rounded-lg space-y-4">
+              <h4 className="font-bold">إعدادات النمط الفاخر</h4>
+              <div className="flex items-center gap-2">
+                <Switch checked={layoutEnable3D} onCheckedChange={setLayoutEnable3D} />
+                <Label>تفعيل تأثيرات 3D عند تمرير الماوس</Label>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Preview Panel - شاشة المعاينة */}
       <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">

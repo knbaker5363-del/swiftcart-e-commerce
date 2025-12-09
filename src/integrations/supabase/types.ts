@@ -495,6 +495,12 @@ export type Database = {
           hero_banner_color: string | null
           hide_header_store_info: boolean | null
           id: string
+          layout_3d_effect_type: string | null
+          layout_category_row_scrollable: boolean | null
+          layout_enable_3d_effect: boolean | null
+          layout_featured_product_id: string | null
+          layout_products_per_category_row: number | null
+          layout_show_category_view_all: boolean | null
           location: string | null
           logo_shape: string | null
           logo_url: string | null
@@ -511,6 +517,7 @@ export type Database = {
           social_snapchat: string | null
           social_tiktok: string | null
           social_whatsapp: string | null
+          store_layout_style: string | null
           store_name: string
           store_name_black: boolean | null
           store_phone: string | null
@@ -550,6 +557,12 @@ export type Database = {
           hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
           id?: string
+          layout_3d_effect_type?: string | null
+          layout_category_row_scrollable?: boolean | null
+          layout_enable_3d_effect?: boolean | null
+          layout_featured_product_id?: string | null
+          layout_products_per_category_row?: number | null
+          layout_show_category_view_all?: boolean | null
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
@@ -566,6 +579,7 @@ export type Database = {
           social_snapchat?: string | null
           social_tiktok?: string | null
           social_whatsapp?: string | null
+          store_layout_style?: string | null
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
@@ -605,6 +619,12 @@ export type Database = {
           hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
           id?: string
+          layout_3d_effect_type?: string | null
+          layout_category_row_scrollable?: boolean | null
+          layout_enable_3d_effect?: boolean | null
+          layout_featured_product_id?: string | null
+          layout_products_per_category_row?: number | null
+          layout_show_category_view_all?: boolean | null
           location?: string | null
           logo_shape?: string | null
           logo_url?: string | null
@@ -621,6 +641,7 @@ export type Database = {
           social_snapchat?: string | null
           social_tiktok?: string | null
           social_whatsapp?: string | null
+          store_layout_style?: string | null
           store_name?: string
           store_name_black?: boolean | null
           store_phone?: string | null
