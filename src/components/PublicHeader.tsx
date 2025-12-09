@@ -126,10 +126,10 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] p-0 bg-background">
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle className="text-right">القائمة</SheetTitle>
+              <SheetHeader className="p-4 pb-3 border-b">
+                <SheetTitle className="text-right pr-8">القائمة</SheetTitle>
               </SheetHeader>
-              <div className="h-[calc(100vh-80px)]">
+              <div className="h-[calc(100vh-80px)] overflow-y-auto">
                 <CategoriesSidebar onItemClick={() => setCategoriesOpen(false)} />
               </div>
             </SheetContent>
