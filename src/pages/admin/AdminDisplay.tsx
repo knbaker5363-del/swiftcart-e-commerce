@@ -283,6 +283,9 @@ const AdminDisplay = () => {
   // Gift icon style
   const [giftIconStyle, setGiftIconStyle] = useState<GiftIconStyleType>('pink-gold');
 
+  // Social icon style
+  const [socialIconStyle, setSocialIconStyle] = useState<'rounded' | 'square' | 'minimal'>('rounded');
+
   // Header logo settings
   const [showHeaderLogo, setShowHeaderLogo] = useState(true);
   const [showHeaderStoreName, setShowHeaderStoreName] = useState(true);
@@ -322,6 +325,7 @@ const AdminDisplay = () => {
       setCardsPerRowMobile((settings as any)?.cards_per_row_mobile || 2);
       setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
       setGiftIconStyle((settings as any)?.gift_icon_style || 'pink-gold');
+      setSocialIconStyle((settings as any)?.social_icon_style || 'rounded');
       setShowHeaderLogo((settings as any)?.show_header_logo !== false);
       setShowHeaderStoreName((settings as any)?.show_header_store_name !== false);
       setStoreNameImageUrl((settings as any)?.store_name_image_url || null);
@@ -414,6 +418,7 @@ const AdminDisplay = () => {
           cards_per_row_mobile: cardsPerRowMobile,
           cards_per_row_desktop: cardsPerRowDesktop,
           gift_icon_style: giftIconStyle,
+          social_icon_style: socialIconStyle,
           show_header_logo: showHeaderLogo,
           show_header_store_name: showHeaderStoreName,
           store_name_image_url: storeNameImageUrl,
@@ -808,6 +813,30 @@ const AdminDisplay = () => {
               </div>
             </div>
           )}
+
+          {/* Social Icon Style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">نمط أيقونات السوشل ميديا</Label>
+            <p className="text-sm text-muted-foreground mb-3">اختر شكل أيقونات التواصل الاجتماعي (تظهر بعد إتمام الطلب)</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'rounded', name: 'دائري', preview: '⚪' },
+                { id: 'square', name: 'مربع', preview: '⬜' },
+                { id: 'minimal', name: 'بسيط', preview: '📝' },
+              ].map(style => (
+                <button
+                  key={style.id}
+                  onClick={() => setSocialIconStyle(style.id as 'rounded' | 'square' | 'minimal')}
+                  className={`p-4 rounded-lg border-2 text-center transition-all hover:scale-[1.02] ${
+                    socialIconStyle === style.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{style.preview}</div>
+                  <div className="font-medium text-sm">{style.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Store Name Image Upload */}
           <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
