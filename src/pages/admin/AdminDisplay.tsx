@@ -125,6 +125,7 @@ const AdminDisplay = () => {
   // Background settings
   const [backgroundStyle, setBackgroundStyle] = useState('solid');
   const [backgroundPattern, setBackgroundPattern] = useState<string | null>(null);
+  const [backgroundIconType, setBackgroundIconType] = useState('shopping');
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
 
@@ -167,6 +168,7 @@ const AdminDisplay = () => {
       setBackButtonText((settings as any)?.back_button_text || 'رجوع');
       setBackgroundStyle((settings as any)?.background_style || 'solid');
       setBackgroundPattern((settings as any)?.background_pattern || null);
+      setBackgroundIconType((settings as any)?.background_icon_type || 'shopping');
       setBackgroundImageUrl((settings as any)?.background_image_url || null);
       setHeaderLayout((settings as any)?.header_layout || 'logo-right-social-below');
       setLogoShape((settings as any)?.logo_shape || 'circle');
@@ -254,6 +256,7 @@ const AdminDisplay = () => {
           back_button_text: backButtonText,
           background_style: backgroundStyle,
           background_pattern: backgroundPattern,
+          background_icon_type: backgroundIconType,
           background_image_url: backgroundImageUrl,
           header_layout: headerLayout,
           logo_shape: logoShape,
@@ -895,26 +898,53 @@ const AdminDisplay = () => {
 
           {/* Pattern options */}
           {backgroundStyle === 'pattern' && (
-            <div>
-              <Label className="text-base font-medium mb-3 block">نوع النمط</Label>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { id: 'dots', name: 'نقاط', icon: '•••' },
-                  { id: 'lines', name: 'خطوط', icon: '|||' },
-                  { id: 'bubbles', name: 'فقاعات', icon: '○○○' },
-                ].map(pattern => (
-                  <button
-                    key={pattern.id}
-                    onClick={() => setBackgroundPattern(pattern.id)}
-                    className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
-                      backgroundPattern === pattern.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="text-xl mb-1 font-mono">{pattern.icon}</div>
-                    <div className="text-xs font-medium">{pattern.name}</div>
-                  </button>
-                ))}
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-medium mb-3 block">نوع النمط</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'dots', name: 'نقاط', icon: '•••' },
+                    { id: 'lines', name: 'أيقونات', icon: '🎨' },
+                    { id: 'bubbles', name: 'فقاعات', icon: '○○○' },
+                  ].map(pattern => (
+                    <button
+                      key={pattern.id}
+                      onClick={() => setBackgroundPattern(pattern.id)}
+                      className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                        backgroundPattern === pattern.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-xl mb-1 font-mono">{pattern.icon}</div>
+                      <div className="text-xs font-medium">{pattern.name}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Icon type selection - only show for 'lines' (icons) pattern */}
+              {backgroundPattern === 'lines' && (
+                <div>
+                  <Label className="text-base font-medium mb-3 block">نوع الأيقونات</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { id: 'shopping', name: 'تسوق', icon: '🛍️' },
+                      { id: 'food', name: 'طعام', icon: '🍔' },
+                      { id: 'sports', name: 'رياضة', icon: '⚽' },
+                    ].map(iconType => (
+                      <button
+                        key={iconType.id}
+                        onClick={() => setBackgroundIconType(iconType.id)}
+                        className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
+                          backgroundIconType === iconType.id ? 'border-primary bg-primary/10 shadow-md' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="text-2xl mb-1">{iconType.icon}</div>
+                        <div className="text-xs font-medium">{iconType.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
