@@ -368,10 +368,7 @@ const HeroSection = () => {
                 <img
                   src={slide.image}
                   alt={`شريحة ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-100"
-                  style={effects.image_parallax ? {
-                    transform: `translateY(${scrollY}px) scale(1.1)`,
-                  } : undefined}
+                  className="w-full h-full object-cover"
                 />
               </div>
             ))}
