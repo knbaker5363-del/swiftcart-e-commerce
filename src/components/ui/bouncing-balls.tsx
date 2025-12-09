@@ -22,7 +22,7 @@ interface BouncingBallsProps {
 export const BouncingBalls = ({
   className,
   ballCount = 5,
-  colors = ['hsl(var(--primary))', 'hsl(var(--accent))', '#60a5fa', '#34d399', '#f472b6'],
+  colors = ['#6366f1', '#8b5cf6', '#60a5fa', '#34d399', '#f472b6'],
   minRadius = 20,
   maxRadius = 40,
   speed = 1,

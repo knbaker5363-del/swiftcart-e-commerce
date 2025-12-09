@@ -20,7 +20,7 @@ interface FloatingParticlesProps {
 export const FloatingParticles = ({
   className,
   particleCount = 20,
-  color = 'hsl(var(--primary))',
+  color = '#6366f1',
 }: FloatingParticlesProps) => {
   const [particles, setParticles] = useState<Particle[]>([]);
 
