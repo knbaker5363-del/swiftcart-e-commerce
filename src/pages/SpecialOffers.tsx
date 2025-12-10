@@ -26,6 +26,8 @@ interface SpecialOffer {
   background_color: string;
   text_color: string;
   expires_at: string | null;
+  position_x: number | null;
+  position_y: number | null;
 }
 
 const SpecialOffers = () => {
@@ -124,22 +126,45 @@ const SpecialOffers = () => {
         </div>
       </section>
 
-      {/* Offers Grid */}
+      {/* Offers Grid - Visual Editor Style */}
       <section className="py-6 md:py-8 container px-3 md:px-4">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-muted animate-pulse rounded-xl md:rounded-2xl aspect-[4/5] md:aspect-square" />
+              <div key={i} className="bg-muted animate-pulse rounded-xl md:rounded-2xl aspect-square" />
             ))}
           </div>
         ) : offers && offers.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-auto">
-            {offers.map((offer, index) => (
+          <div 
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridAutoRows: 'minmax(140px, auto)',
+            }}
+          >
+            {offers.map((offer, index) => {
+              // Calculate grid span based on size
+              const getGridSpan = (size: string) => {
+                switch (size) {
+                  case '2x4': return { col: 2, row: 1 };
+                  case '4x4': return { col: 2, row: 2 };
+                  case 'circle':
+                  case '2x2':
+                  default: return { col: 1, row: 1 };
+                }
+              };
+              
+              const span = getGridSpan(offer.size);
+              const isCircle = offer.size === 'circle';
+              
+              return (
               <Link
                 key={offer.id}
                 to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${getMobileSizeClasses(offer.size)} md:${getSizeClasses(offer.size)}`}
+                className={`group relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${isCircle ? 'rounded-full' : 'rounded-2xl'}`}
                 style={{
+                  gridColumn: `span ${span.col}`,
+                  gridRow: `span ${span.row}`,
                   background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                   animationDelay: `${index * 100}ms`,
                 }}
@@ -228,7 +253,8 @@ const SpecialOffers = () => {
                   ))}
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-16">

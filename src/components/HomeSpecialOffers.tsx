@@ -18,8 +18,11 @@ const HomeSpecialOffers = () => {
   const showHomeSpecialOffers = (settings as any)?.show_home_special_offers !== false;
   const offersShape = (settings as any)?.home_offers_shape || 'circles';
   
+  // Max offers: 3 for circles, 2 for squares
+  const maxOffers = offersShape === 'circles' ? 3 : 2;
+
   const { data: offers, isLoading } = useQuery({
-    queryKey: ['home-special-offers'],
+    queryKey: ['home-special-offers', offersShape],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('special_offers')
@@ -27,7 +30,7 @@ const HomeSpecialOffers = () => {
         .eq('is_active', true)
         .eq('show_on_homepage', true)
         .order('sort_order', { ascending: true })
-        .limit(3);
+        .limit(maxOffers);
       if (error) throw error;
       // Filter out expired offers
       const now = new Date();
