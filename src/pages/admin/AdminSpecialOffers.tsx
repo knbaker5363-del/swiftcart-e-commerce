@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -11,11 +13,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical, CalendarIcon, Clock } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { CountdownBadge } from '@/components/ui/countdown-timer';
+import { cn } from '@/lib/utils';
 
 interface SpecialOffer {
   id: string;
@@ -32,6 +38,7 @@ interface SpecialOffer {
   bundle_price: number | null;
   background_color: string;
   text_color: string;
+  expires_at: string | null;
 }
 
 interface Product {
@@ -136,6 +143,11 @@ const SortableOfferCard = ({
             ) : offer.price ? (
               <div className="text-primary font-bold text-sm">{offer.price}₪</div>
             ) : null}
+            {offer.expires_at && (
+              <div className="mt-1">
+                <CountdownBadge expiresAt={offer.expires_at} />
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -192,6 +204,9 @@ const AdminSpecialOffers = () => {
   const [bundlePrice, setBundlePrice] = useState('');
   const [backgroundColor, setBackgroundColor] = useState('#7c3aed');
   const [textColor, setTextColor] = useState('#ffffff');
+  const [hasExpiration, setHasExpiration] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<Date | undefined>(undefined);
+  const [expiresTime, setExpiresTime] = useState('23:59');
 
   const { data: offers, isLoading } = useQuery({
     queryKey: ['admin-special-offers'],
@@ -246,6 +261,9 @@ const AdminSpecialOffers = () => {
     setBundlePrice('');
     setBackgroundColor('#7c3aed');
     setTextColor('#ffffff');
+    setHasExpiration(false);
+    setExpiresAt(undefined);
+    setExpiresTime('23:59');
     setEditingOffer(null);
   };
 
@@ -264,6 +282,16 @@ const AdminSpecialOffers = () => {
     setBundlePrice(offer.bundle_price?.toString() || '');
     setBackgroundColor(offer.background_color || '#7c3aed');
     setTextColor(offer.text_color || '#ffffff');
+    if (offer.expires_at) {
+      setHasExpiration(true);
+      const date = new Date(offer.expires_at);
+      setExpiresAt(date);
+      setExpiresTime(format(date, 'HH:mm'));
+    } else {
+      setHasExpiration(false);
+      setExpiresAt(undefined);
+      setExpiresTime('23:59');
+    }
     setDialogOpen(true);
   };
 
@@ -289,6 +317,14 @@ const AdminSpecialOffers = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      let expiresAtValue: string | null = null;
+      if (hasExpiration && expiresAt) {
+        const [hours, minutes] = expiresTime.split(':').map(Number);
+        const dateWithTime = new Date(expiresAt);
+        dateWithTime.setHours(hours, minutes, 0, 0);
+        expiresAtValue = dateWithTime.toISOString();
+      }
+
       const offerData = {
         name,
         description: description || null,
@@ -303,6 +339,7 @@ const AdminSpecialOffers = () => {
         bundle_price: bundlePrice ? parseFloat(bundlePrice) : null,
         background_color: backgroundColor,
         text_color: textColor,
+        expires_at: expiresAtValue,
       };
 
       if (editingOffer) {
@@ -588,6 +625,58 @@ const AdminSpecialOffers = () => {
                     </div>
                     <Input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                   </Label>
+                )}
+              </div>
+
+              {/* Expiration Date */}
+              <div className="p-4 bg-muted/50 rounded-xl border">
+                <div className="flex items-center gap-2 mb-3">
+                  <Switch checked={hasExpiration} onCheckedChange={setHasExpiration} />
+                  <Label className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    تحديد تاريخ انتهاء العرض
+                  </Label>
+                </div>
+                
+                {hasExpiration && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">تاريخ الانتهاء</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-right font-normal mt-1",
+                              !expiresAt && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="ml-2 h-4 w-4" />
+                            {expiresAt ? format(expiresAt, 'dd/MM/yyyy', { locale: ar }) : 'اختر التاريخ'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={expiresAt}
+                            onSelect={setExpiresAt}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div>
+                      <Label className="text-xs">وقت الانتهاء</Label>
+                      <Input
+                        type="time"
+                        value={expiresTime}
+                        onChange={(e) => setExpiresTime(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
 

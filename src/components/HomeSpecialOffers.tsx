@@ -3,12 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { CountdownBadge } from '@/components/ui/countdown-timer';
 
 interface SpecialOffer {
   id: string;
   name: string;
   image_url: string | null;
   background_color: string;
+  expires_at: string | null;
 }
 
 const HomeSpecialOffers = () => {
@@ -21,12 +23,16 @@ const HomeSpecialOffers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('special_offers')
-        .select('id, name, image_url, background_color')
+        .select('id, name, image_url, background_color, expires_at')
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .limit(3);
       if (error) throw error;
-      return data as SpecialOffer[];
+      // Filter out expired offers
+      const now = new Date();
+      return (data as SpecialOffer[]).filter(offer => 
+        !offer.expires_at || new Date(offer.expires_at) > now
+      );
     },
     enabled: showHomeSpecialOffers
   });
@@ -75,6 +81,12 @@ const HomeSpecialOffers = () => {
               className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ boxShadow: `0 0 30px ${offer.background_color || 'hsl(var(--primary))'}` }}
             />
+            {/* Countdown Badge */}
+            {offer.expires_at && (
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
+                <CountdownBadge expiresAt={offer.expires_at} className="text-[10px] px-1.5 py-0.5" />
+              </div>
+            )}
           </Link>
         ))
       ) : (
@@ -104,6 +116,12 @@ const HomeSpecialOffers = () => {
               className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ boxShadow: `0 0 30px ${offer.background_color || 'hsl(var(--primary))'}` }}
             />
+            {/* Countdown Badge */}
+            {offer.expires_at && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+                <CountdownBadge expiresAt={offer.expires_at} className="text-xs" />
+              </div>
+            )}
           </Link>
         ))
       )}

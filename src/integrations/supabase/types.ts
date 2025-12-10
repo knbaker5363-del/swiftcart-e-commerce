@@ -793,6 +793,7 @@ export type Database = {
           condition_text: string | null
           created_at: string
           description: string | null
+          expires_at: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -811,6 +812,7 @@ export type Database = {
           condition_text?: string | null
           created_at?: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -829,6 +831,7 @@ export type Database = {
           condition_text?: string | null
           created_at?: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
