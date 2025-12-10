@@ -511,6 +511,7 @@ export type Database = {
           header_logo_position: string | null
           hero_banner_color: string | null
           hide_header_store_info: boolean | null
+          home_offers_shape: string | null
           id: string
           layout_3d_effect_type: string | null
           layout_category_row_scrollable: boolean | null
@@ -603,6 +604,7 @@ export type Database = {
           header_logo_position?: string | null
           hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
+          home_offers_shape?: string | null
           id?: string
           layout_3d_effect_type?: string | null
           layout_category_row_scrollable?: boolean | null
@@ -695,6 +697,7 @@ export type Database = {
           header_logo_position?: string | null
           hero_banner_color?: string | null
           hide_header_store_info?: boolean | null
+          home_offers_shape?: string | null
           id?: string
           layout_3d_effect_type?: string | null
           layout_category_row_scrollable?: boolean | null

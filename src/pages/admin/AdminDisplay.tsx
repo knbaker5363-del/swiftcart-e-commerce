@@ -301,6 +301,7 @@ const AdminDisplay = () => {
   const [offersButtonName, setOffersButtonName] = useState('العروض الخاصة بنا');
   const [offersButtonIcon, setOffersButtonIcon] = useState('Sparkles');
   const [showHomeSpecialOffers, setShowHomeSpecialOffers] = useState(true);
+  const [homeOffersShape, setHomeOffersShape] = useState('circles');
 
   // Load settings
   useEffect(() => {
@@ -348,6 +349,7 @@ const AdminDisplay = () => {
       setOffersButtonName((settings as any)?.offers_button_name || 'العروض الخاصة بنا');
       setOffersButtonIcon((settings as any)?.offers_button_icon || 'Sparkles');
       setShowHomeSpecialOffers((settings as any)?.show_home_special_offers !== false);
+      setHomeOffersShape((settings as any)?.home_offers_shape || 'circles');
     }
   }, [settings]);
 
@@ -456,6 +458,7 @@ const AdminDisplay = () => {
           offers_button_name: offersButtonName,
           offers_button_icon: offersButtonIcon,
           show_home_special_offers: showHomeSpecialOffers,
+          home_offers_shape: homeOffersShape,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -764,13 +767,52 @@ const AdminDisplay = () => {
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-base font-semibold">قسم العروض الخاصة بالصفحة الرئيسية</Label>
-                <p className="text-sm text-muted-foreground">عرض بطاقات العروض 2×2 في الصفحة الرئيسية</p>
+                <p className="text-sm text-muted-foreground">عرض العروض في الصفحة الرئيسية</p>
               </div>
               <Switch
                 checked={showHomeSpecialOffers}
                 onCheckedChange={setShowHomeSpecialOffers}
               />
             </div>
+            
+            {showHomeSpecialOffers && (
+              <div className="pt-3 border-t">
+                <Label className="text-sm font-medium mb-3 block">شكل العرض</Label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setHomeOffersShape('circles')}
+                    className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                      homeOffersShape === 'circles' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-red-500" />
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500" />
+                    </div>
+                    <p className="text-xs font-medium">3 دوائر</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHomeOffersShape('squares')}
+                    className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                      homeOffersShape === 'squares' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex justify-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-500" />
+                    </div>
+                    <p className="text-xs font-medium">مربعين</p>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
         </CardContent>
