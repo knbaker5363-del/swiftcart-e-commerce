@@ -6,9 +6,9 @@ import BrandsButton from '@/components/BrandsButton';
 import BrandsSlider from '@/components/BrandsSlider';
 import OffersButton from '@/components/OffersButton';
 import ProductGrid from '@/components/ProductGrid';
+import HomeSpecialOffers from '@/components/HomeSpecialOffers';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ClassicLayoutProps {
   categories: any[];
@@ -84,6 +84,9 @@ const ClassicLayout = ({
             <OffersButton />
           </div>
         </section>
+
+        {/* Special Offers */}
+        <HomeSpecialOffers />
 
         {/* All Products */}
         <section className="py-8 lg:py-12">

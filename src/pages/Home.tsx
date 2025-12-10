@@ -137,7 +137,6 @@ const Home = () => {
       <HeroSection />
 
       <div className="container">
-        <HomeSpecialOffers />
         {renderLayout()}
       </div>
 
