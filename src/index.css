@@ -1063,12 +1063,117 @@
   animation: twinkle 1.5s ease-in-out infinite;
 }
 
-/* Smooth scrolling and transitions */
+/* ===== MOBILE PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Smooth scrolling with reduced motion support */
 html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Font rendering optimization */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on mobile */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .group\/carousel:hover .opacity-0 {
+    opacity: 0;
+  }
+  
+  /* Faster transitions on mobile */
+  * {
+    transition-duration: 150ms !important;
+  }
+}
+
+/* Momentum scrolling for iOS */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Hardware acceleration for smooth animations */
+.transform,
+.transition-transform,
+[class*="animate-"] {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Prevent layout shifts from images */
+img {
+  content-visibility: auto;
+}
+
+/* Optimize scrollable containers */
+.scroll-container {
+  contain: layout style;
+}
+
+/* Fast tap response */
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection during swipe */
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-inset {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Skeleton loading animation optimized */
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Optimized card hover - only on non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
 }
