@@ -535,6 +535,7 @@ export type Database = {
           show_deals_button: boolean | null
           show_header_logo: boolean | null
           show_header_store_name: boolean | null
+          show_home_special_offers: boolean | null
           show_image_border: boolean | null
           show_offers_button: boolean | null
           site_style: string | null
@@ -626,6 +627,7 @@ export type Database = {
           show_deals_button?: boolean | null
           show_header_logo?: boolean | null
           show_header_store_name?: boolean | null
+          show_home_special_offers?: boolean | null
           show_image_border?: boolean | null
           show_offers_button?: boolean | null
           site_style?: string | null
@@ -717,6 +719,7 @@ export type Database = {
           show_deals_button?: boolean | null
           show_header_logo?: boolean | null
           show_header_store_name?: boolean | null
+          show_home_special_offers?: boolean | null
           show_image_border?: boolean | null
           show_offers_button?: boolean | null
           site_style?: string | null

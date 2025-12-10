@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import { Sparkles, Flame, Zap, Package, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface SpecialOffer {
   id: string;
@@ -21,6 +22,8 @@ interface SpecialOffer {
 }
 
 const HomeSpecialOffers = () => {
+  const { settings } = useSettings();
+  const showHomeSpecialOffers = (settings as any)?.show_home_special_offers !== false;
   const { data: offers, isLoading } = useQuery({
     queryKey: ['home-special-offers'],
     queryFn: async () => {
@@ -32,8 +35,12 @@ const HomeSpecialOffers = () => {
         .limit(4);
       if (error) throw error;
       return data as SpecialOffer[];
-    }
+    },
+    enabled: showHomeSpecialOffers
   });
+
+  // Don't render if disabled
+  if (!showHomeSpecialOffers) return null;
 
   if (isLoading) {
     return (
