@@ -538,6 +538,7 @@ export type Database = {
           show_header_store_name: boolean | null
           show_home_special_offers: boolean | null
           show_image_border: boolean | null
+          show_offer_badges: boolean | null
           show_offers_button: boolean | null
           site_style: string | null
           social_facebook: string | null
@@ -635,6 +636,7 @@ export type Database = {
           show_header_store_name?: boolean | null
           show_home_special_offers?: boolean | null
           show_image_border?: boolean | null
+          show_offer_badges?: boolean | null
           show_offers_button?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
@@ -732,6 +734,7 @@ export type Database = {
           show_header_store_name?: boolean | null
           show_home_special_offers?: boolean | null
           show_image_border?: boolean | null
+          show_offer_badges?: boolean | null
           show_offers_button?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
