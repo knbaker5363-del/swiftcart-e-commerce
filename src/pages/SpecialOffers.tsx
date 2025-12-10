@@ -135,89 +135,117 @@ const SpecialOffers = () => {
             ))}
           </div>
         ) : offers && offers.length > 0 ? (
-          <div 
-            className="grid gap-4 mx-auto"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gridAutoRows: '140px',
-              maxWidth: '700px',
-            }}
-          >
-            {offers.map((offer, index) => {
-              const isCircle = offer.size === 'circle';
-              const is4x4 = offer.size === '4x4';
-              const is2x4 = offer.size === '2x4';
-              
-              // Calculate spans
-              const colSpan = (is4x4 || is2x4) ? 2 : 1;
-              const rowSpan = is4x4 ? 2 : 1;
-              
-              return (
-              <Link
-                key={offer.id}
-                to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
-                  isCircle ? 'rounded-full' : 'rounded-2xl'
-                }`}
-                style={{
-                  gridColumn: `span ${colSpan}`,
-                  gridRow: `span ${rowSpan}`,
-                  background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
-                }}
-              >
-
-                {/* Offer Badge */}
-                {getOfferBadge(offer)}
-
-                {/* Background Image or Gradient */}
-                {offer.image_url ? (
-                  <img
-                    src={offer.image_url}
-                    alt={offer.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <div 
-                    className="w-full h-full flex items-center justify-center"
-                    style={{ backgroundColor: offer.background_color }}
+          <>
+            {/* Desktop Grid */}
+            <div 
+              className="hidden md:grid gap-4 mx-auto"
+              style={{
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridAutoRows: '140px',
+                maxWidth: '700px',
+              }}
+            >
+              {offers.map((offer) => {
+                const isCircle = offer.size === 'circle';
+                const is4x4 = offer.size === '4x4';
+                const is2x4 = offer.size === '2x4';
+                const colSpan = (is4x4 || is2x4) ? 2 : 1;
+                const rowSpan = is4x4 ? 2 : 1;
+                
+                return (
+                  <Link
+                    key={offer.id}
+                    to={`/special-offer/${offer.id}`}
+                    className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
+                      isCircle ? 'rounded-full' : 'rounded-2xl'
+                    }`}
+                    style={{
+                      gridColumn: `span ${colSpan}`,
+                      gridRow: `span ${rowSpan}`,
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
+                    }}
                   >
-                    <Package className="h-12 w-12 md:h-20 md:w-20 opacity-30 animate-pulse" style={{ color: offer.text_color }} />
-                  </div>
-                )}
+                    {getOfferBadge(offer)}
+                    {offer.image_url ? (
+                      <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
+                        <Package className="h-20 w-20 opacity-30" style={{ color: offer.text_color }} />
+                      </div>
+                    )}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className="font-bold text-base mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                      {offer.condition_text && !isCircle && (
+                        <p className="text-xs text-white/80 mb-2 line-clamp-1">{offer.condition_text}</p>
+                      )}
+                      {offer.expires_at && (
+                        <div className="mb-3">
+                          <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+                        </div>
+                      )}
+                      {offer.bundle_price ? (
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-1.5 rounded-full text-white font-bold text-sm">
+                          <Zap className="h-4 w-4" />
+                          {offer.required_quantity} بـ {offer.bundle_price}₪
+                        </div>
+                      ) : offer.price ? (
+                        <div className="inline-block bg-primary px-4 py-1.5 rounded-full font-bold text-sm text-white">
+                          {offer.price}₪
+                        </div>
+                      ) : null}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
 
-                {/* Gradient Overlay - Centered Content */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${isCircle ? 'rounded-full' : ''}`}>
-                  <h3 className="font-bold text-sm md:text-base mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
-                  
-                  {offer.condition_text && !isCircle && (
-                    <p className="text-xs text-white/80 mb-2 line-clamp-1">{offer.condition_text}</p>
-                  )}
-                  
-                  {/* Countdown Timer */}
-                  {offer.expires_at && (
-                    <div className="mb-2 md:mb-3 scale-90 md:scale-100">
-                      <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+            {/* Mobile Grid - 2 columns */}
+            <div className="grid md:hidden grid-cols-2 gap-3">
+              {offers.map((offer) => {
+                const isCircle = offer.size === 'circle';
+                
+                return (
+                  <Link
+                    key={offer.id}
+                    to={`/special-offer/${offer.id}`}
+                    className={`group relative overflow-hidden transition-all duration-300 aspect-square ${
+                      isCircle ? 'rounded-full' : 'rounded-xl'
+                    }`}
+                    style={{
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
+                    }}
+                  >
+                    {getOfferBadge(offer)}
+                    {offer.image_url ? (
+                      <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
+                        <Package className="h-12 w-12 opacity-30" style={{ color: offer.text_color }} />
+                      </div>
+                    )}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-2 pb-3 ${isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className="font-bold text-xs mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                      {offer.expires_at && (
+                        <div className="mb-2 scale-75">
+                          <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+                        </div>
+                      )}
+                      {offer.bundle_price ? (
+                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 rounded-full text-white font-bold text-[10px]">
+                          <Zap className="h-3 w-3" />
+                          {offer.required_quantity} بـ {offer.bundle_price}₪
+                        </div>
+                      ) : offer.price ? (
+                        <div className="inline-block bg-primary px-2 py-1 rounded-full font-bold text-[10px] text-white">
+                          {offer.price}₪
+                        </div>
+                      ) : null}
                     </div>
-                  )}
-                  
-                  {/* Price Display - No shadow */}
-                  {offer.bundle_price ? (
-                    <div className="inline-flex items-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-white font-bold text-xs md:text-sm">
-                      <Zap className="h-3 w-3 md:h-4 md:w-4" />
-                      {offer.required_quantity} بـ {offer.bundle_price}₪
-                    </div>
-                  ) : offer.price ? (
-                    <div className="inline-block bg-primary px-3 py-1.5 md:px-4 md:py-1.5 rounded-full font-bold text-xs md:text-sm text-white">
-                      {offer.price}₪
-                    </div>
-                  ) : null}
-                </div>
-
-              </Link>
-              );
-            })}
-          </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
