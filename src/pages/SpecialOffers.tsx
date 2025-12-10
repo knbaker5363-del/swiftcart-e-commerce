@@ -135,31 +135,37 @@ const SpecialOffers = () => {
             ))}
           </div>
         ) : offers && offers.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div 
+            className="grid gap-4 mx-auto"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridAutoRows: '140px',
+              maxWidth: '700px',
+            }}
+          >
             {offers.map((offer, index) => {
               const isCircle = offer.size === 'circle';
               const is4x4 = offer.size === '4x4';
               const is2x4 = offer.size === '2x4';
               
+              // Calculate spans
+              const colSpan = (is4x4 || is2x4) ? 2 : 1;
+              const rowSpan = is4x4 ? 2 : 1;
+              
               return (
               <Link
                 key={offer.id}
                 to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] aspect-square ${
+                className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
                   isCircle ? 'rounded-full' : 'rounded-2xl'
-                } ${is4x4 || is2x4 ? 'col-span-2' : 'col-span-1'} ${is4x4 ? 'row-span-2' : 'row-span-1'}`}
+                }`}
                 style={{
-                  background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
-                  animationDelay: `${index * 100}ms`,
+                  gridColumn: `span ${colSpan}`,
+                  gridRow: `span ${rowSpan}`,
+                  background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
                 }}
               >
-                {/* Animated Glow Border */}
-                <div 
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"
-                  style={{ 
-                    boxShadow: `0 0 30px ${offer.background_color}80, 0 0 60px ${offer.background_color}40`,
-                  }}
-                />
 
                 {/* Offer Badge */}
                 {getOfferBadge(offer)}
@@ -181,11 +187,11 @@ const SpecialOffers = () => {
                 )}
 
                 {/* Gradient Overlay - Centered Content */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:via-black/50 transition-all duration-300 flex flex-col items-center justify-end text-center p-3 md:p-4 pb-4 md:pb-5">
-                  <h3 className="font-bold text-base md:text-xl lg:text-2xl mb-1 md:mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white leading-tight line-clamp-2">{offer.name}</h3>
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${isCircle ? 'rounded-full' : ''}`}>
+                  <h3 className="font-bold text-sm md:text-base mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
                   
-                  {offer.condition_text && (
-                    <p className="text-xs md:text-sm text-white/90 mb-2 md:mb-3 line-clamp-1 md:line-clamp-2 drop-shadow-lg">{offer.condition_text}</p>
+                  {offer.condition_text && !isCircle && (
+                    <p className="text-xs text-white/80 mb-2 line-clamp-1">{offer.condition_text}</p>
                   )}
                   
                   {/* Countdown Timer */}
@@ -195,47 +201,19 @@ const SpecialOffers = () => {
                     </div>
                   )}
                   
-                  {/* Price Display with Pulse */}
+                  {/* Price Display - No shadow */}
                   {offer.bundle_price ? (
-                    <div className="inline-flex items-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 md:px-5 md:py-2 rounded-full text-white font-bold shadow-xl text-sm md:text-lg group-hover:animate-pulse group-hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]">
-                      <Zap className="h-3.5 w-3.5 md:h-5 md:w-5" />
+                    <div className="inline-flex items-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-white font-bold text-xs md:text-sm">
+                      <Zap className="h-3 w-3 md:h-4 md:w-4" />
                       {offer.required_quantity} بـ {offer.bundle_price}₪
                     </div>
                   ) : offer.price ? (
-                    <div className="inline-block bg-primary px-3 py-1.5 md:px-5 md:py-2 rounded-full font-bold shadow-xl text-sm md:text-lg text-white group-hover:animate-pulse">
+                    <div className="inline-block bg-primary px-3 py-1.5 md:px-4 md:py-1.5 rounded-full font-bold text-xs md:text-sm text-white">
                       {offer.price}₪
                     </div>
                   ) : null}
                 </div>
 
-                {/* Hover Glow Effect */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
-                  style={{ backgroundColor: offer.background_color }}
-                />
-                
-                {/* Shine Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
-                  <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000" />
-                </div>
-
-                {/* Floating Particles Effect */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-2 h-2 rounded-full animate-bounce"
-                      style={{
-                        backgroundColor: offer.text_color,
-                        opacity: 0.3,
-                        left: `${20 + i * 15}%`,
-                        top: `${30 + (i % 3) * 20}%`,
-                        animationDelay: `${i * 200}ms`,
-                        animationDuration: `${1 + i * 0.2}s`,
-                      }}
-                    />
-                  ))}
-                </div>
               </Link>
               );
             })}
