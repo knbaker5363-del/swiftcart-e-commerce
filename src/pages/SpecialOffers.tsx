@@ -278,45 +278,49 @@ const SpecialOffers = () => {
 
             {/* Mobile Grid - 2 columns for larger cards */}
             <div className="md:hidden grid grid-cols-2 gap-3">
-              {positionedOffersMobile.map((offer) => (
-                <Link
-                  key={offer.id}
-                  to={`/special-offer/${offer.id}`}
-                  className={`group relative overflow-hidden transition-all duration-300 active:scale-95 aspect-square ${
-                    offer.isCircle ? 'rounded-full' : 'rounded-xl'
-                  }`}
-                  style={{
-                    background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
-                  }}
-                >
-                  {getOfferBadge(offer)}
-                  {offer.image_url ? (
-                    <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                      <Package className="h-12 w-12 opacity-20" style={{ color: offer.text_color }} />
-                    </div>
-                  )}
-                  <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${offer.isCircle ? 'rounded-full' : ''}`}>
-                    <h3 className="font-bold text-sm mb-1.5 text-white leading-tight line-clamp-2">{offer.name}</h3>
-                    {offer.expires_at && (
-                      <div className="mb-2">
-                        <CountdownBadge expiresAt={offer.expires_at} />
+              {positionedOffersMobile.map((offer) => {
+                const isLarge = offer.size === '4x4' || offer.size === '2x4';
+                
+                return (
+                  <Link
+                    key={offer.id}
+                    to={`/special-offer/${offer.id}`}
+                    className={`group relative overflow-hidden transition-all duration-300 active:scale-95 ${
+                      isLarge ? 'col-span-2 aspect-[2/1]' : 'aspect-square'
+                    } ${offer.isCircle ? 'rounded-full' : 'rounded-xl'}`}
+                    style={{
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
+                    }}
+                  >
+                    {getOfferBadge(offer)}
+                    {offer.image_url ? (
+                      <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
+                        <Package className={`${isLarge ? 'h-16 w-16' : 'h-12 w-12'} opacity-20`} style={{ color: offer.text_color }} />
                       </div>
                     )}
-                    {offer.bundle_price ? (
-                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 rounded-full text-white font-bold text-xs">
-                        <Zap className="h-3 w-3" />
-                        {offer.required_quantity} بـ {offer.bundle_price}₪
-                      </div>
-                    ) : offer.price ? (
-                      <div className="inline-block bg-primary px-3 py-1.5 rounded-full font-bold text-xs text-primary-foreground">
-                        {offer.price}₪
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-              ))}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${offer.isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className={`font-bold ${isLarge ? 'text-base' : 'text-sm'} mb-1.5 text-white leading-tight line-clamp-2`}>{offer.name}</h3>
+                      {offer.expires_at && (
+                        <div className="mb-2">
+                          <CountdownBadge expiresAt={offer.expires_at} />
+                        </div>
+                      )}
+                      {offer.bundle_price ? (
+                        <div className={`inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 ${isLarge ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'} rounded-full text-white font-bold`}>
+                          <Zap className={isLarge ? 'h-4 w-4' : 'h-3 w-3'} />
+                          {offer.required_quantity} بـ {offer.bundle_price}₪
+                        </div>
+                      ) : offer.price ? (
+                        <div className={`inline-block bg-primary ${isLarge ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'} rounded-full font-bold text-primary-foreground`}>
+                          {offer.price}₪
+                        </div>
+                      ) : null}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </>
         ) : (
