@@ -17,6 +17,7 @@ import SEOManager from '@/components/SEOManager';
 import HeroSection from '@/components/HeroSection';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import { ClassicLayout, CategoryRowsLayout } from '@/components/layouts';
+import HomeSpecialOffers from '@/components/HomeSpecialOffers';
 
 const Home = () => {
   useDocumentTitle();
@@ -136,6 +137,7 @@ const Home = () => {
       <HeroSection />
 
       <div className="container">
+        <HomeSpecialOffers />
         {renderLayout()}
       </div>
 
