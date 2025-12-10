@@ -260,52 +260,60 @@ const SpecialOffers = () => {
               ))}
             </div>
 
-            {/* Mobile Grid - 4 columns like admin editor */}
+            {/* Mobile Grid - Full width responsive */}
             <div 
-              className="md:hidden relative mx-auto"
+              className="md:hidden relative w-full"
               style={{
-                width: `${GRID_COLS * (CELL_SIZE_MOBILE + GAP_MOBILE)}px`,
-                height: `${maxRow * (CELL_SIZE_MOBILE + GAP_MOBILE)}px`,
+                aspectRatio: `${GRID_COLS} / ${maxRow}`,
               }}
             >
-              {positionedOffers.map((offer) => (
-                <Link
-                  key={offer.id}
-                  to={`/special-offer/${offer.id}`}
-                  className={`group absolute overflow-hidden transition-all duration-300 active:scale-95 ${
-                    offer.isCircle ? 'rounded-full' : 'rounded-xl'
-                  }`}
-                  style={{
-                    left: `${offer.col * (CELL_SIZE_MOBILE + GAP_MOBILE)}px`,
-                    top: `${offer.row * (CELL_SIZE_MOBILE + GAP_MOBILE)}px`,
-                    width: `${offer.width * CELL_SIZE_MOBILE + (offer.width - 1) * GAP_MOBILE}px`,
-                    height: `${offer.height * CELL_SIZE_MOBILE + (offer.height - 1) * GAP_MOBILE}px`,
-                    background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
-                  }}
-                >
-                  {getOfferBadge(offer)}
-                  {offer.image_url ? (
-                    <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                      <Package className="h-6 w-6 opacity-20" style={{ color: offer.text_color }} />
+              {positionedOffers.map((offer) => {
+                // Calculate cell size based on screen width (container has px-3 = 24px total padding)
+                const cellSize = `calc((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS})`;
+                const cellWidth = `calc(${offer.width} * (100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${(offer.width - 1) * GAP_MOBILE}px)`;
+                const cellHeight = `calc(${offer.height} * (100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${(offer.height - 1) * GAP_MOBILE}px)`;
+                const leftPos = `calc(${offer.col} * ((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${GAP_MOBILE}px))`;
+                const topPos = `calc(${offer.row} * ((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${GAP_MOBILE}px))`;
+                
+                return (
+                  <Link
+                    key={offer.id}
+                    to={`/special-offer/${offer.id}`}
+                    className={`group absolute overflow-hidden transition-all duration-300 active:scale-95 ${
+                      offer.isCircle ? 'rounded-full' : 'rounded-xl'
+                    }`}
+                    style={{
+                      left: leftPos,
+                      top: topPos,
+                      width: cellWidth,
+                      height: cellHeight,
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
+                    }}
+                  >
+                    {getOfferBadge(offer)}
+                    {offer.image_url ? (
+                      <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
+                        <Package className="h-8 w-8 opacity-20" style={{ color: offer.text_color }} />
+                      </div>
+                    )}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col items-center justify-end text-center p-2 pb-2.5 ${offer.isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className="font-bold text-xs mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                      {offer.bundle_price ? (
+                        <div className="inline-flex items-center gap-0.5 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 rounded-full text-white font-bold text-[10px]">
+                          <Zap className="h-2.5 w-2.5" />
+                          {offer.required_quantity} بـ {offer.bundle_price}₪
+                        </div>
+                      ) : offer.price ? (
+                        <div className="inline-block bg-primary px-2 py-1 rounded-full font-bold text-[10px] text-primary-foreground">
+                          {offer.price}₪
+                        </div>
+                      ) : null}
                     </div>
-                  )}
-                  <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col items-center justify-end text-center p-1.5 pb-2 ${offer.isCircle ? 'rounded-full' : ''}`}>
-                    <h3 className="font-bold text-[10px] mb-0.5 text-white leading-tight line-clamp-2">{offer.name}</h3>
-                    {offer.bundle_price ? (
-                      <div className="inline-flex items-center gap-0.5 bg-gradient-to-r from-green-500 to-emerald-500 px-1.5 py-0.5 rounded-full text-white font-bold text-[8px]">
-                        <Zap className="h-2 w-2" />
-                        {offer.required_quantity} بـ {offer.bundle_price}₪
-                      </div>
-                    ) : offer.price ? (
-                      <div className="inline-block bg-primary px-1.5 py-0.5 rounded-full font-bold text-[8px] text-primary-foreground">
-                        {offer.price}₪
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </>
         ) : (
