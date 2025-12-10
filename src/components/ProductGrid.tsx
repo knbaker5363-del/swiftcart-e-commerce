@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart } from 'lucide-react';
@@ -14,10 +15,10 @@ interface ProductGridProps {
   getColorValue: (color: string) => string;
 }
 
-const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridProps) => {
+const ProductGrid = memo(({ products, onProductClick, getColorValue }: ProductGridProps) => {
   const { settings } = useSettings();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { effects, getProductCardClasses, getHeartClasses } = useVisualEffects();
+  const { effects, getProductCardClasses } = useVisualEffects();
 
   // Get card display settings
   const cardSize = (settings as any)?.card_size || 'medium';
@@ -72,6 +73,15 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
   };
 
   const textSizes = getTextSizes();
+
+  const handleFavoriteClick = useCallback((productId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(productId);
+  }, [toggleFavorite]);
+
+  const handleProductClick = useCallback((product: any) => {
+    onProductClick(product);
+  }, [onProductClick]);
 
   return (
     <div className={`grid gap-2 md:gap-3 ${getGridClasses()}`} dir="rtl">
@@ -197,6 +207,6 @@ const ProductGrid = ({ products, onProductClick, getColorValue }: ProductGridPro
       })}
     </div>
   );
-};
+});
 
 export default ProductGrid;
