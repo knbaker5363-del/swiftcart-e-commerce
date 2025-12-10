@@ -135,36 +135,20 @@ const SpecialOffers = () => {
             ))}
           </div>
         ) : offers && offers.length > 0 ? (
-          <div 
-            className="grid gap-4"
-            style={{
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gridAutoRows: 'minmax(140px, auto)',
-            }}
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {offers.map((offer, index) => {
-              // Calculate grid span based on size
-              const getGridSpan = (size: string) => {
-                switch (size) {
-                  case '2x4': return { col: 2, row: 1 };
-                  case '4x4': return { col: 2, row: 2 };
-                  case 'circle':
-                  case '2x2':
-                  default: return { col: 1, row: 1 };
-                }
-              };
-              
-              const span = getGridSpan(offer.size);
               const isCircle = offer.size === 'circle';
+              const is4x4 = offer.size === '4x4';
+              const is2x4 = offer.size === '2x4';
               
               return (
               <Link
                 key={offer.id}
                 to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${isCircle ? 'rounded-full' : 'rounded-2xl'}`}
+                className={`group relative overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] aspect-square ${
+                  isCircle ? 'rounded-full' : 'rounded-2xl'
+                } ${is4x4 || is2x4 ? 'col-span-2' : 'col-span-1'} ${is4x4 ? 'row-span-2' : 'row-span-1'}`}
                 style={{
-                  gridColumn: `span ${span.col}`,
-                  gridRow: `span ${span.row}`,
                   background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                   animationDelay: `${index * 100}ms`,
                 }}
