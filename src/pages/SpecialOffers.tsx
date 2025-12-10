@@ -55,12 +55,12 @@ const SpecialOffers = () => {
     }
   });
 
-  // Grid configuration - matches admin editor exactly
-  const GRID_COLS = 4;
+  // Grid configuration
+  const GRID_COLS_DESKTOP = 4;
+  const GRID_COLS_MOBILE = 2; // 2 columns for larger cards on mobile
   const CELL_SIZE_DESKTOP = 140;
-  const CELL_SIZE_MOBILE = 82; // Increased for better visibility
   const GAP_DESKTOP = 16;
-  const GAP_MOBILE = 6; // Reduced gap to fit screen
+  const GAP_MOBILE = 8;
 
   // Convert size to width/height
   const getSizeFromType = (size: string): { width: number; height: number; isCircle: boolean } => {
@@ -77,18 +77,17 @@ const SpecialOffers = () => {
     }
   };
 
-  // Calculate grid positions from offers - auto-arrange to prevent overlap
-  const getPositionedOffers = () => {
+  // Calculate grid positions for desktop (4 columns)
+  const getPositionedOffersDesktop = () => {
     if (!offers || offers.length === 0) return [];
     
-    // Create occupied grid
     const occupied: boolean[][] = [];
     const result: any[] = [];
     
     const isOccupied = (col: number, row: number, width: number, height: number) => {
       for (let r = row; r < row + height; r++) {
         for (let c = col; c < col + width; c++) {
-          if (c >= GRID_COLS) return true;
+          if (c >= GRID_COLS_DESKTOP) return true;
           if (occupied[r]?.[c]) return true;
         }
       }
@@ -106,7 +105,7 @@ const SpecialOffers = () => {
     
     const findNextFreePosition = (width: number, height: number): { col: number; row: number } => {
       for (let row = 0; row < 100; row++) {
-        for (let col = 0; col <= GRID_COLS - width; col++) {
+        for (let col = 0; col <= GRID_COLS_DESKTOP - width; col++) {
           if (!isOccupied(col, row, width, height)) {
             return { col, row };
           }
@@ -118,11 +117,9 @@ const SpecialOffers = () => {
     for (const offer of offers) {
       const { width, height, isCircle } = getSizeFromType(offer.size);
       
-      // Try saved position first
       let col = offer.position_x ?? -1;
       let row = offer.position_y ?? -1;
       
-      // If no saved position or it causes overlap, find next free position
       if (col < 0 || row < 0 || isOccupied(col, row, width, height)) {
         const freePos = findNextFreePosition(width, height);
         col = freePos.col;
@@ -144,8 +141,27 @@ const SpecialOffers = () => {
     return result;
   };
 
-  const positionedOffers = getPositionedOffers();
-  const maxRow = positionedOffers.length > 0 ? Math.max(...positionedOffers.map(o => o.row + o.height)) : 2;
+  // Calculate grid positions for mobile (2 columns, all items same size)
+  const getPositionedOffersMobile = () => {
+    if (!offers || offers.length === 0) return [];
+    
+    return offers.map((offer, index) => {
+      const { isCircle } = getSizeFromType(offer.size);
+      return {
+        ...offer,
+        col: index % GRID_COLS_MOBILE,
+        row: Math.floor(index / GRID_COLS_MOBILE),
+        width: 1,
+        height: 1,
+        isCircle,
+      };
+    });
+  };
+
+  const positionedOffersDesktop = getPositionedOffersDesktop();
+  const positionedOffersMobile = getPositionedOffersMobile();
+  const maxRowDesktop = positionedOffersDesktop.length > 0 ? Math.max(...positionedOffersDesktop.map(o => o.row + o.height)) : 2;
+  const maxRowMobile = positionedOffersMobile.length > 0 ? Math.max(...positionedOffersMobile.map(o => o.row + o.height)) : 2;
 
   const getOfferBadge = (offer: SpecialOffer) => {
     if (!showBadges) return null;
@@ -194,10 +210,10 @@ const SpecialOffers = () => {
         </div>
       </section>
 
-      {/* Offers Grid - Exact Match to Admin Editor */}
+      {/* Offers Grid */}
       <section className="py-6 md:py-8 container px-3 md:px-4">
         {isLoading ? (
-          <div className="grid grid-cols-4 gap-3 md:gap-4 mx-auto" style={{ maxWidth: `${GRID_COLS * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px` }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mx-auto" style={{ maxWidth: `${GRID_COLS_DESKTOP * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px` }}>
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-muted animate-pulse rounded-xl md:rounded-2xl aspect-square" />
             ))}
@@ -208,11 +224,11 @@ const SpecialOffers = () => {
             <div 
               className="hidden md:block relative mx-auto"
               style={{
-                width: `${GRID_COLS * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px`,
-                height: `${maxRow * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px`,
+                width: `${GRID_COLS_DESKTOP * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px`,
+                height: `${maxRowDesktop * (CELL_SIZE_DESKTOP + GAP_DESKTOP)}px`,
               }}
             >
-              {positionedOffers.map((offer) => (
+              {positionedOffersDesktop.map((offer) => (
                 <Link
                   key={offer.id}
                   to={`/special-offer/${offer.id}`}
@@ -260,60 +276,47 @@ const SpecialOffers = () => {
               ))}
             </div>
 
-            {/* Mobile Grid - Full width responsive */}
-            <div 
-              className="md:hidden relative w-full"
-              style={{
-                aspectRatio: `${GRID_COLS} / ${maxRow}`,
-              }}
-            >
-              {positionedOffers.map((offer) => {
-                // Calculate cell size based on screen width (container has px-3 = 24px total padding)
-                const cellSize = `calc((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS})`;
-                const cellWidth = `calc(${offer.width} * (100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${(offer.width - 1) * GAP_MOBILE}px)`;
-                const cellHeight = `calc(${offer.height} * (100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${(offer.height - 1) * GAP_MOBILE}px)`;
-                const leftPos = `calc(${offer.col} * ((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${GAP_MOBILE}px))`;
-                const topPos = `calc(${offer.row} * ((100vw - 32px - ${(GRID_COLS - 1) * GAP_MOBILE}px) / ${GRID_COLS} + ${GAP_MOBILE}px))`;
-                
-                return (
-                  <Link
-                    key={offer.id}
-                    to={`/special-offer/${offer.id}`}
-                    className={`group absolute overflow-hidden transition-all duration-300 active:scale-95 ${
-                      offer.isCircle ? 'rounded-full' : 'rounded-xl'
-                    }`}
-                    style={{
-                      left: leftPos,
-                      top: topPos,
-                      width: cellWidth,
-                      height: cellHeight,
-                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
-                    }}
-                  >
-                    {getOfferBadge(offer)}
-                    {offer.image_url ? (
-                      <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                        <Package className="h-8 w-8 opacity-20" style={{ color: offer.text_color }} />
+            {/* Mobile Grid - 2 columns for larger cards */}
+            <div className="md:hidden grid grid-cols-2 gap-3">
+              {positionedOffersMobile.map((offer) => (
+                <Link
+                  key={offer.id}
+                  to={`/special-offer/${offer.id}`}
+                  className={`group relative overflow-hidden transition-all duration-300 active:scale-95 aspect-square ${
+                    offer.isCircle ? 'rounded-full' : 'rounded-xl'
+                  }`}
+                  style={{
+                    background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
+                  }}
+                >
+                  {getOfferBadge(offer)}
+                  {offer.image_url ? (
+                    <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
+                      <Package className="h-12 w-12 opacity-20" style={{ color: offer.text_color }} />
+                    </div>
+                  )}
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${offer.isCircle ? 'rounded-full' : ''}`}>
+                    <h3 className="font-bold text-sm mb-1.5 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                    {offer.expires_at && (
+                      <div className="mb-2">
+                        <CountdownBadge expiresAt={offer.expires_at} />
                       </div>
                     )}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col items-center justify-end text-center p-2 pb-2.5 ${offer.isCircle ? 'rounded-full' : ''}`}>
-                      <h3 className="font-bold text-xs mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
-                      {offer.bundle_price ? (
-                        <div className="inline-flex items-center gap-0.5 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 rounded-full text-white font-bold text-[10px]">
-                          <Zap className="h-2.5 w-2.5" />
-                          {offer.required_quantity} بـ {offer.bundle_price}₪
-                        </div>
-                      ) : offer.price ? (
-                        <div className="inline-block bg-primary px-2 py-1 rounded-full font-bold text-[10px] text-primary-foreground">
-                          {offer.price}₪
-                        </div>
-                      ) : null}
-                    </div>
-                  </Link>
-                );
-              })}
+                    {offer.bundle_price ? (
+                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 rounded-full text-white font-bold text-xs">
+                        <Zap className="h-3 w-3" />
+                        {offer.required_quantity} بـ {offer.bundle_price}₪
+                      </div>
+                    ) : offer.price ? (
+                      <div className="inline-block bg-primary px-3 py-1.5 rounded-full font-bold text-xs text-primary-foreground">
+                        {offer.price}₪
+                      </div>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
             </div>
           </>
         ) : (
