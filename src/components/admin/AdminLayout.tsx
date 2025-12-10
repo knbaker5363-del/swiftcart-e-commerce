@@ -3,7 +3,7 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { NavLink } from '@/components/NavLink';
-import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, X, Tag, Gift, BarChart3, Layout, Settings2, Sparkles, Megaphone, Move } from 'lucide-react';
+import { LogOut, Package, FolderOpen, ShoppingBag, Settings, Award, Store, Menu, Tag, Gift, BarChart3, Layout, Settings2, Sparkles, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -55,7 +55,6 @@ const AdminLayout = () => {
       title: 'العروض والتسويق',
       items: [
         { to: '/admin/special-offers', icon: Sparkles, label: 'العروض الخاصة' },
-        { to: '/admin/special-offers-editor', icon: Move, label: 'تحرير مواقع العروض' },
         { to: '/admin/promo-codes', icon: Tag, label: 'أكواد الخصم' },
         { to: '/admin/gifts', icon: Gift, label: 'الهدايا والعروض' },
         { to: '/admin/announcement', icon: Megaphone, label: 'شريط الإعلانات' },
