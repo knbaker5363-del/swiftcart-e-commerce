@@ -47,43 +47,14 @@ const HomeSpecialOffers = () => {
   const displayAsCircles = offersShape === 'circles';
 
   return (
-    <div className="flex justify-center gap-4 sm:gap-5 py-4">
+    <div className="flex justify-center gap-5 sm:gap-6 py-5">
       {displayAsCircles ? (
         // 3 Circles Layout
         offers.slice(0, 3).map((offer) => (
           <Link
             key={offer.id}
             to={`/special-offer/${offer.id}`}
-            className="group relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex-shrink-0"
-          >
-            {offer.image_url ? (
-              <img
-                src={offer.image_url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div 
-                className="w-full h-full flex items-center justify-center"
-                style={{ background: offer.background_color || 'hsl(var(--primary))' }}
-              >
-                <Package className="h-8 w-8 sm:h-10 sm:w-10 text-white/50" />
-              </div>
-            )}
-            {/* Hover Glow */}
-            <div 
-              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ boxShadow: `0 0 25px ${offer.background_color || 'hsl(var(--primary))'}` }}
-            />
-          </Link>
-        ))
-      ) : (
-        // 2 Squares Layout
-        offers.slice(0, 2).map((offer) => (
-          <Link
-            key={offer.id}
-            to={`/special-offer/${offer.id}`}
-            className="group relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex-shrink-0"
+            className="group relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex-shrink-0"
           >
             {offer.image_url ? (
               <img
@@ -101,8 +72,37 @@ const HomeSpecialOffers = () => {
             )}
             {/* Hover Glow */}
             <div 
+              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ boxShadow: `0 0 30px ${offer.background_color || 'hsl(var(--primary))'}` }}
+            />
+          </Link>
+        ))
+      ) : (
+        // 2 Squares Layout
+        offers.slice(0, 2).map((offer) => (
+          <Link
+            key={offer.id}
+            to={`/special-offer/${offer.id}`}
+            className="group relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex-shrink-0"
+          >
+            {offer.image_url ? (
+              <img
+                src={offer.image_url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div 
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: offer.background_color || 'hsl(var(--primary))' }}
+              >
+                <Package className="h-12 w-12 sm:h-14 sm:w-14 text-white/50" />
+              </div>
+            )}
+            {/* Hover Glow */}
+            <div 
               className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ boxShadow: `0 0 25px ${offer.background_color || 'hsl(var(--primary))'}` }}
+              style={{ boxShadow: `0 0 30px ${offer.background_color || 'hsl(var(--primary))'}` }}
             />
           </Link>
         ))
