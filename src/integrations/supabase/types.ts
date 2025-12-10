@@ -559,6 +559,10 @@ export type Database = {
           theme: string
           updated_at: string
           visual_effects: Json | null
+          welcome_popup_enabled: boolean | null
+          welcome_popup_image_url: string | null
+          welcome_popup_link: string | null
+          welcome_popup_show_once: boolean | null
           whatsapp_country_code: string | null
           whatsapp_number: string | null
         }
@@ -652,6 +656,10 @@ export type Database = {
           theme?: string
           updated_at?: string
           visual_effects?: Json | null
+          welcome_popup_enabled?: boolean | null
+          welcome_popup_image_url?: string | null
+          welcome_popup_link?: string | null
+          welcome_popup_show_once?: boolean | null
           whatsapp_country_code?: string | null
           whatsapp_number?: string | null
         }
@@ -745,6 +753,10 @@ export type Database = {
           theme?: string
           updated_at?: string
           visual_effects?: Json | null
+          welcome_popup_enabled?: boolean | null
+          welcome_popup_image_url?: string | null
+          welcome_popup_link?: string | null
+          welcome_popup_show_once?: boolean | null
           whatsapp_country_code?: string | null
           whatsapp_number?: string | null
         }
@@ -799,6 +811,8 @@ export type Database = {
           is_active: boolean
           name: string
           offer_type: string | null
+          position_x: number | null
+          position_y: number | null
           price: number | null
           required_quantity: number | null
           size: string
@@ -818,6 +832,8 @@ export type Database = {
           is_active?: boolean
           name: string
           offer_type?: string | null
+          position_x?: number | null
+          position_y?: number | null
           price?: number | null
           required_quantity?: number | null
           size?: string
@@ -837,6 +853,8 @@ export type Database = {
           is_active?: boolean
           name?: string
           offer_type?: string | null
+          position_x?: number | null
+          position_y?: number | null
           price?: number | null
           required_quantity?: number | null
           size?: string

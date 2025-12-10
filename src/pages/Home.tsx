@@ -18,6 +18,7 @@ import HeroSection from '@/components/HeroSection';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import { ClassicLayout, CategoryRowsLayout } from '@/components/layouts';
 import HomeSpecialOffers from '@/components/HomeSpecialOffers';
+import WelcomePopup from '@/components/WelcomePopup';
 
 const Home = () => {
   useDocumentTitle();
@@ -111,6 +112,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background relative" dir="rtl">
+      <WelcomePopup />
       <SEOManager />
       <BackgroundPattern />
       <AnnouncementBar />
