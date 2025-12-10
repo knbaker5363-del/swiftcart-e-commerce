@@ -57,25 +57,35 @@ const SpecialOffers = () => {
       case '4x4':
         return 'col-span-2 row-span-2 aspect-square';
       case 'circle':
-        return 'col-span-1 row-span-1 aspect-square';
+        return 'col-span-1 row-span-1 aspect-square rounded-full';
       case '2x2':
       default:
         return 'col-span-1 row-span-1 aspect-square';
     }
   };
 
+  const getMobileSizeClasses = (size: string) => {
+    switch (size) {
+      case '2x4':
+      case '4x4':
+        return 'col-span-2 aspect-[16/10]';
+      default:
+        return 'col-span-1 aspect-[4/5]';
+    }
+  };
+
   const getOfferBadge = (offer: SpecialOffer) => {
     if (offer.offer_type === 'bundle' && offer.required_quantity) {
       return (
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-bold shadow-lg animate-pulse">
-          <Flame className="h-4 w-4" />
+        <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10 flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs md:text-sm font-bold shadow-lg animate-pulse">
+          <Flame className="h-3 w-3 md:h-4 md:w-4" />
           اختر {offer.required_quantity}
         </div>
       );
     }
     return (
-      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-bold shadow-lg">
-        <Sparkles className="h-4 w-4" />
+      <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10 flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs md:text-sm font-bold shadow-lg">
+        <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
         عرض خاص
       </div>
     );
@@ -110,21 +120,21 @@ const SpecialOffers = () => {
       </section>
 
       {/* Offers Grid */}
-      <section className="py-8 container">
+      <section className="py-6 md:py-8 container px-3 md:px-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-muted animate-pulse rounded-2xl aspect-square" />
+              <div key={i} className="bg-muted animate-pulse rounded-xl md:rounded-2xl aspect-[4/5] md:aspect-square" />
             ))}
           </div>
         ) : offers && offers.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-auto">
             {offers.map((offer, index) => (
               <Link
                 key={offer.id}
                 to={`/special-offer/${offer.id}`}
-                className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${getSizeClasses(offer.size)} ${offer.size === 'circle' ? 'rounded-full' : ''}`}
-                style={{ 
+                className={`group relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] ${getMobileSizeClasses(offer.size)} md:${getSizeClasses(offer.size)}`}
+                style={{
                   background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                   animationDelay: `${index * 100}ms`,
                 }}
@@ -145,40 +155,40 @@ const SpecialOffers = () => {
                   <img
                     src={offer.image_url}
                     alt={offer.name}
-                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${offer.size === 'circle' ? 'rounded-full' : ''}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
                   <div 
                     className="w-full h-full flex items-center justify-center"
                     style={{ backgroundColor: offer.background_color }}
                   >
-                    <Package className="h-20 w-20 opacity-30 animate-pulse" style={{ color: offer.text_color }} />
+                    <Package className="h-12 w-12 md:h-20 md:w-20 opacity-30 animate-pulse" style={{ color: offer.text_color }} />
                   </div>
                 )}
 
                 {/* Gradient Overlay - Centered Content */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:via-black/60 transition-all duration-300 flex flex-col items-center justify-center text-center p-4 ${offer.size === 'circle' ? 'rounded-full' : ''}`}>
-                  <h3 className="font-bold text-xl md:text-2xl mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white animate-fade-in">{offer.name}</h3>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:via-black/50 transition-all duration-300 flex flex-col items-center justify-end text-center p-3 md:p-4 pb-4 md:pb-5">
+                  <h3 className="font-bold text-base md:text-xl lg:text-2xl mb-1 md:mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white leading-tight line-clamp-2">{offer.name}</h3>
                   
                   {offer.condition_text && (
-                    <p className="text-sm text-white/90 mb-3 line-clamp-2 drop-shadow-lg max-w-[90%]">{offer.condition_text}</p>
+                    <p className="text-xs md:text-sm text-white/90 mb-2 md:mb-3 line-clamp-1 md:line-clamp-2 drop-shadow-lg">{offer.condition_text}</p>
                   )}
                   
                   {/* Countdown Timer */}
                   {offer.expires_at && (
-                    <div className="mb-3">
+                    <div className="mb-2 md:mb-3 scale-90 md:scale-100">
                       <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
                     </div>
                   )}
                   
                   {/* Price Display with Pulse */}
                   {offer.bundle_price ? (
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-2 rounded-full text-white font-bold shadow-xl text-lg group-hover:animate-pulse group-hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]">
-                      <Zap className="h-5 w-5" />
+                    <div className="inline-flex items-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 md:px-5 md:py-2 rounded-full text-white font-bold shadow-xl text-sm md:text-lg group-hover:animate-pulse group-hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]">
+                      <Zap className="h-3.5 w-3.5 md:h-5 md:w-5" />
                       {offer.required_quantity} بـ {offer.bundle_price}₪
                     </div>
                   ) : offer.price ? (
-                    <div className="inline-block bg-primary px-5 py-2 rounded-full font-bold shadow-xl text-lg text-white group-hover:animate-pulse">
+                    <div className="inline-block bg-primary px-3 py-1.5 md:px-5 md:py-2 rounded-full font-bold shadow-xl text-sm md:text-lg text-white group-hover:animate-pulse">
                       {offer.price}₪
                     </div>
                   ) : null}
