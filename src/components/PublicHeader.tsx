@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, User, LogOut, Menu, HelpCircle } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { useCart } from '@/contexts/CartContext';
@@ -8,8 +8,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import CategoriesSidebar from './CategoriesSidebar';
 
 interface PublicHeaderProps {
@@ -37,8 +35,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [secretDialogOpen, setSecretDialogOpen] = useState(false);
-  const [secretCode, setSecretCode] = useState('');
   
   // Admin button visibility is now based on actual auth state
   const showAdminButton = user !== null;
@@ -46,14 +42,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
-  };
-
-  const handleSecretCodeSubmit = () => {
-    if (secretCode === 'admin123123') {
-      setSecretDialogOpen(false);
-      setSecretCode('');
-      navigate('/admin123');
-    }
   };
   
   const headerLogoPosition = (settings as any)?.header_logo_position || 'right';
@@ -132,59 +120,8 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           <HeaderLogo />
         </div>
         
-        {/* Right side - Cart, Favorites, Help, and Admin button */}
+        {/* Right side - Cart, Favorites, and Admin button */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Help button with hidden admin access */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <HelpCircle className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background border min-w-[180px]">
-              {(settings as any)?.whatsapp_number && (
-                <DropdownMenuItem 
-                  onClick={() => {
-                    const phoneNumber = (settings as any).whatsapp_number?.replace(/^0/, '');
-                    const countryCode = (settings as any)?.whatsapp_country_code || '970';
-                    window.open(`https://wa.me/${countryCode}${phoneNumber}`, '_blank');
-                  }}
-                >
-                  <span className="ml-2">📱</span>
-                  تواصل عبر واتساب
-                </DropdownMenuItem>
-              )}
-              
-              {(settings as any)?.social_instagram && (
-                <DropdownMenuItem 
-                  onClick={() => window.open(`https://instagram.com/${(settings as any).social_instagram}`, '_blank')}
-                >
-                  <span className="ml-2">📸</span>
-                  تابعنا على انستجرام
-                </DropdownMenuItem>
-              )}
-              
-              {(settings as any)?.social_facebook && (
-                <DropdownMenuItem 
-                  onClick={() => window.open(`https://facebook.com/${(settings as any).social_facebook}`, '_blank')}
-                >
-                  <span className="ml-2">📘</span>
-                  تابعنا على فيسبوك
-                </DropdownMenuItem>
-              )}
-              
-              <DropdownMenuSeparator />
-              
-              {/* Hidden admin access option */}
-              <DropdownMenuItem 
-                onClick={() => setSecretDialogOpen(true)}
-                className="text-muted-foreground/60 hover:text-muted-foreground"
-              >
-                <span className="ml-2">ℹ️</span>
-                معلومات إضافية
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           
           {/* Admin/User button - Only show when user is logged in */}
           {showAdminButton && (
@@ -231,26 +168,5 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         </div>
       </div>
       
-      {/* Secret code dialog */}
-      <Dialog open={secretDialogOpen} onOpenChange={setSecretDialogOpen}>
-        <DialogContent className="sm:max-w-[300px]">
-          <DialogHeader>
-            <DialogTitle className="text-center">معلومات إضافية</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            <Input
-              type="password"
-              placeholder="أدخل الكود"
-              value={secretCode}
-              onChange={(e) => setSecretCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSecretCodeSubmit()}
-              className="text-center"
-            />
-            <Button onClick={handleSecretCodeSubmit} className="w-full">
-              تأكيد
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </header>;
 };

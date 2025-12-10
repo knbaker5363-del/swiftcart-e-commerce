@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HardDrive, Database, FileImage, RefreshCw, Send, Table } from 'lucide-react';
+import { HardDrive, Database, FileImage, RefreshCw, Send, Lock, AlertTriangle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -38,23 +40,68 @@ const AdminAdvancedSettings = () => {
     productViews: number;
   } | null>(null);
   const [loadingDb, setLoadingDb] = useState(false);
+  
+  // Setup lock
+  const [setupLocked, setSetupLocked] = useState(false);
+  const [savingSetupLock, setSavingSetupLock] = useState(false);
 
-  // Load sensitive settings on mount
+  // Load sensitive settings and setup lock on mount
   useEffect(() => {
-    const loadSensitiveSettings = async () => {
-      const { data, error } = await supabase
+    const loadSettings = async () => {
+      // Load sensitive settings
+      const { data: sensitiveData } = await supabase
         .from('sensitive_settings')
         .select('*')
         .maybeSingle();
       
-      if (data && !error) {
-        setTelegramBotToken(data.telegram_bot_token || '');
-        setTelegramChatId(data.telegram_chat_id || '');
-        setTelegramBotPassword(data.telegram_bot_password || '');
+      if (sensitiveData) {
+        setTelegramBotToken(sensitiveData.telegram_bot_token || '');
+        setTelegramChatId(sensitiveData.telegram_chat_id || '');
+        setTelegramBotPassword(sensitiveData.telegram_bot_password || '');
+      }
+      
+      // Load setup lock status
+      const { data: settingsData } = await supabase
+        .from('settings')
+        .select('setup_locked')
+        .maybeSingle();
+      
+      if (settingsData) {
+        setSetupLocked((settingsData as any).setup_locked || false);
       }
     };
-    loadSensitiveSettings();
+    loadSettings();
   }, []);
+
+  const handleToggleSetupLock = async (locked: boolean) => {
+    setSavingSetupLock(true);
+    try {
+      const { data: existing } = await supabase
+        .from('settings')
+        .select('id')
+        .maybeSingle();
+      
+      if (existing) {
+        const { error } = await supabase
+          .from('settings')
+          .update({ setup_locked: locked } as any)
+          .eq('id', existing.id);
+        
+        if (error) throw error;
+        
+        setSetupLocked(locked);
+        toast({ 
+          title: locked ? 'تم قفل صفحة الإعداد' : 'تم فتح صفحة الإعداد',
+          description: locked ? 'لن يستطيع أحد الوصول لصفحة /setup' : 'يمكن الآن الوصول لصفحة /setup'
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling setup lock:', error);
+      toast({ title: 'خطأ في تحديث الإعدادات', variant: 'destructive' });
+    } finally {
+      setSavingSetupLock(false);
+    }
+  };
 
   const handleSetupWebhook = async () => {
     if (!telegramBotToken) {
@@ -220,6 +267,41 @@ const AdminAdvancedSettings = () => {
       </div>
 
       <div className="grid gap-6 max-w-4xl">
+        {/* قفل صفحة الإعداد */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              أمان صفحة الإعداد
+            </CardTitle>
+            <CardDescription>قفل صفحة الإعداد لمنع أي شخص من إعادة تكوين المتجر</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+              <div>
+                <p className="font-medium">قفل صفحة الإعداد</p>
+                <p className="text-sm text-muted-foreground">
+                  بعد التفعيل، لن يستطيع أي شخص الوصول لصفحة /setup
+                </p>
+              </div>
+              <Switch 
+                checked={setupLocked}
+                onCheckedChange={handleToggleSetupLock}
+                disabled={savingSetupLock}
+              />
+            </div>
+            
+            {setupLocked && (
+              <Alert className="border-orange-500/50 bg-orange-500/10">
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <AlertDescription className="text-orange-700 dark:text-orange-300">
+                  صفحة الإعداد مقفلة. يمكنك إلغاء القفل من هنا فقط.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
         {/* إشعارات تيليجرام */}
         <Card>
           <CardHeader>
