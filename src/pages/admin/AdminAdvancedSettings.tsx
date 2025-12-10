@@ -39,13 +39,22 @@ const AdminAdvancedSettings = () => {
   } | null>(null);
   const [loadingDb, setLoadingDb] = useState(false);
 
+  // Load sensitive settings on mount
   useEffect(() => {
-    if (settings) {
-      setTelegramBotToken((settings as any).telegram_bot_token || '');
-      setTelegramChatId((settings as any).telegram_chat_id || '');
-      setTelegramBotPassword((settings as any).telegram_bot_password || '');
-    }
-  }, [settings]);
+    const loadSensitiveSettings = async () => {
+      const { data, error } = await supabase
+        .from('sensitive_settings')
+        .select('*')
+        .maybeSingle();
+      
+      if (data && !error) {
+        setTelegramBotToken(data.telegram_bot_token || '');
+        setTelegramChatId(data.telegram_chat_id || '');
+        setTelegramBotPassword(data.telegram_bot_password || '');
+      }
+    };
+    loadSensitiveSettings();
+  }, []);
 
   const handleSetupWebhook = async () => {
     if (!telegramBotToken) {
@@ -72,14 +81,33 @@ const AdminAdvancedSettings = () => {
   const handleSaveTelegram = async () => {
     setSavingTelegram(true);
     try {
-      const { error } = await supabase.from('settings').update({
-        telegram_bot_token: telegramBotToken || null,
-        telegram_chat_id: telegramChatId || null,
-        telegram_bot_password: telegramBotPassword || null,
-        updated_at: new Date().toISOString()
-      }).eq('id', settings?.id);
+      // Check if sensitive_settings record exists
+      const { data: existing } = await supabase
+        .from('sensitive_settings')
+        .select('id')
+        .maybeSingle();
       
-      if (error) throw error;
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase.from('sensitive_settings').update({
+          telegram_bot_token: telegramBotToken || null,
+          telegram_chat_id: telegramChatId || null,
+          telegram_bot_password: telegramBotPassword || null,
+          updated_at: new Date().toISOString()
+        }).eq('id', existing.id);
+        
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase.from('sensitive_settings').insert({
+          telegram_bot_token: telegramBotToken || null,
+          telegram_chat_id: telegramChatId || null,
+          telegram_bot_password: telegramBotPassword || null
+        });
+        
+        if (error) throw error;
+      }
+      
       toast({ title: 'تم حفظ إعدادات تيليجرام بنجاح' });
     } catch (error) {
       console.error('Error saving telegram settings:', error);

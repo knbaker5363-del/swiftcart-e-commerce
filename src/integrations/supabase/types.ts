@@ -519,6 +519,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sensitive_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          telegram_bot_password: string | null
+          telegram_bot_token: string | null
+          telegram_chat_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          telegram_bot_password?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          telegram_bot_password?: string | null
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           accent_color: string | null
@@ -604,9 +631,6 @@ export type Database = {
           store_name_black: boolean | null
           store_name_image_url: string | null
           store_phone: string | null
-          telegram_bot_password: string | null
-          telegram_bot_token: string | null
-          telegram_chat_id: string | null
           text_style: string | null
           theme: string
           updated_at: string
@@ -702,9 +726,6 @@ export type Database = {
           store_name_black?: boolean | null
           store_name_image_url?: string | null
           store_phone?: string | null
-          telegram_bot_password?: string | null
-          telegram_bot_token?: string | null
-          telegram_chat_id?: string | null
           text_style?: string | null
           theme?: string
           updated_at?: string
@@ -800,9 +821,6 @@ export type Database = {
           store_name_black?: boolean | null
           store_name_image_url?: string | null
           store_phone?: string | null
-          telegram_bot_password?: string | null
-          telegram_bot_token?: string | null
-          telegram_chat_id?: string | null
           text_style?: string | null
           theme?: string
           updated_at?: string

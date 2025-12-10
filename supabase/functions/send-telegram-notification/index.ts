@@ -34,27 +34,45 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Create Supabase client to fetch settings
+    // Create Supabase client with service role to access sensitive_settings
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch Telegram credentials from settings
-    const { data: settings, error: settingsError } = await supabase
-      .from("settings")
+    // Parse order first to validate the request
+    const order: OrderNotification = await req.json();
+    
+    // Verify the order exists in the database (prevents fake notifications)
+    const { data: orderExists, error: orderError } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("id", order.orderId)
+      .maybeSingle();
+    
+    if (orderError || !orderExists) {
+      console.error("Order verification failed:", orderError || "Order not found");
+      return new Response(
+        JSON.stringify({ error: "Invalid order" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Fetch Telegram credentials from sensitive_settings table
+    const { data: sensitiveSettings, error: settingsError } = await supabase
+      .from("sensitive_settings")
       .select("telegram_bot_token, telegram_chat_id")
       .maybeSingle();
 
     if (settingsError) {
-      console.error("Error fetching settings:", settingsError);
+      console.error("Error fetching sensitive settings:", settingsError);
       return new Response(
         JSON.stringify({ error: "Failed to fetch settings" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const TELEGRAM_BOT_TOKEN = settings?.telegram_bot_token;
-    const TELEGRAM_CHAT_ID = settings?.telegram_chat_id;
+    const TELEGRAM_BOT_TOKEN = sensitiveSettings?.telegram_bot_token;
+    const TELEGRAM_CHAT_ID = sensitiveSettings?.telegram_chat_id;
 
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       console.log("Telegram not configured, skipping notification");
@@ -64,7 +82,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const order: OrderNotification = await req.json();
     console.log("Order received:", order.orderId);
 
     // Format the message for Telegram
