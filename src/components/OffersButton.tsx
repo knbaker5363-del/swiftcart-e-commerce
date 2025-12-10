@@ -12,13 +12,11 @@ const iconMap: Record<string, any> = {
   Crown,
 };
 
-const DEFAULT_ICON = 'Flame';
-
 const OffersButton = () => {
   const { settings } = useSettings();
   const showButton = (settings as any)?.show_offers_button !== false;
   const buttonName = (settings as any)?.offers_button_name || 'العروض الخاصة بنا';
-  const iconName = (settings as any)?.offers_button_icon || DEFAULT_ICON;
+  const iconName = (settings as any)?.offers_button_icon || 'Sparkles';
   const buttonLink = '/special-offers';
 
   if (!showButton) return null;
@@ -37,7 +35,7 @@ const OffersButton = () => {
             <div className="bg-white/25 p-1.5 md:p-2 rounded-lg border border-white/40 shadow-md">
               <IconComponent className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <h3 className="text-xs md:text-sm font-bold">{buttonName}</h3>
+            <h3 className="text-sm md:text-base font-bold">{buttonName}</h3>
           </div>
           <div className="bg-white/25 p-1 md:p-1.5 rounded-full border border-white/40 group-hover:bg-white/40 transition-all group-hover:translate-x-1">
             <ArrowLeft className="h-3 w-3 md:h-4 md:w-4" />
