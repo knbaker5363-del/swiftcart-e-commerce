@@ -609,6 +609,7 @@ export type Database = {
           seo_description: string | null
           seo_keywords: string | null
           seo_title: string | null
+          setup_locked: boolean | null
           show_brands_button: boolean | null
           show_brands_slider: boolean | null
           show_deals_button: boolean | null
@@ -704,6 +705,7 @@ export type Database = {
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
+          setup_locked?: boolean | null
           show_brands_button?: boolean | null
           show_brands_slider?: boolean | null
           show_deals_button?: boolean | null
@@ -799,6 +801,7 @@ export type Database = {
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
+          setup_locked?: boolean | null
           show_brands_button?: boolean | null
           show_brands_slider?: boolean | null
           show_deals_button?: boolean | null
