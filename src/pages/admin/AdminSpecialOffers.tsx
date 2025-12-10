@@ -22,6 +22,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { CSS } from '@dnd-kit/utilities';
 import { CountdownBadge } from '@/components/ui/countdown-timer';
 import { cn } from '@/lib/utils';
+import OffersGridEditor from '@/components/admin/OffersGridEditor';
 
 interface SpecialOffer {
   id: string;
@@ -39,6 +40,8 @@ interface SpecialOffer {
   background_color: string;
   text_color: string;
   expires_at: string | null;
+  position_x: number | null;
+  position_y: number | null;
 }
 
 interface Product {
@@ -771,6 +774,14 @@ const AdminSpecialOffers = () => {
             <p className="text-sm text-muted-foreground/70">أضف عروضاً جديدة لجذب العملاء</p>
           </div>
         </Card>
+      )}
+
+      {/* Visual Grid Editor */}
+      {offers && offers.length > 0 && (
+        <OffersGridEditor 
+          offers={offers} 
+          onRefresh={() => queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] })}
+        />
       )}
 
       {/* Products Dialog */}
