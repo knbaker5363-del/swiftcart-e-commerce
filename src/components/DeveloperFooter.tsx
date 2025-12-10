@@ -5,6 +5,7 @@ import { HelpCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 const DeveloperFooter = () => {
   const { settings } = useSettings();
@@ -20,56 +21,61 @@ const DeveloperFooter = () => {
     }
   };
 
-  const handleWhatsAppClick = () => {
-    const phoneNumber = (settings as any)?.whatsapp_number?.replace(/^0/, '');
-    const countryCode = (settings as any)?.whatsapp_country_code || '970';
-    if (phoneNumber) {
-      window.open(`https://wa.me/${countryCode}${phoneNumber}`, '_blank');
-    }
-  };
-
   return (
     <footer className="bg-card border-t mt-8">
-      {/* قسم المساعدة */}
-      <div className="container py-6 border-b">
-        <div className="flex flex-col items-center gap-4">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <HelpCircle className="h-5 w-5" />
-            هل تحتاج مساعدة؟
-          </h3>
-          <div className="flex flex-wrap justify-center gap-3">
-            {(settings as any)?.whatsapp_number && (
-              <Button variant="outline" size="sm" onClick={handleWhatsAppClick}>
-                📱 تواصل عبر واتساب
+      {/* زر المساعدة الصغير */}
+      <div className="container py-4 border-b">
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <HelpCircle className="h-4 w-4" />
+                مساعدة
               </Button>
-            )}
-            {(settings as any)?.social_instagram && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open(`https://instagram.com/${(settings as any).social_instagram}`, '_blank')}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="bg-background border min-w-[180px]">
+              {(settings as any)?.whatsapp_number && (
+                <DropdownMenuItem 
+                  onClick={() => {
+                    const phoneNumber = (settings as any).whatsapp_number?.replace(/^0/, '');
+                    const countryCode = (settings as any)?.whatsapp_country_code || '970';
+                    window.open(`https://wa.me/${countryCode}${phoneNumber}`, '_blank');
+                  }}
+                >
+                  <span className="ml-2">📱</span>
+                  تواصل عبر واتساب
+                </DropdownMenuItem>
+              )}
+              
+              {(settings as any)?.social_instagram && (
+                <DropdownMenuItem 
+                  onClick={() => window.open(`https://instagram.com/${(settings as any).social_instagram}`, '_blank')}
+                >
+                  <span className="ml-2">📸</span>
+                  انستجرام
+                </DropdownMenuItem>
+              )}
+              
+              {(settings as any)?.social_facebook && (
+                <DropdownMenuItem 
+                  onClick={() => window.open(`https://facebook.com/${(settings as any).social_facebook}`, '_blank')}
+                >
+                  <span className="ml-2">📘</span>
+                  فيسبوك
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem 
+                onClick={() => setSecretDialogOpen(true)}
+                className="text-muted-foreground/60 hover:text-muted-foreground"
               >
-                📸 انستجرام
-              </Button>
-            )}
-            {(settings as any)?.social_facebook && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open(`https://facebook.com/${(settings as any).social_facebook}`, '_blank')}
-              >
-                📘 فيسبوك
-              </Button>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setSecretDialogOpen(true)}
-              className="text-muted-foreground/60 hover:text-muted-foreground"
-            >
-              ℹ️ معلومات إضافية
-            </Button>
-          </div>
+                <span className="ml-2">ℹ️</span>
+                معلومات إضافية
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
