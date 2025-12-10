@@ -30,22 +30,22 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch settings
-    const { data: settings, error: settingsError } = await supabase
-      .from("settings")
+    // Fetch sensitive settings from the protected table
+    const { data: sensitiveSettings, error: settingsError } = await supabase
+      .from("sensitive_settings")
       .select("telegram_bot_token, telegram_chat_id, telegram_bot_password")
       .maybeSingle();
 
-    if (settingsError || !settings) {
-      console.error("Error fetching settings:", settingsError);
+    if (settingsError || !sensitiveSettings) {
+      console.error("Error fetching sensitive settings:", settingsError);
       return new Response(JSON.stringify({ ok: true }), {
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const BOT_TOKEN = settings.telegram_bot_token;
-    const STORED_PASSWORD = settings.telegram_bot_password;
-    const AUTHORIZED_CHAT_ID = settings.telegram_chat_id;
+    const BOT_TOKEN = sensitiveSettings.telegram_bot_token;
+    const STORED_PASSWORD = sensitiveSettings.telegram_bot_password;
+    const AUTHORIZED_CHAT_ID = sensitiveSettings.telegram_chat_id;
 
     if (!BOT_TOKEN) {
       console.log("Bot token not configured");
@@ -97,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!STORED_PASSWORD) {
       // No password set, auto-authorize and save chat_id
       const { error: updateError } = await supabase
-        .from("settings")
+        .from("sensitive_settings")
         .update({ telegram_chat_id: String(chatId) })
         .not("id", "is", null);
 
@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (messageText === STORED_PASSWORD) {
       // Correct password - save chat_id
       const { error: updateError } = await supabase
-        .from("settings")
+        .from("sensitive_settings")
         .update({ telegram_chat_id: String(chatId) })
         .not("id", "is", null);
 
