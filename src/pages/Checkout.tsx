@@ -1186,34 +1186,60 @@ const Checkout = () => {
                       {/* Special Offers Section */}
                       {specialOffers.length > 0 && (
                         <div className="space-y-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="h-4 w-4 text-amber-500" />
+                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400">عروض خاصة</span>
+                          </div>
                           {specialOffers.map((item, index) => (
                             <div 
                               key={item.id} 
-                              className="rounded-xl p-3 animate-in fade-in slide-in-from-right-2"
+                              className="rounded-xl p-3 animate-in fade-in slide-in-from-right-2 relative overflow-hidden"
                               style={{ 
                                 backgroundColor: item.special_offer?.background_color || '#7c3aed',
                                 color: item.special_offer?.text_color || '#ffffff',
                                 animationDelay: `${index * 50}ms` 
                               }}
                             >
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
-                                  <Sparkles className="h-5 w-5" />
+                              {/* Shine effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                              
+                              <div className="flex items-start gap-3 relative z-10">
+                                <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+                                  <Sparkles className="h-6 w-6" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-bold text-sm">🎯 {item.name}</p>
+                                  <p className="font-bold text-sm flex items-center gap-1">
+                                    🎯 {item.name}
+                                  </p>
                                   {item.special_offer?.products && (
-                                    <p className="text-xs opacity-80 mt-0.5">
-                                      {item.special_offer.products.map(p => p.name).join(' • ')}
-                                    </p>
+                                    <div className="mt-1 space-y-0.5">
+                                      {item.special_offer.products.map((p: any, i: number) => (
+                                        <p key={i} className="text-xs opacity-90 flex items-center gap-1">
+                                          <span className="w-1 h-1 rounded-full bg-current opacity-70" />
+                                          {p.name}
+                                        </p>
+                                      ))}
+                                    </div>
                                   )}
                                 </div>
-                                <p className="font-bold text-sm whitespace-nowrap">
-                                  {(item.price * item.quantity).toFixed(2)} ₪
-                                </p>
+                                <div className="text-left flex-shrink-0">
+                                  <p className="font-bold text-lg">
+                                    {(item.price * item.quantity).toFixed(0)}₪
+                                  </p>
+                                  <p className="text-xs opacity-70">×{item.quantity}</p>
+                                </div>
                               </div>
                             </div>
                           ))}
+                        </div>
+                      )}
+                      
+                      {/* Separator if both sections exist */}
+                      {specialOffers.length > 0 && regularItems.length > 0 && (
+                        <div className="flex items-center gap-2 py-2">
+                          <div className="flex-1 h-px bg-border" />
+                          <span className="text-xs text-muted-foreground">منتجات أخرى</span>
+                          <div className="flex-1 h-px bg-border" />
                         </div>
                       )}
                       
