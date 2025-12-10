@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, User, LogOut, Grid3X3, Menu } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Menu, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -123,8 +123,60 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           <HeaderLogo />
         </div>
         
-        {/* Right side - Cart, Favorites, and Admin button */}
+        {/* Right side - Cart, Favorites, Help, and Admin button */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Help button with hidden admin access */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-background border min-w-[180px]">
+              {(settings as any)?.whatsapp_number && (
+                <DropdownMenuItem 
+                  onClick={() => {
+                    const phoneNumber = (settings as any).whatsapp_number?.replace(/^0/, '');
+                    const countryCode = (settings as any)?.whatsapp_country_code || '970';
+                    window.open(`https://wa.me/${countryCode}${phoneNumber}`, '_blank');
+                  }}
+                >
+                  <span className="ml-2">📱</span>
+                  تواصل عبر واتساب
+                </DropdownMenuItem>
+              )}
+              
+              {(settings as any)?.social_instagram && (
+                <DropdownMenuItem 
+                  onClick={() => window.open(`https://instagram.com/${(settings as any).social_instagram}`, '_blank')}
+                >
+                  <span className="ml-2">📸</span>
+                  تابعنا على انستجرام
+                </DropdownMenuItem>
+              )}
+              
+              {(settings as any)?.social_facebook && (
+                <DropdownMenuItem 
+                  onClick={() => window.open(`https://facebook.com/${(settings as any).social_facebook}`, '_blank')}
+                >
+                  <span className="ml-2">📘</span>
+                  تابعنا على فيسبوك
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              {/* Hidden admin access option */}
+              <DropdownMenuItem 
+                onClick={() => navigate('/admin123')}
+                className="text-muted-foreground/60 hover:text-muted-foreground"
+              >
+                <span className="ml-2">ℹ️</span>
+                معلومات إضافية
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           {/* Admin/User button - Only show when user is logged in */}
           {showAdminButton && (
             <DropdownMenu>
