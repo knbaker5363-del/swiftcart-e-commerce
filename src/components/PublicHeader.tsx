@@ -1,15 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart, User, LogOut, Menu, HelpCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import CategoriesSidebar from './CategoriesSidebar';
 
 interface PublicHeaderProps {
@@ -37,14 +37,23 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const favoritesCount = favorites.length;
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [secretDialogOpen, setSecretDialogOpen] = useState(false);
+  const [secretCode, setSecretCode] = useState('');
   
-  // Admin button visibility is now based on actual auth state, not localStorage
-  // This prevents revealing admin panel existence to non-admins
+  // Admin button visibility is now based on actual auth state
   const showAdminButton = user !== null;
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleSecretCodeSubmit = () => {
+    if (secretCode === 'admin123123') {
+      setSecretDialogOpen(false);
+      setSecretCode('');
+      navigate('/admin123');
+    }
   };
   
   const headerLogoPosition = (settings as any)?.header_logo_position || 'right';
@@ -168,7 +177,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
               
               {/* Hidden admin access option */}
               <DropdownMenuItem 
-                onClick={() => navigate('/admin123')}
+                onClick={() => setSecretDialogOpen(true)}
                 className="text-muted-foreground/60 hover:text-muted-foreground"
               >
                 <span className="ml-2">ℹ️</span>
@@ -221,5 +230,27 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           </Button>
         </div>
       </div>
+      
+      {/* Secret code dialog */}
+      <Dialog open={secretDialogOpen} onOpenChange={setSecretDialogOpen}>
+        <DialogContent className="sm:max-w-[300px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">معلومات إضافية</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Input
+              type="password"
+              placeholder="أدخل الكود"
+              value={secretCode}
+              onChange={(e) => setSecretCode(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSecretCodeSubmit()}
+              className="text-center"
+            />
+            <Button onClick={handleSecretCodeSubmit} className="w-full">
+              تأكيد
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>;
 };
