@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical, CalendarIcon, Clock } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical, CalendarIcon, Clock, Eye, EyeOff } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -188,6 +188,42 @@ const AdminSpecialOffers = () => {
   const [uploading, setUploading] = useState(false);
   const [productsDialogOpen, setProductsDialogOpen] = useState(false);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [showOfferBadges, setShowOfferBadges] = useState(true);
+
+  // Fetch current settings for badge visibility
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from('settings').select('*').single();
+      if (data) {
+        setShowOfferBadges((data as any).show_offer_badges !== false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const toggleBadgesSetting = async () => {
+    const newValue = !showOfferBadges;
+    setShowOfferBadges(newValue);
+    
+    const { error } = await supabase
+      .from('settings')
+      .update({ show_offer_badges: newValue } as any)
+      .eq('id', (await supabase.from('settings').select('id').single()).data?.id);
+    
+    if (error) {
+      toast({ title: 'حدث خطأ', variant: 'destructive' });
+      setShowOfferBadges(!newValue);
+    } else {
+      // Update localStorage cache
+      const cached = localStorage.getItem('store_settings');
+      if (cached) {
+        const settings = JSON.parse(cached);
+        settings.show_offer_badges = newValue;
+        localStorage.setItem('store_settings', JSON.stringify(settings));
+      }
+      toast({ title: newValue ? 'تم إظهار الشارات' : 'تم إخفاء الشارات' });
+    }
+  };
 
   // Form state
   const [name, setName] = useState('');
@@ -425,11 +461,20 @@ const AdminSpecialOffers = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold">العروض الخاصة</h1>
           <p className="text-muted-foreground mt-1">إدارة العروض الخاصة وباقات المنتجات</p>
         </div>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={toggleBadgesSetting}
+            className="gap-2"
+          >
+            {showOfferBadges ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showOfferBadges ? 'إخفاء الشارات' : 'إظهار الشارات'}
+          </Button>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 ml-2" /> إضافة عرض</Button>
@@ -691,6 +736,7 @@ const AdminSpecialOffers = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Offers Grid */}
