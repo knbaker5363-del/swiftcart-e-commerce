@@ -136,33 +136,20 @@ const SpecialOffers = () => {
           </div>
         ) : offers && offers.length > 0 ? (
           <>
-            {/* Desktop Grid */}
-            <div 
-              className="hidden md:grid gap-4 mx-auto"
-              style={{
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gridAutoRows: '140px',
-                maxWidth: '700px',
-              }}
-            >
+            {/* Desktop Grid - 3 columns */}
+            <div className="hidden md:grid grid-cols-3 gap-5 mx-auto max-w-4xl">
               {offers.map((offer) => {
                 const isCircle = offer.size === 'circle';
-                const is4x4 = offer.size === '4x4';
-                const is2x4 = offer.size === '2x4';
-                const colSpan = (is4x4 || is2x4) ? 2 : 1;
-                const rowSpan = is4x4 ? 2 : 1;
                 
                 return (
                   <Link
                     key={offer.id}
                     to={`/special-offer/${offer.id}`}
-                    className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
+                    className={`group relative overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-xl aspect-square ${
                       isCircle ? 'rounded-full' : 'rounded-2xl'
                     }`}
                     style={{
-                      gridColumn: `span ${colSpan}`,
-                      gridRow: `span ${rowSpan}`,
-                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                     }}
                   >
                     {getOfferBadge(offer)}
@@ -170,13 +157,13 @@ const SpecialOffers = () => {
                       <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                        <Package className="h-20 w-20 opacity-30" style={{ color: offer.text_color }} />
+                        <Package className="h-16 w-16 opacity-20" style={{ color: offer.text_color }} />
                       </div>
                     )}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${isCircle ? 'rounded-full' : ''}`}>
-                      <h3 className="font-bold text-base mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center p-4 pb-5 ${isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className="font-bold text-lg mb-2 text-white leading-tight line-clamp-2">{offer.name}</h3>
                       {offer.condition_text && !isCircle && (
-                        <p className="text-xs text-white/80 mb-2 line-clamp-1">{offer.condition_text}</p>
+                        <p className="text-sm text-white/80 mb-2 line-clamp-1">{offer.condition_text}</p>
                       )}
                       {offer.expires_at && (
                         <div className="mb-3">
@@ -184,12 +171,12 @@ const SpecialOffers = () => {
                         </div>
                       )}
                       {offer.bundle_price ? (
-                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-1.5 rounded-full text-white font-bold text-sm">
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-2 rounded-full text-white font-bold text-base">
                           <Zap className="h-4 w-4" />
                           {offer.required_quantity} بـ {offer.bundle_price}₪
                         </div>
                       ) : offer.price ? (
-                        <div className="inline-block bg-primary px-4 py-1.5 rounded-full font-bold text-sm text-white">
+                        <div className="inline-block bg-primary px-5 py-2 rounded-full font-bold text-base text-primary-foreground">
                           {offer.price}₪
                         </div>
                       ) : null}
@@ -208,11 +195,11 @@ const SpecialOffers = () => {
                   <Link
                     key={offer.id}
                     to={`/special-offer/${offer.id}`}
-                    className={`group relative overflow-hidden transition-all duration-300 aspect-square ${
+                    className={`group relative overflow-hidden transition-all duration-300 active:scale-95 aspect-square ${
                       isCircle ? 'rounded-full' : 'rounded-xl'
                     }`}
                     style={{
-                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}cc)`,
+                      background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                     }}
                   >
                     {getOfferBadge(offer)}
@@ -220,23 +207,23 @@ const SpecialOffers = () => {
                       <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                        <Package className="h-12 w-12 opacity-30" style={{ color: offer.text_color }} />
+                        <Package className="h-10 w-10 opacity-20" style={{ color: offer.text_color }} />
                       </div>
                     )}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col items-center justify-end text-center p-2 pb-3 ${isCircle ? 'rounded-full' : ''}`}>
-                      <h3 className="font-bold text-xs mb-1 text-white leading-tight line-clamp-2">{offer.name}</h3>
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col items-center justify-end text-center p-2 pb-3 ${isCircle ? 'rounded-full' : ''}`}>
+                      <h3 className="font-bold text-sm mb-1.5 text-white leading-tight line-clamp-2">{offer.name}</h3>
                       {offer.expires_at && (
-                        <div className="mb-2 scale-75">
-                          <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+                        <div className="mb-2 scale-90">
+                          <CountdownBadge expiresAt={offer.expires_at} />
                         </div>
                       )}
                       {offer.bundle_price ? (
-                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 rounded-full text-white font-bold text-[10px]">
+                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-1.5 rounded-full text-white font-bold text-xs">
                           <Zap className="h-3 w-3" />
                           {offer.required_quantity} بـ {offer.bundle_price}₪
                         </div>
                       ) : offer.price ? (
-                        <div className="inline-block bg-primary px-2 py-1 rounded-full font-bold text-[10px] text-white">
+                        <div className="inline-block bg-primary px-3 py-1.5 rounded-full font-bold text-xs text-primary-foreground">
                           {offer.price}₪
                         </div>
                       ) : null}
