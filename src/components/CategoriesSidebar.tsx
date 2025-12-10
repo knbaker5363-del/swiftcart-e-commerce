@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getIconByName } from '@/lib/categoryIcons';
-import { Grid3X3, Package, Sparkles, Percent, ChevronLeft, Tags, ShoppingBag } from 'lucide-react';
+import { Grid3X3, Package, Flame, Percent, ChevronLeft, Tags, ShoppingBag } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { FaWhatsapp, FaInstagram, FaFacebookF, FaSnapchatGhost, FaTiktok } from 'react-icons/fa';
 
@@ -115,12 +115,12 @@ const CategoriesSidebar = ({ onItemClick }: CategoriesSidebarProps) => {
           </Link>
 
           <Link
-            to="/deals"
+            to="/special-offers"
             onClick={onItemClick}
             className="flex items-center gap-3 p-3 rounded-xl hover:bg-destructive/5 transition-all duration-200 group"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <Sparkles className="h-5 w-5 text-white" />
+              <Flame className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
               <span className="font-bold text-sm block">{(settings as any)?.offers_button_name || 'العروض الخاصة بنا'}</span>
