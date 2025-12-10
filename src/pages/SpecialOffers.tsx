@@ -7,7 +7,8 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/contexts/SettingsContext';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import Breadcrumb from '@/components/Breadcrumb';
-import { Sparkles, Flame, Zap, Package } from 'lucide-react';
+import { Sparkles, Flame, Zap, Package, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer';
 
@@ -31,6 +32,7 @@ interface SpecialOffer {
 const SpecialOffers = () => {
   useDocumentTitle('العروض الخاصة');
   const [cartOpen, setCartOpen] = useState(false);
+  const [showBadges, setShowBadges] = useState(true);
   const { settings } = useSettings();
 
   const { data: offers, isLoading } = useQuery({
@@ -75,6 +77,8 @@ const SpecialOffers = () => {
   };
 
   const getOfferBadge = (offer: SpecialOffer) => {
+    if (!showBadges) return null;
+    
     if (offer.offer_type === 'bundle' && offer.required_quantity) {
       return (
         <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10 flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs md:text-sm font-bold shadow-lg animate-pulse">
@@ -107,14 +111,26 @@ const SpecialOffers = () => {
             items={[{ label: 'العروض الخاصة' }]} 
             className="text-white/70 mb-4"
           />
-          <div className="flex items-center gap-3 text-white">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <Sparkles className="h-6 w-6" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-white">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-4xl font-bold">العروض الخاصة بنا</h1>
+                <p className="text-white/70 mt-1">اكتشف أفضل العروض والخصومات الحصرية</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold">العروض الخاصة بنا</h1>
-              <p className="text-white/70 mt-1">اكتشف أفضل العروض والخصومات الحصرية</p>
-            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBadges(!showBadges)}
+              className="bg-white/10 border-white/30 text-white hover:bg-white/20 gap-2"
+            >
+              {showBadges ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <span className="hidden sm:inline">{showBadges ? 'إخفاء الشارات' : 'إظهار الشارات'}</span>
+            </Button>
           </div>
         </div>
       </section>
