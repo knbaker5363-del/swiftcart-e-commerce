@@ -77,21 +77,21 @@ const Deals = () => {
           }} />
         </div>
         
-        <div className="container relative py-12 md:py-16">
+        <div className="container relative py-6 md:py-8">
           <Breadcrumb 
             items={[{ label: 'العروض الخاصة' }]} 
-            className="mb-6"
+            className="mb-4"
           />
           
-          <div className="flex flex-col items-center justify-center gap-4 animate-fade-in text-center">
-            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
-              <Tag className="h-12 w-12 text-white" />
+          <div className="flex flex-col items-center justify-center gap-3 animate-fade-in text-center">
+            <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+              <Tag className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
                 العروض الخاصة
               </h1>
-              <p className="text-white/80 text-base md:text-lg max-w-md mx-auto">
+              <p className="text-white/80 text-sm md:text-base">
                 أفضل الخصومات على منتجاتنا المميزة • {products?.length || 0} عرض
               </p>
             </div>
@@ -100,12 +100,12 @@ const Deals = () => {
       </section>
 
       {/* Products */}
-      <section className="py-16">
+      <section className="py-8">
         <div className="container">
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
               {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-lg" />
+                <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
@@ -115,14 +115,14 @@ const Deals = () => {
               getColorValue={getColorValue}
             />
           ) : (
-            <div className="text-center py-20">
-              <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-2xl font-bold mb-2">لا توجد عروض حالياً</h3>
-              <p className="text-muted-foreground mb-6">
+            <div className="text-center py-16">
+              <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-bold mb-2">لا توجد عروض حالياً</h3>
+              <p className="text-muted-foreground text-sm mb-4">
                 تابعنا للحصول على أفضل العروض والخصومات
               </p>
               <Link to="/">
-                <Button>العودة للصفحة الرئيسية</Button>
+                <Button size="sm">العودة للصفحة الرئيسية</Button>
               </Link>
             </div>
           )}
