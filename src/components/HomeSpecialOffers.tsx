@@ -14,6 +14,7 @@ interface SpecialOffer {
 const HomeSpecialOffers = () => {
   const { settings } = useSettings();
   const showHomeSpecialOffers = (settings as any)?.show_home_special_offers !== false;
+  const offersShape = (settings as any)?.home_offers_shape || 'circles';
   
   const { data: offers, isLoading } = useQuery({
     queryKey: ['home-special-offers'],
@@ -42,8 +43,8 @@ const HomeSpecialOffers = () => {
   }
   if (!offers || offers.length === 0) return null;
 
-  // Display as 3 circles if 3+ offers, otherwise 2 squares
-  const displayAsCircles = offers.length >= 3;
+  // Display based on merchant's setting
+  const displayAsCircles = offersShape === 'circles';
 
   return (
     <div className="flex justify-center gap-3 sm:gap-4 py-3">
