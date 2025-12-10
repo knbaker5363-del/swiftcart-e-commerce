@@ -468,6 +468,57 @@ export type Database = {
         }
         Relationships: []
       }
+      push_notifications: {
+        Row: {
+          body: string
+          id: string
+          recipients_count: number | null
+          sent_at: string
+          sent_by: string | null
+          title: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          recipients_count?: number | null
+          sent_at?: string
+          sent_by?: string | null
+          title: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          recipients_count?: number | null
+          sent_at?: string
+          sent_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          device_token: string
+          id: string
+          platform: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          device_token: string
+          id?: string
+          platform: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          device_token?: string
+          id?: string
+          platform?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           accent_color: string | null
