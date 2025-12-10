@@ -300,6 +300,7 @@ const AdminDisplay = () => {
   const [showOffersButton, setShowOffersButton] = useState(true);
   const [offersButtonName, setOffersButtonName] = useState('العروض الخاصة بنا');
   const [offersButtonIcon, setOffersButtonIcon] = useState('Sparkles');
+  const [showHomeSpecialOffers, setShowHomeSpecialOffers] = useState(true);
 
   // Load settings
   useEffect(() => {
@@ -346,6 +347,7 @@ const AdminDisplay = () => {
       setShowOffersButton((settings as any)?.show_offers_button !== false);
       setOffersButtonName((settings as any)?.offers_button_name || 'العروض الخاصة بنا');
       setOffersButtonIcon((settings as any)?.offers_button_icon || 'Sparkles');
+      setShowHomeSpecialOffers((settings as any)?.show_home_special_offers !== false);
     }
   }, [settings]);
 
@@ -453,6 +455,7 @@ const AdminDisplay = () => {
           show_offers_button: showOffersButton,
           offers_button_name: offersButtonName,
           offers_button_icon: offersButtonIcon,
+          show_home_special_offers: showHomeSpecialOffers,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -754,6 +757,20 @@ const AdminDisplay = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Home Special Offers Section */}
+          <div className="p-4 rounded-lg border bg-gradient-to-l from-purple-500/10 to-transparent space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-semibold">قسم العروض الخاصة بالصفحة الرئيسية</Label>
+                <p className="text-sm text-muted-foreground">عرض بطاقات العروض 2×2 في الصفحة الرئيسية</p>
+              </div>
+              <Switch
+                checked={showHomeSpecialOffers}
+                onCheckedChange={setShowHomeSpecialOffers}
+              />
+            </div>
           </div>
 
         </CardContent>
