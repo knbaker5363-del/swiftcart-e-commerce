@@ -1010,10 +1010,6 @@ const Checkout = () => {
                     </div>
                     
                     {/* Estimated delivery time */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                      <Clock className="h-4 w-4" />
-                      <span>وقت التوصيل المتوقع: 2-5 أيام عمل</span>
-                    </div>
                   </div>
                   
                   {/* Promo Code with enhanced styling */}
