@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, MessageCircle, Image, Trash2, Instagram, Search, Eye } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Upload, X, MessageCircle, Image, Trash2, Instagram, Search, Eye, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { compressImageToFile } from '@/lib/imageCompression';
@@ -50,6 +51,13 @@ const AdminSettings = () => {
   const [seoKeywords, setSeoKeywords] = useState('');
   const [ogImageUrl, setOgImageUrl] = useState<string | null>(null);
   const [uploadingOgImage, setUploadingOgImage] = useState(false);
+  
+  // Welcome Popup
+  const [welcomePopupEnabled, setWelcomePopupEnabled] = useState(false);
+  const [welcomePopupImageUrl, setWelcomePopupImageUrl] = useState<string | null>(null);
+  const [welcomePopupLink, setWelcomePopupLink] = useState('');
+  const [welcomePopupShowOnce, setWelcomePopupShowOnce] = useState(true);
+  const [uploadingPopupImage, setUploadingPopupImage] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -74,6 +82,11 @@ const AdminSettings = () => {
       setSeoDescription((settings as any).seo_description || '');
       setSeoKeywords((settings as any).seo_keywords || '');
       setOgImageUrl((settings as any).og_image_url || null);
+      // Welcome Popup
+      setWelcomePopupEnabled((settings as any).welcome_popup_enabled || false);
+      setWelcomePopupImageUrl((settings as any).welcome_popup_image_url || null);
+      setWelcomePopupLink((settings as any).welcome_popup_link || '');
+      setWelcomePopupShowOnce((settings as any).welcome_popup_show_once !== false);
     }
   }, [settings]);
 
@@ -158,6 +171,26 @@ const AdminSettings = () => {
     }
   };
 
+  const handlePopupImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingPopupImage(true);
+    try {
+      const compressedFile = await compressImageToFile(file, 800, 800, 0.9);
+      const fileName = `popup-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setWelcomePopupImageUrl(publicUrl);
+      toast({ title: 'تم رفع صورة الإشعار بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+    } finally {
+      setUploadingPopupImage(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
       const { error } = await supabase.from('settings').update({
@@ -181,10 +214,16 @@ const AdminSettings = () => {
         seo_description: seoDescription || null,
         seo_keywords: seoKeywords || null,
         og_image_url: ogImageUrl,
+        welcome_popup_enabled: welcomePopupEnabled,
+        welcome_popup_image_url: welcomePopupImageUrl,
+        welcome_popup_link: welcomePopupLink || null,
+        welcome_popup_show_once: welcomePopupShowOnce,
         updated_at: new Date().toISOString()
       }).eq('id', settings?.id);
       
       if (error) throw error;
+      // Clear popup storage if popup settings changed
+      localStorage.removeItem('welcome_popup_shown');
       toast({ title: 'تم حفظ الإعدادات بنجاح' });
       window.location.reload();
     } catch (error) {
@@ -498,6 +537,75 @@ const AdminSettings = () => {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* إشعار الترحيب */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              إشعار الترحيب (Popup)
+            </CardTitle>
+            <CardDescription>صورة منبثقة تظهر عند فتح الموقع</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="popup-enabled">تفعيل الإشعار</Label>
+              <Switch
+                id="popup-enabled"
+                checked={welcomePopupEnabled}
+                onCheckedChange={setWelcomePopupEnabled}
+              />
+            </div>
+            
+            {welcomePopupEnabled && (
+              <>
+                <div className="space-y-2">
+                  <Label>صورة الإشعار</Label>
+                  <div className="flex items-center gap-4">
+                    {welcomePopupImageUrl ? (
+                      <div className="relative">
+                        <img src={welcomePopupImageUrl} alt="Popup" className="w-32 h-32 rounded-lg object-cover border" />
+                        <button onClick={() => setWelcomePopupImageUrl(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-32 rounded-lg bg-muted flex items-center justify-center">
+                        <Image className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <Input type="file" accept="image/*" onChange={handlePopupImageUpload} disabled={uploadingPopupImage} />
+                      <p className="text-sm text-muted-foreground mt-1">{uploadingPopupImage ? 'جاري الرفع...' : 'صورة العرض أو الإعلان'}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>رابط عند الضغط (اختياري)</Label>
+                  <Input 
+                    value={welcomePopupLink} 
+                    onChange={e => setWelcomePopupLink(e.target.value)} 
+                    placeholder="/special-offers أو /deals"
+                  />
+                  <p className="text-xs text-muted-foreground">عند الضغط على الصورة، ينتقل العميل لهذا الرابط</p>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="popup-once">عرض مرة واحدة فقط</Label>
+                    <p className="text-xs text-muted-foreground">إذا فعّلت، يظهر الإشعار مرة واحدة للعميل</p>
+                  </div>
+                  <Switch
+                    id="popup-once"
+                    checked={welcomePopupShowOnce}
+                    onCheckedChange={setWelcomePopupShowOnce}
+                  />
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
