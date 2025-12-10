@@ -17,7 +17,7 @@ const OffersButton = () => {
   const showButton = (settings as any)?.show_offers_button !== false;
   const buttonName = (settings as any)?.offers_button_name || 'العروض الخاصة بنا';
   const iconName = (settings as any)?.offers_button_icon || 'Sparkles';
-  const buttonLink = '/special-offers';
+  const buttonLink = (settings as any)?.offers_button_link || '/special-offers';
 
   if (!showButton) return null;
 
