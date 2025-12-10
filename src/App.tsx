@@ -40,7 +40,6 @@ import AdminAdvancedSettings from "./pages/admin/AdminAdvancedSettings";
 import AdminEffects from "./pages/admin/AdminEffects";
 import AdminAnnouncement from "./pages/admin/AdminAnnouncement";
 import AdminSpecialOffers from "./pages/admin/AdminSpecialOffers";
-import AdminSpecialOffersEditor from "./pages/admin/AdminSpecialOffersEditor";
 import SpecialOffers from "./pages/SpecialOffers";
 import SpecialOfferDetail from "./pages/SpecialOfferDetail";
 import NotFound from "./pages/NotFound";
@@ -110,7 +109,6 @@ const App = () => (
                         <Route path="effects" element={<AdminEffects />} />
                         <Route path="announcement" element={<AdminAnnouncement />} />
                         <Route path="special-offers" element={<AdminSpecialOffers />} />
-                        <Route path="special-offers-editor" element={<AdminSpecialOffersEditor />} />
                       </Route>
 
                       {/* 404 */}
