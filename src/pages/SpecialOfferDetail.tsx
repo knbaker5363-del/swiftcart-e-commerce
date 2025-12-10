@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import BackgroundPattern from '@/components/BackgroundPattern';
 import Breadcrumb from '@/components/Breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Sparkles, ShoppingCart, Check, Package, Flame, X } from 'lucide-react';
+import { Sparkles, ShoppingCart, Check, Package, Flame, X, Clock } from 'lucide-react';
+import { CountdownTimer } from '@/components/ui/countdown-timer';
 
 interface SpecialOffer {
   id: string;
@@ -27,6 +28,7 @@ interface SpecialOffer {
   bundle_price: number | null;
   background_color: string;
   text_color: string;
+  expires_at: string | null;
 }
 
 interface Product {
@@ -198,6 +200,15 @@ const SpecialOfferDetail = () => {
 
             {/* Price Badge */}
             <div className="mt-6 flex flex-wrap items-center gap-4">
+              {/* Countdown Timer */}
+              {offer?.expires_at && (
+                <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full" style={{ color: offer?.text_color }}>
+                  <Clock className="h-5 w-5" />
+                  <span className="text-sm font-medium">ينتهي خلال:</span>
+                  <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+                </div>
+              )}
+              
               {offer?.bundle_price ? (
                 <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-5 py-2.5 rounded-full text-xl font-bold" style={{ color: offer?.text_color }}>
                   <Package className="h-5 w-5" />

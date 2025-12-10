@@ -9,6 +9,7 @@ import BackgroundPattern from '@/components/BackgroundPattern';
 import Breadcrumb from '@/components/Breadcrumb';
 import { Sparkles, Flame, Zap, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer';
 
 interface SpecialOffer {
   id: string;
@@ -24,6 +25,7 @@ interface SpecialOffer {
   bundle_price: number | null;
   background_color: string;
   text_color: string;
+  expires_at: string | null;
 }
 
 const SpecialOffers = () => {
@@ -40,7 +42,11 @@ const SpecialOffers = () => {
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
       if (error) throw error;
-      return data as SpecialOffer[];
+      // Filter out expired offers
+      const now = new Date();
+      return (data as SpecialOffer[]).filter(offer => 
+        !offer.expires_at || new Date(offer.expires_at) > now
+      );
     }
   });
 
@@ -156,6 +162,13 @@ const SpecialOffers = () => {
                   
                   {offer.condition_text && (
                     <p className="text-sm text-white/90 mb-3 line-clamp-2 drop-shadow-lg max-w-[90%]">{offer.condition_text}</p>
+                  )}
+                  
+                  {/* Countdown Timer */}
+                  {offer.expires_at && (
+                    <div className="mb-3">
+                      <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+                    </div>
                   )}
                   
                   {/* Price Display with Pulse */}
