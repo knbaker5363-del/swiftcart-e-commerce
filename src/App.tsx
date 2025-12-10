@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
 import { ConfigProvider } from "@/contexts/ConfigContext";
+import { SupabaseProvider } from "@/contexts/SupabaseContext";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { SetupGuard } from "@/components/SetupGuard";
 import AnimatedEffects from "@/components/AnimatedEffects";
@@ -62,8 +63,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ConfigProvider>
-      <BrowserRouter>
-        <SetupGuard>
+      <SupabaseProvider>
+        <BrowserRouter>
+          <SetupGuard>
           <AuthProvider>
             <SettingsProvider>
               <CartProvider>
@@ -119,8 +121,9 @@ const App = () => (
               </CartProvider>
             </SettingsProvider>
           </AuthProvider>
-        </SetupGuard>
-      </BrowserRouter>
+          </SetupGuard>
+        </BrowserRouter>
+      </SupabaseProvider>
     </ConfigProvider>
   </QueryClientProvider>
 );
