@@ -1,0 +1,81 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+import { getStoredConfig } from '@/lib/supabase-runtime';
+
+let supabaseInstance: SupabaseClient<Database> | null = null;
+
+// Check if environment variables are set (for Lovable Cloud / development)
+const hasEnvConfig = (): boolean => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return !!url && !!key && url !== '' && key !== '';
+};
+
+export const getSupabaseClient = (): SupabaseClient<Database> | null => {
+  if (supabaseInstance) return supabaseInstance;
+  
+  // Try environment variables first (Lovable Cloud)
+  if (hasEnvConfig()) {
+    const envUrl = import.meta.env.VITE_SUPABASE_URL;
+    const envKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    supabaseInstance = createClient<Database>(envUrl, envKey, {
+      auth: { 
+        storage: localStorage, 
+        persistSession: true, 
+        autoRefreshToken: true 
+      }
+    });
+    return supabaseInstance;
+  }
+  
+  // Try localStorage (self-hosted)
+  const config = getStoredConfig();
+  if (config?.supabaseUrl && config?.supabaseAnonKey) {
+    supabaseInstance = createClient<Database>(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: { 
+        storage: localStorage, 
+        persistSession: true, 
+        autoRefreshToken: true 
+      }
+    });
+    return supabaseInstance;
+  }
+  
+  return null; // Not configured yet
+};
+
+// Function to reinitialize after setup
+export const reinitializeSupabase = (url?: string, anonKey?: string): SupabaseClient<Database> | null => {
+  supabaseInstance = null;
+  
+  // If explicit credentials provided, use them
+  if (url && anonKey) {
+    supabaseInstance = createClient<Database>(url, anonKey, {
+      auth: { 
+        storage: localStorage, 
+        persistSession: true, 
+        autoRefreshToken: true 
+      }
+    });
+    return supabaseInstance;
+  }
+  
+  return getSupabaseClient();
+};
+
+// Check if Supabase is configured (either via env or localStorage)
+export const isSupabaseConfigured = (): boolean => {
+  if (hasEnvConfig()) return true;
+  const config = getStoredConfig();
+  return !!(config?.supabaseUrl && config?.supabaseAnonKey && config?.isConfigured);
+};
+
+// Get current Supabase URL (for edge functions, etc.)
+export const getSupabaseUrl = (): string | null => {
+  if (hasEnvConfig()) {
+    return import.meta.env.VITE_SUPABASE_URL;
+  }
+  const config = getStoredConfig();
+  return config?.supabaseUrl || null;
+};

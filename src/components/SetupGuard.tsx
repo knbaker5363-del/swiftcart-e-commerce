@@ -1,7 +1,6 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isStoreConfigured, getStoredConfig } from '@/lib/supabase-runtime';
-import { createClient } from '@supabase/supabase-js';
+import { isSupabaseConfigured, getSupabaseClient } from '@/lib/supabase-wrapper';
 import { Loader2 } from 'lucide-react';
 
 interface SetupGuardProps {
@@ -19,20 +18,21 @@ export const SetupGuard = ({ children }: SetupGuardProps) => {
       // Check if already on setup page
       if (location.pathname === '/setup') {
         // Check if setup is locked in database
-        const config = getStoredConfig();
-        if (config?.supabaseUrl && config?.supabaseAnonKey) {
+        if (isSupabaseConfigured()) {
           try {
-            const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
-            const { data } = await supabase
-              .from('settings')
-              .select('setup_locked')
-              .maybeSingle();
-            
-            if (data?.setup_locked) {
-              // Setup is locked, redirect to home
-              navigate('/', { replace: true });
-              setChecking(false);
-              return;
+            const supabase = getSupabaseClient();
+            if (supabase) {
+              const { data } = await supabase
+                .from('settings')
+                .select('setup_locked')
+                .maybeSingle();
+              
+              if (data?.setup_locked) {
+                // Setup is locked, redirect to home
+                navigate('/', { replace: true });
+                setChecking(false);
+                return;
+              }
             }
           } catch (error) {
             // If error, allow access to setup
@@ -45,9 +45,11 @@ export const SetupGuard = ({ children }: SetupGuardProps) => {
         return;
       }
 
-      const isConfigured = isStoreConfigured();
+      // Check if Supabase is configured
+      const isConfigured = isSupabaseConfigured();
       
       if (!isConfigured) {
+        // Not configured, redirect to setup
         navigate('/setup', { replace: true });
       } else {
         setConfigured(true);
