@@ -74,13 +74,15 @@ const SortableOfferCard = ({
   index, 
   onEdit, 
   onProducts, 
-  onDelete 
+  onDelete,
+  onToggleVisibility,
 }: { 
   offer: SpecialOffer; 
   index: number; 
   onEdit: () => void; 
   onProducts: () => void; 
   onDelete: () => void; 
+  onToggleVisibility: () => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: offer.id });
   
@@ -137,6 +139,13 @@ const SortableOfferCard = ({
                   باقة
                 </span>
               )}
+              {/* Visibility indicator */}
+              {!offer.is_active && (
+                <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded text-xs flex items-center gap-1 flex-shrink-0">
+                  <EyeOff className="h-3 w-3" />
+                  مخفي
+                </span>
+              )}
             </div>
             {offer.offer_type === 'bundle' && offer.bundle_price ? (
               <div className="text-orange-600 font-bold flex items-center gap-1 text-sm">
@@ -155,6 +164,15 @@ const SortableOfferCard = ({
 
           {/* Actions */}
           <div className="flex gap-2 flex-shrink-0">
+            {/* Toggle Visibility Button */}
+            <Button 
+              variant={offer.is_active ? "outline" : "secondary"} 
+              size="sm" 
+              onClick={onToggleVisibility}
+              title={offer.is_active ? 'إخفاء من الزبون' : 'إظهار للزبون'}
+            >
+              {offer.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </Button>
             <Button variant="outline" size="sm" onClick={onEdit}>
               <Pencil className="h-4 w-4" />
             </Button>
@@ -413,6 +431,20 @@ const AdminSpecialOffers = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] });
       toast({ title: 'تم حذف العرض' });
+    }
+  });
+
+  const toggleVisibilityMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from('special_offers')
+        .update({ is_active: !is_active })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] });
+      toast({ title: variables.is_active ? 'تم إخفاء العرض' : 'تم إظهار العرض' });
     }
   });
 
@@ -761,6 +793,7 @@ const AdminSpecialOffers = () => {
                   onEdit={() => openEditDialog(offer)}
                   onProducts={() => { setSelectedOfferId(offer.id); setProductsDialogOpen(true); }}
                   onDelete={() => deleteMutation.mutate(offer.id)}
+                  onToggleVisibility={() => toggleVisibilityMutation.mutate({ id: offer.id, is_active: offer.is_active })}
                 />
               ))}
             </div>
