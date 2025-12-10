@@ -286,7 +286,7 @@ const SpecialOffers = () => {
                     key={offer.id}
                     to={`/special-offer/${offer.id}`}
                     className={`group relative overflow-hidden transition-all duration-300 active:scale-95 ${
-                      isLarge ? 'col-span-2 aspect-[2/1]' : 'aspect-[3/4]'
+                      isLarge ? 'col-span-2 aspect-[2/1.2]' : 'aspect-[3/4]'
                     } ${offer.isCircle ? 'rounded-full' : 'rounded-xl'}`}
                     style={{
                       background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
