@@ -286,34 +286,43 @@ const SpecialOffers = () => {
                     key={offer.id}
                     to={`/special-offer/${offer.id}`}
                     className={`group relative overflow-hidden transition-all duration-300 active:scale-95 ${
-                      isLarge ? 'col-span-2 aspect-[2/1.2]' : 'aspect-[3/4]'
-                    } ${offer.isCircle ? 'rounded-full' : 'rounded-xl'}`}
+                      isLarge ? 'col-span-2 aspect-[2/1.2]' : offer.isCircle ? 'aspect-square' : 'aspect-[3/4]'
+                    } ${offer.isCircle ? 'rounded-full shadow-lg ring-4 ring-white/20' : 'rounded-xl'}`}
                     style={{
                       background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
                     }}
                   >
+                    {/* Glow effect for circles */}
+                    {offer.isCircle && (
+                      <div 
+                        className="absolute inset-0 rounded-full animate-pulse opacity-50"
+                        style={{ 
+                          boxShadow: `0 0 30px ${offer.background_color}80, 0 0 60px ${offer.background_color}40`
+                        }}
+                      />
+                    )}
                     {getOfferBadge(offer)}
                     {offer.image_url ? (
                       <img src={offer.image_url} alt={offer.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: offer.background_color }}>
-                        <Package className={`${isLarge ? 'h-16 w-16' : 'h-12 w-12'} opacity-20`} style={{ color: offer.text_color }} />
+                        <Package className={`${isLarge ? 'h-16 w-16' : offer.isCircle ? 'h-10 w-10' : 'h-12 w-12'} opacity-20`} style={{ color: offer.text_color }} />
                       </div>
                     )}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center p-3 pb-4 ${offer.isCircle ? 'rounded-full' : ''}`}>
-                      <h3 className={`font-bold ${isLarge ? 'text-base' : 'text-sm'} mb-1.5 text-white leading-tight line-clamp-2`}>{offer.name}</h3>
-                      {offer.expires_at && (
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col items-center justify-end text-center ${offer.isCircle ? 'p-2 pb-3 rounded-full' : 'p-3 pb-4'}`}>
+                      <h3 className={`font-bold ${isLarge ? 'text-base' : offer.isCircle ? 'text-xs' : 'text-sm'} mb-1 text-white leading-tight line-clamp-2`}>{offer.name}</h3>
+                      {offer.expires_at && !offer.isCircle && (
                         <div className="mb-2">
                           <CountdownBadge expiresAt={offer.expires_at} />
                         </div>
                       )}
                       {offer.bundle_price ? (
-                        <div className={`inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 ${isLarge ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'} rounded-full text-white font-bold`}>
+                        <div className={`inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 ${isLarge ? 'px-4 py-2 text-sm' : offer.isCircle ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs'} rounded-full text-white font-bold`}>
                           <Zap className={isLarge ? 'h-4 w-4' : 'h-3 w-3'} />
                           {offer.required_quantity} بـ {offer.bundle_price}₪
                         </div>
                       ) : offer.price ? (
-                        <div className={`inline-block bg-primary ${isLarge ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'} rounded-full font-bold text-primary-foreground`}>
+                        <div className={`inline-block bg-primary ${isLarge ? 'px-4 py-2 text-sm' : offer.isCircle ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs'} rounded-full font-bold text-primary-foreground`}>
                           {offer.price}₪
                         </div>
                       ) : null}
