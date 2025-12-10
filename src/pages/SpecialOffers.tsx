@@ -58,9 +58,9 @@ const SpecialOffers = () => {
   // Grid configuration - matches admin editor exactly
   const GRID_COLS = 4;
   const CELL_SIZE_DESKTOP = 140;
-  const CELL_SIZE_MOBILE = 80;
+  const CELL_SIZE_MOBILE = 82; // Increased for better visibility
   const GAP_DESKTOP = 16;
-  const GAP_MOBILE = 10;
+  const GAP_MOBILE = 6; // Reduced gap to fit screen
 
   // Convert size to width/height
   const getSizeFromType = (size: string): { width: number; height: number; isCircle: boolean } => {
@@ -77,23 +77,75 @@ const SpecialOffers = () => {
     }
   };
 
-  // Calculate grid positions from offers
+  // Calculate grid positions from offers - auto-arrange to prevent overlap
   const getPositionedOffers = () => {
-    return offers?.map((offer, index) => {
+    if (!offers || offers.length === 0) return [];
+    
+    // Create occupied grid
+    const occupied: boolean[][] = [];
+    const result: any[] = [];
+    
+    const isOccupied = (col: number, row: number, width: number, height: number) => {
+      for (let r = row; r < row + height; r++) {
+        for (let c = col; c < col + width; c++) {
+          if (c >= GRID_COLS) return true;
+          if (occupied[r]?.[c]) return true;
+        }
+      }
+      return false;
+    };
+    
+    const markOccupied = (col: number, row: number, width: number, height: number) => {
+      for (let r = row; r < row + height; r++) {
+        if (!occupied[r]) occupied[r] = [];
+        for (let c = col; c < col + width; c++) {
+          occupied[r][c] = true;
+        }
+      }
+    };
+    
+    const findNextFreePosition = (width: number, height: number): { col: number; row: number } => {
+      for (let row = 0; row < 100; row++) {
+        for (let col = 0; col <= GRID_COLS - width; col++) {
+          if (!isOccupied(col, row, width, height)) {
+            return { col, row };
+          }
+        }
+      }
+      return { col: 0, row: 0 };
+    };
+    
+    for (const offer of offers) {
       const { width, height, isCircle } = getSizeFromType(offer.size);
-      return {
+      
+      // Try saved position first
+      let col = offer.position_x ?? -1;
+      let row = offer.position_y ?? -1;
+      
+      // If no saved position or it causes overlap, find next free position
+      if (col < 0 || row < 0 || isOccupied(col, row, width, height)) {
+        const freePos = findNextFreePosition(width, height);
+        col = freePos.col;
+        row = freePos.row;
+      }
+      
+      markOccupied(col, row, width, height);
+      
+      result.push({
         ...offer,
-        col: offer.position_x ?? (index % GRID_COLS),
-        row: offer.position_y ?? Math.floor(index / GRID_COLS),
+        col,
+        row,
         width,
         height,
         isCircle,
-      };
-    }) || [];
+      });
+    }
+    
+    return result;
   };
 
   const positionedOffers = getPositionedOffers();
-  const maxRow = Math.max(...positionedOffers.map(o => o.row + o.height), 2);
+  const maxRow = positionedOffers.length > 0 ? Math.max(...positionedOffers.map(o => o.row + o.height)) : 2;
 
   const getOfferBadge = (offer: SpecialOffer) => {
     if (!showBadges) return null;
