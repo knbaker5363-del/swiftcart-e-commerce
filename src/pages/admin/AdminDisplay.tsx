@@ -21,6 +21,9 @@ import {
   Image,
   X,
   Upload,
+  MessageSquare,
+  Link,
+  Eye,
   Heart,
   Star,
   Crown,
@@ -303,7 +306,12 @@ const AdminDisplay = () => {
   const [showHomeSpecialOffers, setShowHomeSpecialOffers] = useState(true);
   const [homeOffersShape, setHomeOffersShape] = useState('circles');
 
-  // Load settings
+  // Welcome popup settings
+  const [welcomePopupEnabled, setWelcomePopupEnabled] = useState(false);
+  const [welcomePopupImageUrl, setWelcomePopupImageUrl] = useState<string | null>(null);
+  const [welcomePopupLink, setWelcomePopupLink] = useState('');
+  const [welcomePopupShowOnce, setWelcomePopupShowOnce] = useState(true);
+  const [uploadingWelcomeImage, setUploadingWelcomeImage] = useState(false);
   useEffect(() => {
     if (settings) {
       setCartIconStyle((settings as any)?.cart_icon_style || 'cart');
@@ -350,6 +358,11 @@ const AdminDisplay = () => {
       setOffersButtonIcon((settings as any)?.offers_button_icon || 'Sparkles');
       setShowHomeSpecialOffers((settings as any)?.show_home_special_offers !== false);
       setHomeOffersShape((settings as any)?.home_offers_shape || 'circles');
+      // Welcome popup
+      setWelcomePopupEnabled((settings as any)?.welcome_popup_enabled === true);
+      setWelcomePopupImageUrl((settings as any)?.welcome_popup_image_url || null);
+      setWelcomePopupLink((settings as any)?.welcome_popup_link || '');
+      setWelcomePopupShowOnce((settings as any)?.welcome_popup_show_once !== false);
     }
   }, [settings]);
 
@@ -400,6 +413,26 @@ const AdminDisplay = () => {
       toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
     } finally {
       setUploadingNameImage(false);
+    }
+  };
+
+  const handleWelcomeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingWelcomeImage(true);
+    try {
+      const compressedFile = await compressImageToFile(file, 800, 800, 0.85);
+      const fileName = `welcome-popup-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      setWelcomePopupImageUrl(publicUrl);
+      toast({ title: 'تم رفع صورة الترحيب بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ في رفع الصورة', variant: 'destructive' });
+    } finally {
+      setUploadingWelcomeImage(false);
     }
   };
 
@@ -459,6 +492,11 @@ const AdminDisplay = () => {
           offers_button_icon: offersButtonIcon,
           show_home_special_offers: showHomeSpecialOffers,
           home_offers_shape: homeOffersShape,
+          // Welcome popup
+          welcome_popup_enabled: welcomePopupEnabled,
+          welcome_popup_image_url: welcomePopupImageUrl,
+          welcome_popup_link: welcomePopupLink,
+          welcome_popup_show_once: welcomePopupShowOnce,
           updated_at: new Date().toISOString(),
         })
         .eq('id', settings?.id);
@@ -532,6 +570,7 @@ const AdminDisplay = () => {
               { id: 'cards', label: '🃏 البطاقات' },
               { id: 'background', label: '✨ الخلفية' },
               { id: 'loading', label: '⏳ التحميل' },
+              { id: 'welcome-popup', label: '💬 نافذة الترحيب' },
             ].map(item => (
               <Button
                 key={item.id}
@@ -1789,6 +1828,136 @@ const AdminDisplay = () => {
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Welcome Popup Settings */}
+      <Card id="welcome-popup" className="scroll-mt-4 border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-amber-500" />
+            نافذة الترحيب المنبثقة
+          </CardTitle>
+          <CardDescription>
+            إعلان منبثق يظهر للزبون عند دخوله للمتجر لأول مرة
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Enable/Disable */}
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Eye className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <Label className="text-base font-medium">تفعيل نافذة الترحيب</Label>
+                <p className="text-sm text-muted-foreground">إظهار نافذة منبثقة عند دخول الزبون</p>
+              </div>
+            </div>
+            <Switch
+              checked={welcomePopupEnabled}
+              onCheckedChange={setWelcomePopupEnabled}
+            />
+          </div>
+
+          {welcomePopupEnabled && (
+            <>
+              {/* Image Upload */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  صورة الإعلان
+                </Label>
+                
+                {welcomePopupImageUrl ? (
+                  <div className="relative w-full max-w-md mx-auto">
+                    <img
+                      src={welcomePopupImageUrl}
+                      alt="Welcome popup"
+                      className="w-full h-auto rounded-lg border shadow-md"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 left-2"
+                      onClick={() => setWelcomePopupImageUrl(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full max-w-md mx-auto h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="h-10 w-10 text-muted-foreground mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        {uploadingWelcomeImage ? 'جاري الرفع...' : 'اضغط لرفع صورة الإعلان'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PNG, JPG, WEBP (الحد الأقصى 5MB)
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleWelcomeImageUpload}
+                      disabled={uploadingWelcomeImage}
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Link */}
+              <div className="space-y-2">
+                <Label className="text-base font-medium flex items-center gap-2">
+                  <Link className="h-4 w-4" />
+                  رابط عند الضغط على الصورة (اختياري)
+                </Label>
+                <Input
+                  type="url"
+                  placeholder="https://example.com أو /products أو /special-offers"
+                  value={welcomePopupLink}
+                  onChange={(e) => setWelcomePopupLink(e.target.value)}
+                  dir="ltr"
+                  className="text-left"
+                />
+                <p className="text-xs text-muted-foreground">
+                  يمكنك إضافة رابط خارجي أو صفحة داخلية مثل /special-offers
+                </p>
+              </div>
+
+              {/* Show Once Toggle */}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <Label className="text-base font-medium">عرض مرة واحدة فقط</Label>
+                  <p className="text-sm text-muted-foreground">
+                    عند التفعيل، لن تظهر النافذة مجدداً للزبون بعد إغلاقها
+                  </p>
+                </div>
+                <Switch
+                  checked={welcomePopupShowOnce}
+                  onCheckedChange={setWelcomePopupShowOnce}
+                />
+              </div>
+
+              {/* Preview */}
+              {welcomePopupImageUrl && (
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <Label className="text-sm font-medium mb-3 block">معاينة:</Label>
+                  <div className="relative bg-black/50 rounded-lg p-8 flex items-center justify-center">
+                    <div className="bg-background rounded-xl shadow-2xl max-w-xs overflow-hidden">
+                      <img
+                        src={welcomePopupImageUrl}
+                        alt="Preview"
+                        className="w-full h-auto"
+                      />
+                      <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full p-1">
+                        <X className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
