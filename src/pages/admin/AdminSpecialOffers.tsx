@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical, CalendarIcon, Clock, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, X, Sparkles, Package, Palette, Flame, Zap, GripVertical, CalendarIcon, Clock, Eye, EyeOff, Home } from 'lucide-react';
 import { compressImageToFile } from '@/lib/imageCompression';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -42,6 +42,7 @@ interface SpecialOffer {
   expires_at: string | null;
   position_x: number | null;
   position_y: number | null;
+  show_on_homepage: boolean;
 }
 
 interface Product {
@@ -76,6 +77,7 @@ const SortableOfferCard = ({
   onProducts, 
   onDelete,
   onToggleVisibility,
+  onToggleHomepage,
 }: { 
   offer: SpecialOffer; 
   index: number; 
@@ -83,6 +85,7 @@ const SortableOfferCard = ({
   onProducts: () => void; 
   onDelete: () => void; 
   onToggleVisibility: () => void;
+  onToggleHomepage: () => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: offer.id });
   
@@ -146,6 +149,13 @@ const SortableOfferCard = ({
                   مخفي
                 </span>
               )}
+              {/* Homepage indicator */}
+              {offer.show_on_homepage && (
+                <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded text-xs flex items-center gap-1 flex-shrink-0">
+                  <Home className="h-3 w-3" />
+                  الرئيسية
+                </span>
+              )}
             </div>
             {offer.offer_type === 'bundle' && offer.bundle_price ? (
               <div className="text-orange-600 font-bold flex items-center gap-1 text-sm">
@@ -164,6 +174,16 @@ const SortableOfferCard = ({
 
           {/* Actions */}
           <div className="flex gap-2 flex-shrink-0">
+            {/* Toggle Homepage Button */}
+            <Button 
+              variant={offer.show_on_homepage ? "default" : "outline"} 
+              size="sm" 
+              onClick={onToggleHomepage}
+              title={offer.show_on_homepage ? 'إزالة من الصفحة الرئيسية' : 'إظهار في الصفحة الرئيسية'}
+              className={offer.show_on_homepage ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              <Home className="h-4 w-4" />
+            </Button>
             {/* Toggle Visibility Button */}
             <Button 
               variant={offer.is_active ? "outline" : "secondary"} 
@@ -445,6 +465,21 @@ const AdminSpecialOffers = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] });
       toast({ title: variables.is_active ? 'تم إخفاء العرض' : 'تم إظهار العرض' });
+    }
+  });
+
+  const toggleHomepageMutation = useMutation({
+    mutationFn: async ({ id, show_on_homepage }: { id: string; show_on_homepage: boolean }) => {
+      const { error } = await supabase
+        .from('special_offers')
+        .update({ show_on_homepage: !show_on_homepage } as any)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-special-offers'] });
+      queryClient.invalidateQueries({ queryKey: ['home-special-offers'] });
+      toast({ title: variables.show_on_homepage ? 'تم إزالته من الصفحة الرئيسية' : 'تم إضافته للصفحة الرئيسية' });
     }
   });
 
@@ -794,6 +829,7 @@ const AdminSpecialOffers = () => {
                   onProducts={() => { setSelectedOfferId(offer.id); setProductsDialogOpen(true); }}
                   onDelete={() => deleteMutation.mutate(offer.id)}
                   onToggleVisibility={() => toggleVisibilityMutation.mutate({ id: offer.id, is_active: offer.is_active })}
+                  onToggleHomepage={() => toggleHomepageMutation.mutate({ id: offer.id, show_on_homepage: offer.show_on_homepage })}
                 />
               ))}
             </div>
