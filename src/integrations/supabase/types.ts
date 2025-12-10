@@ -818,6 +818,7 @@ export type Database = {
           position_y: number | null
           price: number | null
           required_quantity: number | null
+          show_on_homepage: boolean | null
           size: string
           sort_order: number | null
           text_color: string | null
@@ -839,6 +840,7 @@ export type Database = {
           position_y?: number | null
           price?: number | null
           required_quantity?: number | null
+          show_on_homepage?: boolean | null
           size?: string
           sort_order?: number | null
           text_color?: string | null
@@ -860,6 +862,7 @@ export type Database = {
           position_y?: number | null
           price?: number | null
           required_quantity?: number | null
+          show_on_homepage?: boolean | null
           size?: string
           sort_order?: number | null
           text_color?: string | null

@@ -23,8 +23,9 @@ const HomeSpecialOffers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('special_offers')
-        .select('id, name, image_url, background_color, expires_at')
+        .select('id, name, image_url, background_color, expires_at, show_on_homepage')
         .eq('is_active', true)
+        .eq('show_on_homepage', true)
         .order('sort_order', { ascending: true })
         .limit(3);
       if (error) throw error;
