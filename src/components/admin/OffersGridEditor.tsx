@@ -4,10 +4,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Eye, RotateCcw, Save, GripVertical, Flame, Sparkles, Move } from 'lucide-react';
+import { Eye, RotateCcw, Save, GripVertical, Flame, Sparkles, Move, Zap, Package } from 'lucide-react';
+import { CountdownTimer } from '@/components/ui/countdown-timer';
 
 interface SpecialOffer {
   id: string;
@@ -16,6 +16,7 @@ interface SpecialOffer {
   image_url: string | null;
   size: string;
   price: number | null;
+  condition_text: string | null;
   offer_type: string;
   required_quantity: number;
   bundle_price: number | null;
@@ -24,6 +25,7 @@ interface SpecialOffer {
   position_x: number | null;
   position_y: number | null;
   is_active: boolean;
+  expires_at: string | null;
 }
 
 interface GridPosition {
@@ -49,10 +51,10 @@ const OffersGridEditor = ({ offers, onRefresh }: OffersGridEditorProps) => {
   const [previewMode, setPreviewMode] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Grid configuration
+  // Grid configuration - matches customer view
   const GRID_COLS = 4;
-  const CELL_SIZE = 100; // Base cell size in pixels
-  const GAP = 12;
+  const CELL_SIZE = 140;
+  const GAP = 16;
 
   // Convert size to width/height
   const getSizeFromType = (size: string): { width: number; height: number; isCircle: boolean } => {
@@ -95,7 +97,6 @@ const OffersGridEditor = ({ offers, onRefresh }: OffersGridEditorProps) => {
     for (const pos of positions) {
       if (pos.id === id) continue;
       
-      // Check for overlap
       const overlapsX = col < pos.col + pos.width && col + width > pos.col;
       const overlapsY = row < pos.row + pos.height && row + height > pos.row;
       
@@ -106,13 +107,14 @@ const OffersGridEditor = ({ offers, onRefresh }: OffersGridEditorProps) => {
 
   // Handle drag start
   const handleDragStart = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
     const pos = positions.find(p => p.id === id);
     if (!pos) return;
     
     setDraggingId(id);
     setSelectedOfferId(id);
     
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setDragOffset({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -212,16 +214,118 @@ const OffersGridEditor = ({ offers, onRefresh }: OffersGridEditorProps) => {
   // Calculate max row for grid height
   const maxRow = Math.max(...positions.map(p => p.row + p.height), 2);
 
+  // Render offer card exactly like customer sees it
+  const renderOfferCard = (offer: SpecialOffer, pos: GridPosition, isEditable: boolean = true) => {
+    const isSelected = selectedOfferId === pos.id;
+    const isDragging = draggingId === pos.id;
+
+    return (
+      <div
+        key={pos.id}
+        className={`group relative overflow-hidden transition-all duration-300 ${
+          pos.isCircle ? 'rounded-full' : 'rounded-2xl'
+        } shadow-lg ${isDragging ? 'z-50 scale-105 shadow-2xl cursor-grabbing' : 'cursor-grab'} ${
+          isSelected && isEditable ? 'ring-4 ring-primary ring-offset-2 ring-offset-background' : ''
+        } ${isEditable ? 'hover:shadow-2xl hover:scale-[1.02]' : ''}`}
+        style={{
+          position: isEditable ? 'absolute' : 'relative',
+          left: isEditable ? `${pos.col * (CELL_SIZE + GAP)}px` : undefined,
+          top: isEditable ? `${pos.row * (CELL_SIZE + GAP)}px` : undefined,
+          width: isEditable ? `${pos.width * CELL_SIZE + (pos.width - 1) * GAP}px` : undefined,
+          height: isEditable ? `${pos.height * CELL_SIZE + (pos.height - 1) * GAP}px` : undefined,
+          gridColumn: !isEditable ? `span ${pos.width}` : undefined,
+          gridRow: !isEditable ? `span ${pos.height}` : undefined,
+          background: offer.image_url ? undefined : `linear-gradient(135deg, ${offer.background_color}, ${offer.background_color}dd)`,
+        }}
+        onMouseDown={isEditable ? (e) => handleDragStart(e, pos.id) : undefined}
+        onClick={isEditable ? () => setSelectedOfferId(pos.id) : undefined}
+      >
+        {/* Animated Glow Border */}
+        <div 
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ 
+            boxShadow: `0 0 30px ${offer.background_color}80, 0 0 60px ${offer.background_color}40`,
+          }}
+        />
+
+        {/* Badge */}
+        {offer.offer_type === 'bundle' && offer.required_quantity && (
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold shadow-lg animate-pulse">
+            <Flame className="h-3 w-3" />
+            اختر {offer.required_quantity}
+          </div>
+        )}
+
+        {/* Background Image or Gradient */}
+        {offer.image_url ? (
+          <img
+            src={offer.image_url}
+            alt={offer.name}
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+              pos.isCircle ? 'rounded-full' : ''
+            }`}
+          />
+        ) : (
+          <div 
+            className={`w-full h-full flex items-center justify-center ${pos.isCircle ? 'rounded-full' : ''}`}
+            style={{ backgroundColor: offer.background_color }}
+          >
+            <Package className="h-12 w-12 opacity-30 animate-pulse" style={{ color: offer.text_color }} />
+          </div>
+        )}
+
+        {/* Gradient Overlay - Centered Content */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:via-black/50 transition-all duration-300 flex flex-col items-center justify-end text-center p-3 pb-4 ${
+          pos.isCircle ? 'rounded-full' : ''
+        }`}>
+          <h3 className="font-bold text-sm md:text-base mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white leading-tight line-clamp-2">
+            {offer.name}
+          </h3>
+          
+          {offer.condition_text && !pos.isCircle && (
+            <p className="text-xs text-white/90 mb-2 line-clamp-1 drop-shadow-lg">{offer.condition_text}</p>
+          )}
+          
+          {/* Countdown Timer */}
+          {offer.expires_at && !pos.isCircle && (
+            <div className="mb-2 scale-75">
+              <CountdownTimer expiresAt={offer.expires_at} size="sm" showLabels={false} />
+            </div>
+          )}
+          
+          {/* Price Display */}
+          {offer.bundle_price ? (
+            <div className="inline-flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 rounded-full text-white font-bold shadow-xl text-xs group-hover:animate-pulse">
+              <Zap className="h-3 w-3" />
+              {offer.required_quantity} بـ {offer.bundle_price}₪
+            </div>
+          ) : offer.price ? (
+            <div className="inline-block bg-primary px-2 py-1 rounded-full font-bold shadow-xl text-xs text-white group-hover:animate-pulse">
+              {offer.price}₪
+            </div>
+          ) : null}
+        </div>
+
+        {/* Drag indicator for editable mode */}
+        {isEditable && (
+          <div className="absolute top-2 left-2 opacity-50 group-hover:opacity-100 bg-black/50 rounded-full p-1 transition-opacity">
+            <Move className="h-3 w-3 text-white" />
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="mt-8 border-t pt-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold">محرر ترتيب العروض</h2>
           <p className="text-muted-foreground text-sm">اسحب العروض لترتيبها كما ستظهر للزبون</p>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant={previewMode ? "default" : "outline"}
             size="sm"
             onClick={() => setPreviewMode(!previewMode)}
             className="gap-2"
@@ -250,295 +354,190 @@ const OffersGridEditor = ({ offers, onRefresh }: OffersGridEditorProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
-        {/* Grid Canvas */}
-        <Card className="p-4 overflow-auto">
-          <div
-            id="offers-grid-canvas"
-            className="relative bg-muted/30 rounded-xl p-4"
-            style={{
-              backgroundImage: 'linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px)',
-              backgroundSize: `${CELL_SIZE + GAP}px ${CELL_SIZE + GAP}px`,
-              minHeight: `${maxRow * (CELL_SIZE + GAP) + GAP}px`,
-              width: `${GRID_COLS * (CELL_SIZE + GAP) + GAP}px`,
-            }}
-            onMouseMove={handleDrag}
-            onMouseUp={handleDragEnd}
-            onMouseLeave={handleDragEnd}
-          >
-            {/* Grid cells overlay */}
-            {Array.from({ length: GRID_COLS * maxRow }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute border border-dashed border-border/30 rounded-lg pointer-events-none"
-                style={{
-                  left: `${(i % GRID_COLS) * (CELL_SIZE + GAP) + GAP / 2}px`,
-                  top: `${Math.floor(i / GRID_COLS) * (CELL_SIZE + GAP) + GAP / 2}px`,
-                  width: `${CELL_SIZE}px`,
-                  height: `${CELL_SIZE}px`,
-                }}
-              />
-            ))}
+      {!previewMode ? (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+          {/* Grid Canvas */}
+          <Card className="p-6 overflow-auto bg-muted/20">
+            <div
+              id="offers-grid-canvas"
+              className="relative mx-auto"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, hsl(var(--border) / 0.3) 1px, transparent 1px),
+                  linear-gradient(to bottom, hsl(var(--border) / 0.3) 1px, transparent 1px)
+                `,
+                backgroundSize: `${CELL_SIZE + GAP}px ${CELL_SIZE + GAP}px`,
+                minHeight: `${maxRow * (CELL_SIZE + GAP)}px`,
+                width: `${GRID_COLS * (CELL_SIZE + GAP)}px`,
+              }}
+              onMouseMove={handleDrag}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+            >
+              {/* Offer cards */}
+              {positions.map(pos => {
+                const offer = offers.find(o => o.id === pos.id);
+                if (!offer) return null;
+                return renderOfferCard(offer, pos, true);
+              })}
+            </div>
 
-            {/* Offer cards */}
-            {positions.map(pos => {
-              const offer = offers.find(o => o.id === pos.id);
-              if (!offer) return null;
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              💡 اسحب البطاقات لتغيير مواقعها • الشبكة 4 أعمدة كما يراها الزبون
+            </p>
+          </Card>
 
-              const isSelected = selectedOfferId === pos.id;
-              const isDragging = draggingId === pos.id;
+          {/* Settings Panel */}
+          <Card className="p-4 h-fit sticky top-4">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <GripVertical className="h-4 w-4" />
+              إعدادات البطاقة
+            </h3>
 
-              return (
-                <div
-                  key={pos.id}
-                  className={`absolute cursor-move transition-all duration-150 ${
-                    isDragging ? 'z-50 scale-105 shadow-2xl' : 'z-10'
-                  } ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''} ${
-                    pos.isCircle ? 'rounded-full' : 'rounded-xl'
+            {selectedOffer && selectedPosition ? (
+              <div className="space-y-4">
+                {/* Offer mini preview */}
+                <div 
+                  className={`w-full aspect-square relative overflow-hidden ${
+                    selectedPosition.isCircle ? 'rounded-full' : 'rounded-xl'
                   }`}
-                  style={{
-                    left: `${pos.col * (CELL_SIZE + GAP) + GAP / 2}px`,
-                    top: `${pos.row * (CELL_SIZE + GAP) + GAP / 2}px`,
-                    width: `${pos.width * CELL_SIZE + (pos.width - 1) * GAP}px`,
-                    height: `${pos.height * CELL_SIZE + (pos.height - 1) * GAP}px`,
-                    backgroundColor: offer.background_color,
-                    color: offer.text_color,
+                  style={{ 
+                    background: selectedOffer.image_url ? undefined : `linear-gradient(135deg, ${selectedOffer.background_color}, ${selectedOffer.background_color}dd)`,
                   }}
-                  onMouseDown={(e) => handleDragStart(e, pos.id)}
-                  onClick={() => setSelectedOfferId(pos.id)}
                 >
-                  {/* Card content */}
-                  <div className={`relative w-full h-full flex flex-col items-center justify-center p-2 overflow-hidden ${
-                    pos.isCircle ? 'rounded-full' : 'rounded-xl'
-                  }`}>
-                    {offer.image_url ? (
-                      <img
-                        src={offer.image_url}
-                        alt={offer.name}
-                        className={`absolute inset-0 w-full h-full object-cover ${
-                          pos.isCircle ? 'rounded-full' : 'rounded-xl'
-                        }`}
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                        {offer.offer_type === 'bundle' ? (
-                          <Flame className="h-12 w-12" />
-                        ) : (
-                          <Sparkles className="h-12 w-12" />
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Content overlay */}
-                    <div className="relative z-10 text-center">
-                      <p className="font-bold text-xs truncate max-w-full px-1" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
-                        {offer.name}
-                      </p>
-                      {offer.offer_type === 'bundle' && offer.bundle_price && (
-                        <p className="text-xs opacity-80">
-                          {offer.required_quantity} بـ {offer.bundle_price}₪
-                        </p>
+                  {selectedOffer.image_url ? (
+                    <img 
+                      src={selectedOffer.image_url} 
+                      alt={selectedOffer.name}
+                      className={`w-full h-full object-cover ${
+                        selectedPosition.isCircle ? 'rounded-full' : 'rounded-xl'
+                      }`}
+                    />
+                  ) : (
+                    <div className={`w-full h-full flex items-center justify-center ${
+                      selectedPosition.isCircle ? 'rounded-full' : ''
+                    }`}>
+                      {selectedOffer.offer_type === 'bundle' ? (
+                        <Flame className="h-12 w-12 opacity-30" style={{ color: selectedOffer.text_color }} />
+                      ) : (
+                        <Sparkles className="h-12 w-12 opacity-30" style={{ color: selectedOffer.text_color }} />
                       )}
                     </div>
-
-                    {/* Drag handle indicator */}
-                    <div className="absolute top-1 right-1 opacity-50 hover:opacity-100">
-                      <Move className="h-3 w-3" />
-                    </div>
-
-                    {/* Size indicator */}
-                    <div className="absolute bottom-1 left-1 text-[10px] opacity-50 bg-black/30 px-1 rounded">
-                      {pos.width}x{pos.height}
-                    </div>
+                  )}
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-center pb-3 ${
+                    selectedPosition.isCircle ? 'rounded-full' : ''
+                  }`}>
+                    <p className="text-white font-bold text-sm text-center px-2">{selectedOffer.name}</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
 
-          <p className="text-xs text-muted-foreground text-center mt-3">
-            اسحب البطاقات لتغيير مواقعها • الشبكة 4 أعمدة
-          </p>
-        </Card>
+                {/* Size selection */}
+                <div>
+                  <Label className="text-xs mb-2 block">نوع البطاقة</Label>
+                  <Select 
+                    value={selectedPosition.isCircle ? 'circle' : 
+                           selectedPosition.width === 2 && selectedPosition.height === 2 ? '4x4' :
+                           selectedPosition.width === 2 ? '2x4' : '2x2'}
+                    onValueChange={updateOfferSize}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2x2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-primary/20 rounded" />
+                          مربع صغير (1×1)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="2x4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-4 bg-primary/20 rounded" />
+                          مستطيل عرضي (2×1)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="4x4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-primary/20 rounded" />
+                          مربع كبير (2×2)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="circle">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-primary/20 rounded-full" />
+                          دائرة
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* Settings Panel */}
-        <Card className="p-4 h-fit">
-          <h3 className="font-bold mb-4 flex items-center gap-2">
-            <GripVertical className="h-4 w-4" />
-            إعدادات البطاقة
-          </h3>
-
-          {selectedOffer && selectedPosition ? (
-            <div className="space-y-4">
-              {/* Offer preview */}
-              <div 
-                className={`w-full aspect-square flex items-center justify-center ${
-                  selectedPosition.isCircle ? 'rounded-full' : 'rounded-xl'
-                }`}
-                style={{ 
-                  backgroundColor: selectedOffer.background_color,
-                  color: selectedOffer.text_color,
-                }}
-              >
-                {selectedOffer.image_url ? (
-                  <img 
-                    src={selectedOffer.image_url} 
-                    alt={selectedOffer.name}
-                    className={`w-full h-full object-cover ${
-                      selectedPosition.isCircle ? 'rounded-full' : 'rounded-xl'
-                    }`}
-                  />
-                ) : (
-                  <div className="text-center p-4">
-                    {selectedOffer.offer_type === 'bundle' ? (
-                      <Flame className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    ) : (
-                      <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    )}
-                    <p className="font-bold text-sm">{selectedOffer.name}</p>
+                {/* Position info */}
+                <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">العمود</p>
+                    <p className="font-bold text-lg">{selectedPosition.col + 1}</p>
                   </div>
-                )}
-              </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">الصف</p>
+                    <p className="font-bold text-lg">{selectedPosition.row + 1}</p>
+                  </div>
+                </div>
 
-              {/* Title */}
-              <div>
-                <Label className="text-xs">اسم العرض</Label>
-                <Input value={selectedOffer.name} disabled className="mt-1" />
-              </div>
-
-              {/* Size selection */}
-              <div>
-                <Label className="text-xs">نوع البطاقة</Label>
-                <Select 
-                  value={selectedPosition.isCircle ? 'circle' : 
-                         selectedPosition.width === 2 && selectedPosition.height === 2 ? '4x4' :
-                         selectedPosition.width === 2 ? '2x4' : '2x2'}
-                  onValueChange={updateOfferSize}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2x2">مربع صغير (1×1)</SelectItem>
-                    <SelectItem value="2x4">مستطيل عرضي (2×1)</SelectItem>
-                    <SelectItem value="4x4">مربع كبير (2×2)</SelectItem>
-                    <SelectItem value="circle">دائرة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Position info */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs">العمود</Label>
-                  <Input 
-                    type="number" 
-                    value={selectedPosition.col + 1} 
-                    disabled 
-                    className="mt-1" 
+                {/* Circle toggle */}
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <Label className="text-sm">شكل دائري</Label>
+                  <Switch 
+                    checked={selectedPosition.isCircle}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        updateOfferSize('circle');
+                      } else {
+                        updateOfferSize('2x2');
+                      }
+                    }}
                   />
                 </div>
-                <div>
-                  <Label className="text-xs">الصف</Label>
-                  <Input 
-                    type="number" 
-                    value={selectedPosition.row + 1} 
-                    disabled 
-                    className="mt-1" 
-                  />
-                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  💡 اسحب البطاقة في الشبكة لتغيير موقعها
+                </p>
               </div>
-
-              {/* Circle toggle */}
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <Label className="text-sm">شكل دائري</Label>
-                <Switch 
-                  checked={selectedPosition.isCircle}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      updateOfferSize('circle');
-                    } else {
-                      updateOfferSize('2x2');
-                    }
-                  }}
-                />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <GripVertical className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                <p className="text-sm">اضغط على بطاقة لتعديلها</p>
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                💡 اسحب البطاقة في الشبكة لتغيير موقعها
-              </p>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <GripVertical className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">اضغط على بطاقة لتعديلها</p>
-            </div>
-          )}
-        </Card>
-      </div>
-
-      {/* Preview Mode Modal */}
-      {previewMode && (
-        <div className="fixed inset-0 bg-background/95 z-50 overflow-auto">
-          <div className="container py-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">معاينة صفحة العروض</h2>
-              <Button onClick={() => setPreviewMode(false)}>
-                إغلاق المعاينة
-              </Button>
-            </div>
-            
-            {/* Customer view grid */}
-            <div 
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gridAutoRows: '120px',
-              }}
-            >
-              {positions
-                .sort((a, b) => a.row - b.row || a.col - b.col)
-                .map(pos => {
-                  const offer = offers.find(o => o.id === pos.id);
-                  if (!offer) return null;
-
-                  return (
-                    <div
-                      key={pos.id}
-                      className={`relative overflow-hidden ${
-                        pos.isCircle ? 'rounded-full' : 'rounded-2xl'
-                      }`}
-                      style={{
-                        gridColumn: `span ${pos.width}`,
-                        gridRow: `span ${pos.height}`,
-                        backgroundColor: offer.background_color,
-                        color: offer.text_color,
-                      }}
-                    >
-                      {offer.image_url ? (
-                        <img
-                          src={offer.image_url}
-                          alt={offer.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : null}
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                        <h3 className="font-bold text-lg">{offer.name}</h3>
-                        {offer.offer_type === 'bundle' && offer.bundle_price && (
-                          <p className="text-sm opacity-90">
-                            اختر {offer.required_quantity} بـ {offer.bundle_price}₪
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
+            )}
+          </Card>
         </div>
+      ) : (
+        /* Preview Mode - Exactly like customer view */
+        <Card className="p-6 bg-background">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
+              <Eye className="h-4 w-4" />
+              هذا ما سيراه الزبون
+            </div>
+          </div>
+          
+          <div 
+            className="grid gap-4 mx-auto"
+            style={{
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gridAutoRows: '140px',
+              maxWidth: `${GRID_COLS * (CELL_SIZE + GAP)}px`,
+            }}
+          >
+            {positions
+              .sort((a, b) => a.row - b.row || a.col - b.col)
+              .map(pos => {
+                const offer = offers.find(o => o.id === pos.id);
+                if (!offer) return null;
+                return renderOfferCard(offer, pos, false);
+              })}
+          </div>
+        </Card>
       )}
     </div>
   );
