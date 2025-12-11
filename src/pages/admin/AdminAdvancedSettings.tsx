@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HardDrive, Database, FileImage, RefreshCw, Send, Lock, AlertTriangle, RotateCcw } from 'lucide-react';
+import { HardDrive, Database, FileImage, RefreshCw, Send, Lock, LockOpen, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -338,11 +338,34 @@ const AdminAdvancedSettings = () => {
                   بعد التفعيل، لن يستطيع أي شخص الوصول لصفحة /setup
                 </p>
               </div>
-              <Switch 
-                checked={setupLocked}
-                onCheckedChange={handleToggleSetupLock}
-                disabled={savingSetupLock}
-              />
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={setupLocked}
+                  onCheckedChange={handleToggleSetupLock}
+                  disabled={savingSetupLock}
+                />
+                <Button
+                  variant={setupLocked ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => handleToggleSetupLock(!setupLocked)}
+                  disabled={savingSetupLock}
+                  className="gap-2"
+                >
+                  {savingSetupLock ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : setupLocked ? (
+                    <>
+                      <LockOpen className="h-4 w-4" />
+                      فتح القفل
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" />
+                      قفل الآن
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
             
             {setupLocked && (
