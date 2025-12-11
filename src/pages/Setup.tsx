@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useSupabaseContext } from '@/contexts/SupabaseContext';
 import { testSupabaseConnection, createRuntimeSupabaseClient } from '@/lib/supabase-runtime';
+import { reinitializeSupabase } from '@/lib/supabase-wrapper';
 import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy } from 'lucide-react';
 
 type Step = 'welcome' | 'supabase' | 'database' | 'admin' | 'store' | 'complete';
@@ -161,19 +162,26 @@ const Setup = () => {
   const handleComplete = () => {
     // Clear ALL cached data to ensure fresh data from new database
     const keysToRemove = [
+      'store_settings_cache',
       'store_settings',
+      'storeSettings',
       'store_categories', 
       'store_products',
       'store_brands',
       'cart',
       'my_orders',
       'favorites_guest',
-      'welcome_popup_shown'
+      'favorites',
+      'welcome_popup_shown',
+      'visitor_id'
     ];
     
     keysToRemove.forEach(key => localStorage.removeItem(key));
     
-    // Force full page reload to reinitialize Supabase client with new credentials
+    // Reinitialize Supabase client with new credentials
+    reinitializeSupabase();
+    
+    // Force full page reload
     window.location.href = '/';
   };
 
