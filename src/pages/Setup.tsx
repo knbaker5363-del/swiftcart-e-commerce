@@ -159,11 +159,19 @@ const Setup = () => {
   };
 
   const handleComplete = () => {
-    // Clear any cached data to ensure fresh data from new database
-    localStorage.removeItem('store_settings');
-    localStorage.removeItem('store_categories');
-    localStorage.removeItem('store_products');
-    localStorage.removeItem('store_brands');
+    // Clear ALL cached data to ensure fresh data from new database
+    const keysToRemove = [
+      'store_settings',
+      'store_categories', 
+      'store_products',
+      'store_brands',
+      'cart',
+      'my_orders',
+      'favorites_guest',
+      'welcome_popup_shown'
+    ];
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key));
     
     // Force full page reload to reinitialize Supabase client with new credentials
     window.location.href = '/';
