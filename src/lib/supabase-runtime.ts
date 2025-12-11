@@ -91,3 +91,50 @@ export const testSupabaseConnection = async (url: string, anonKey: string): Prom
     return false;
   }
 };
+
+// Clear all Supabase-related data from localStorage
+export const clearAllSupabaseData = (): void => {
+  try {
+    const keysToRemove: string[] = [];
+    
+    // Find all Supabase auth tokens (pattern: sb-*-auth-token)
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-')) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    // Add other store-related keys
+    const storeKeys = [
+      CONFIG_KEY,
+      'store_settings_cache',
+      'store_settings',
+      'storeSettings',
+      'store_categories', 
+      'store_products',
+      'store_brands',
+      'cart',
+      'my_orders',
+      'favorites_guest',
+      'favorites',
+      'welcome_popup_shown',
+      'visitor_id'
+    ];
+    
+    keysToRemove.push(...storeKeys);
+    
+    // Remove all identified keys
+    keysToRemove.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        console.error(`Error removing key ${key}:`, e);
+      }
+    });
+    
+    console.log('Cleared all Supabase data from localStorage');
+  } catch (e) {
+    console.error('Error clearing Supabase data:', e);
+  }
+};

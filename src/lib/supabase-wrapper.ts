@@ -47,7 +47,23 @@ export const getSupabaseClient = (): SupabaseClient<Database> | null => {
 
 // Function to reinitialize after setup
 export const reinitializeSupabase = (url?: string, anonKey?: string): SupabaseClient<Database> | null => {
+  // Clear the existing instance
   supabaseInstance = null;
+  
+  // Clear any existing auth session from the old instance
+  try {
+    // Find and remove all Supabase auth tokens
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.includes('auth-token')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+  } catch (e) {
+    console.error('Error clearing auth tokens:', e);
+  }
   
   // If explicit credentials provided, use them
   if (url && anonKey) {

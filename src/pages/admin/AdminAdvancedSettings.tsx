@@ -4,16 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HardDrive, Database, FileImage, RefreshCw, Send, Lock, AlertTriangle } from 'lucide-react';
+import { HardDrive, Database, FileImage, RefreshCw, Send, Lock, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { clearAllSupabaseData } from '@/lib/supabase-runtime';
+import { useNavigate } from 'react-router-dom';
 
 const AdminAdvancedSettings = () => {
   const { settings, loading } = useSettings();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Telegram
   const [telegramBotToken, setTelegramBotToken] = useState('');
@@ -103,7 +117,46 @@ const AdminAdvancedSettings = () => {
     }
   };
 
-  const handleSetupWebhook = async () => {
+  const handleResetConnection = async () => {
+    try {
+      // First unlock setup page
+      const { data: existing } = await supabase
+        .from('settings')
+        .select('id')
+        .maybeSingle();
+      
+      if (existing) {
+        await supabase
+          .from('settings')
+          .update({ setup_locked: false } as any)
+          .eq('id', existing.id);
+      }
+
+      // Sign out
+      await supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear all Supabase data
+      clearAllSupabaseData();
+      
+      toast({ 
+        title: 'تم إعادة التعيين', 
+        description: 'سيتم نقلك لصفحة الإعداد...' 
+      });
+      
+      // Small delay then redirect to setup
+      setTimeout(() => {
+        window.location.href = '/setup';
+      }, 1000);
+    } catch (error) {
+      console.error('Error resetting connection:', error);
+      toast({ 
+        title: 'خطأ', 
+        description: 'حدث خطأ أثناء إعادة التعيين',
+        variant: 'destructive' 
+      });
+    }
+  };
+
     if (!telegramBotToken) {
       toast({ title: 'يرجى إدخال توكين البوت أولاً', variant: 'destructive' });
       return;
@@ -299,6 +352,73 @@ const AdminAdvancedSettings = () => {
                 </AlertDescription>
               </Alert>
             )}
+          </CardContent>
+        </Card>
+
+        {/* إعادة تعيين الاتصال */}
+        <Card className="border-red-200 dark:border-red-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+              <RotateCcw className="h-5 w-5" />
+              إعادة تعيين الاتصال بقاعدة البيانات
+            </CardTitle>
+            <CardDescription>
+              قم بإعادة تكوين الاتصال بحساب Supabase جديد أو إعادة إعداد المتجر من البداية
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-red-500/50 bg-red-500/10">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+              <AlertDescription className="text-red-700 dark:text-red-300">
+                <strong>تحذير:</strong> هذا الإجراء سيقوم بـ:
+                <ul className="list-disc list-inside mt-2 mr-4 space-y-1">
+                  <li>مسح جميع بيانات الاتصال الحالية</li>
+                  <li>تسجيل خروجك من حسابك</li>
+                  <li>إعادتك لصفحة الإعداد لربط حساب Supabase جديد</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <h4 className="font-semibold">متى تستخدم هذه الميزة؟</h4>
+              <ul className="text-sm text-muted-foreground space-y-2 mr-4">
+                <li>✓ عند الرغبة في ربط حساب Supabase جديد</li>
+                <li>✓ عند الانتقال لمشروع Supabase آخر</li>
+                <li>✓ عند مواجهة مشاكل في الاتصال بقاعدة البيانات</li>
+                <li>✓ عند الرغبة في البدء من جديد بقاعدة بيانات فارغة</li>
+              </ul>
+            </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  إعادة تعيين الاتصال والذهاب لصفحة الإعداد
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>هل أنت متأكد من إعادة التعيين؟</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p>
+                      سيتم مسح جميع بيانات الاتصال المحلية وتسجيل خروجك.
+                    </p>
+                    <p className="font-semibold text-red-600 dark:text-red-400">
+                      تأكد من حفظ بيانات الاتصال الحالية إذا كنت ستحتاجها لاحقاً!
+                    </p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleResetConnection}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    نعم، إعادة التعيين
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
 
