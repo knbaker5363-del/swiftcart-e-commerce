@@ -429,6 +429,14 @@ const Setup = () => {
       clearAllSupabaseData();
       console.log('Cleared all old Supabase data');
       
+      // IMPORTANT: Re-save config AFTER clearing (clearAllSupabaseData removes the config too)
+      saveConfig({
+        supabaseUrl,
+        supabaseAnonKey,
+        isConfigured: true,
+      });
+      console.log('Saved new Supabase config to localStorage');
+      
       reinitializeSupabase(supabaseUrl, supabaseAnonKey);
       console.log('Reinitialized Supabase with new credentials');
       
