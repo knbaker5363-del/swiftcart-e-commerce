@@ -9,9 +9,10 @@ import { useConfig } from '@/contexts/ConfigContext';
 import { useSupabaseContext } from '@/contexts/SupabaseContext';
 import { testSupabaseConnection, createRuntimeSupabaseClient, clearAllSupabaseData } from '@/lib/supabase-runtime';
 import { reinitializeSupabase } from '@/lib/supabase-wrapper';
-import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy, Upload, RefreshCw } from 'lucide-react';
+import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy, Upload, RefreshCw, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
-type Step = 'welcome' | 'supabase' | 'detect' | 'database' | 'admin' | 'store' | 'import-confirm' | 'complete';
+type Step = 'welcome' | 'supabase' | 'detect' | 'schema-check' | 'database' | 'admin' | 'store' | 'import-confirm' | 'complete';
 type SetupMode = 'new' | 'import';
 
 interface ExistingData {
@@ -19,8 +20,48 @@ interface ExistingData {
   hasAdmin: boolean;
   hasProducts: boolean;
   productsCount: number;
+  categoriesCount: number;
+  brandsCount: number;
+  ordersCount: number;
   existingStoreName?: string;
 }
+
+interface SchemaCheckResult {
+  table: string;
+  exists: boolean;
+  missingColumns: string[];
+  status: 'ok' | 'missing' | 'incomplete';
+}
+
+interface SchemaValidation {
+  isValid: boolean;
+  isPartiallyValid: boolean;
+  results: SchemaCheckResult[];
+  missingTables: string[];
+  incompleteTables: string[];
+}
+
+// Required tables and their essential columns
+const REQUIRED_SCHEMA = {
+  settings: ['id', 'store_name', 'theme', 'created_at', 'updated_at'],
+  products: ['id', 'name', 'price', 'is_active', 'created_at'],
+  categories: ['id', 'name', 'created_at'],
+  brands: ['id', 'name', 'created_at'],
+  orders: ['id', 'customer_name', 'customer_phone', 'customer_address', 'total_amount', 'status', 'created_at'],
+  order_items: ['id', 'order_id', 'product_id', 'quantity', 'price_at_purchase'],
+  user_roles: ['id', 'user_id', 'role', 'created_at'],
+  profiles: ['id', 'email', 'created_at'],
+  favorites: ['id', 'user_id', 'product_id', 'created_at'],
+  product_categories: ['id', 'product_id', 'category_id'],
+  special_offers: ['id', 'name', 'is_active', 'created_at'],
+  special_offer_products: ['id', 'offer_id', 'product_id'],
+  gift_offers: ['id', 'name', 'minimum_amount', 'is_active'],
+  gift_products: ['id', 'gift_offer_id', 'product_id'],
+  promo_codes: ['id', 'code', 'discount_percentage', 'is_active'],
+  page_views: ['id', 'visitor_id', 'page_path', 'created_at'],
+  product_views: ['id', 'visitor_id', 'product_id', 'created_at'],
+  sensitive_settings: ['id', 'telegram_bot_token', 'telegram_chat_id'],
+};
 
 const Setup = () => {
   const navigate = useNavigate();
@@ -32,6 +73,8 @@ const Setup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [setupMode, setSetupMode] = useState<SetupMode>('new');
   const [existingData, setExistingData] = useState<ExistingData | null>(null);
+  const [schemaValidation, setSchemaValidation] = useState<SchemaValidation | null>(null);
+  const [checkProgress, setCheckProgress] = useState(0);
   
   // Supabase credentials
   const [supabaseUrl, setSupabaseUrl] = useState('');
@@ -53,7 +96,7 @@ const Setup = () => {
       return [
         { id: 'welcome', title: 'مرحباً', icon: <Sparkles className="h-5 w-5" /> },
         { id: 'supabase', title: 'ربط قاعدة البيانات', icon: <Database className="h-5 w-5" /> },
-        { id: 'detect', title: 'فحص البيانات', icon: <RefreshCw className="h-5 w-5" /> },
+        { id: 'schema-check', title: 'فحص الهيكل', icon: <RefreshCw className="h-5 w-5" /> },
         { id: 'import-confirm', title: 'تأكيد الاستيراد', icon: <Upload className="h-5 w-5" /> },
         { id: 'complete', title: 'انتهى!', icon: <Check className="h-5 w-5" /> },
       ];
@@ -61,7 +104,7 @@ const Setup = () => {
     return [
       { id: 'welcome', title: 'مرحباً', icon: <Sparkles className="h-5 w-5" /> },
       { id: 'supabase', title: 'ربط قاعدة البيانات', icon: <Database className="h-5 w-5" /> },
-      { id: 'detect', title: 'فحص البيانات', icon: <RefreshCw className="h-5 w-5" /> },
+      { id: 'schema-check', title: 'فحص الهيكل', icon: <RefreshCw className="h-5 w-5" /> },
       { id: 'database', title: 'تهيئة الجداول', icon: <FileCode className="h-5 w-5" /> },
       { id: 'admin', title: 'حساب المدير', icon: <User className="h-5 w-5" /> },
       { id: 'store', title: 'إعدادات المتجر', icon: <Store className="h-5 w-5" /> },
@@ -70,6 +113,57 @@ const Setup = () => {
   };
 
   const steps = getStepsForMode();
+
+  const checkTableSchema = async (client: any, tableName: string, requiredColumns: string[]): Promise<SchemaCheckResult> => {
+    try {
+      // Try to select from the table with limit 0 to check if it exists
+      const { data, error } = await client.from(tableName).select(requiredColumns.join(',')).limit(0);
+      
+      if (error) {
+        // Check if error is about missing table or missing columns
+        if (error.message?.includes('does not exist') || error.code === '42P01') {
+          return { table: tableName, exists: false, missingColumns: requiredColumns, status: 'missing' };
+        }
+        
+        // Check for missing columns
+        const missingColumns: string[] = [];
+        for (const col of requiredColumns) {
+          const { error: colError } = await client.from(tableName).select(col).limit(0);
+          if (colError) {
+            missingColumns.push(col);
+          }
+        }
+        
+        if (missingColumns.length > 0) {
+          return { table: tableName, exists: true, missingColumns, status: 'incomplete' };
+        }
+      }
+      
+      return { table: tableName, exists: true, missingColumns: [], status: 'ok' };
+    } catch (err) {
+      return { table: tableName, exists: false, missingColumns: requiredColumns, status: 'missing' };
+    }
+  };
+
+  const validateSchema = async (): Promise<SchemaValidation> => {
+    const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
+    const results: SchemaCheckResult[] = [];
+    const tables = Object.entries(REQUIRED_SCHEMA);
+    
+    for (let i = 0; i < tables.length; i++) {
+      const [tableName, columns] = tables[i];
+      const result = await checkTableSchema(client, tableName, columns);
+      results.push(result);
+      setCheckProgress(Math.round(((i + 1) / tables.length) * 100));
+    }
+    
+    const missingTables = results.filter(r => r.status === 'missing').map(r => r.table);
+    const incompleteTables = results.filter(r => r.status === 'incomplete').map(r => r.table);
+    const isValid = missingTables.length === 0 && incompleteTables.length === 0;
+    const isPartiallyValid = missingTables.length < tables.length / 2;
+    
+    return { isValid, isPartiallyValid, results, missingTables, incompleteTables };
+  };
 
   const checkExistingData = async (): Promise<ExistingData> => {
     const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
@@ -81,13 +175,25 @@ const Setup = () => {
     const { data: admins } = await client.from('user_roles').select('id').eq('role', 'admin').limit(1);
     
     // Check products count
-    const { data: products, count } = await client.from('products').select('id', { count: 'exact' }).limit(1);
+    const { count: productsCount } = await client.from('products').select('id', { count: 'exact', head: true });
+    
+    // Check categories count
+    const { count: categoriesCount } = await client.from('categories').select('id', { count: 'exact', head: true });
+    
+    // Check brands count
+    const { count: brandsCount } = await client.from('brands').select('id', { count: 'exact', head: true });
+    
+    // Check orders count
+    const { count: ordersCount } = await client.from('orders').select('id', { count: 'exact', head: true });
     
     return {
       hasSettings: settings && settings.length > 0,
       hasAdmin: admins && admins.length > 0,
-      hasProducts: products && products.length > 0,
-      productsCount: count || 0,
+      hasProducts: (productsCount || 0) > 0,
+      productsCount: productsCount || 0,
+      categoriesCount: categoriesCount || 0,
+      brandsCount: brandsCount || 0,
+      ordersCount: ordersCount || 0,
       existingStoreName: settings?.[0]?.store_name
     };
   };
@@ -113,31 +219,52 @@ const Setup = () => {
     setIsLoading(false);
   };
 
-  const handleDetectData = async () => {
+  const handleSchemaCheck = async () => {
     setIsLoading(true);
+    setCheckProgress(0);
+    setCurrentStep('schema-check');
+    
     try {
-      const data = await checkExistingData();
-      setExistingData(data);
+      // First validate schema
+      const validation = await validateSchema();
+      setSchemaValidation(validation);
       
-      if (data.hasSettings && data.hasAdmin) {
-        // Database has existing data - use import mode
-        setSetupMode('import');
-        setCurrentStep('import-confirm');
-        if (data.existingStoreName) {
-          setStoreName(data.existingStoreName);
+      if (validation.isValid) {
+        // Schema is complete, check for existing data
+        const data = await checkExistingData();
+        setExistingData(data);
+        
+        if (data.hasSettings && data.hasAdmin) {
+          setSetupMode('import');
+          if (data.existingStoreName) {
+            setStoreName(data.existingStoreName);
+          }
+          toast({ title: 'قاعدة بيانات متوافقة!', description: 'يمكنك استيراد البيانات مباشرة' });
+          setCurrentStep('import-confirm');
+        } else {
+          setSetupMode('new');
+          toast({ title: 'الجداول موجودة', description: 'يمكنك إكمال الإعداد' });
+          setCurrentStep('admin');
         }
-        toast({ title: 'تم اكتشاف بيانات موجودة!', description: 'يمكنك استيراد البيانات مباشرة' });
       } else {
-        // Empty database - proceed with new setup
+        // Schema is incomplete or missing
         setSetupMode('new');
-        setCurrentStep('database');
-        toast({ title: 'قاعدة بيانات جديدة', description: 'سيتم إعداد المتجر من الصفر' });
+        toast({ 
+          title: validation.missingTables.length > 0 ? 'جداول مفقودة' : 'جداول غير مكتملة', 
+          description: 'يجب تشغيل ملف SQL لإنشاء الجداول',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
-      // If tables don't exist, it's a new setup
-      console.log('Tables not found, proceeding with new setup');
+      console.log('Schema check failed, proceeding with new setup');
       setSetupMode('new');
-      setCurrentStep('database');
+      setSchemaValidation({
+        isValid: false,
+        isPartiallyValid: false,
+        results: [],
+        missingTables: Object.keys(REQUIRED_SCHEMA),
+        incompleteTables: []
+      });
     }
     setIsLoading(false);
   };
@@ -176,7 +303,6 @@ const Setup = () => {
     try {
       const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
       
-      // Sign up the admin user
       const { data: authData, error: signUpError } = await client.auth.signUp({
         email: adminEmail,
         password: adminPassword,
@@ -188,10 +314,8 @@ const Setup = () => {
       if (signUpError) throw signUpError;
 
       if (authData.user) {
-        // Wait a bit for the trigger to create profile
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Add admin role
         const { error: roleError } = await client.from('user_roles').insert({
           user_id: authData.user.id,
           role: 'admin'
@@ -216,11 +340,9 @@ const Setup = () => {
     try {
       const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
       
-      // Check if settings exist
       const { data: existingSettings } = await client.from('settings').select('id').limit(1);
       
       if (existingSettings && existingSettings.length > 0) {
-        // Update existing settings and lock setup
         await client.from('settings').update({
           store_name: storeName,
           location: storeLocation,
@@ -228,7 +350,6 @@ const Setup = () => {
           setup_locked: true,
         }).eq('id', existingSettings[0].id);
       } else {
-        // Insert new settings
         await client.from('settings').insert({
           store_name: storeName,
           location: storeLocation,
@@ -237,7 +358,6 @@ const Setup = () => {
         });
       }
 
-      // Save config to localStorage
       saveConfig({
         supabaseUrl,
         supabaseAnonKey,
@@ -257,7 +377,6 @@ const Setup = () => {
     try {
       console.log('Starting setup completion...');
       
-      // Sign out from any existing session first
       try {
         const oldClient = reinitializeSupabase();
         if (oldClient) {
@@ -268,18 +387,14 @@ const Setup = () => {
         console.log('No existing session to sign out from');
       }
       
-      // Clear ALL Supabase auth tokens and cached data
       clearAllSupabaseData();
       console.log('Cleared all old Supabase data');
       
-      // Reinitialize Supabase client with new credentials
       reinitializeSupabase(supabaseUrl, supabaseAnonKey);
       console.log('Reinitialized Supabase with new credentials');
       
-      // Small delay to ensure everything is cleared and reinitialized
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // For import mode, go to admin login; for new setup, go to home
       console.log('Reloading page...');
       if (setupMode === 'import') {
         window.location.href = '/admin123';
@@ -295,6 +410,17 @@ const Setup = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'تم النسخ!', description: 'تم نسخ الرابط' });
+  };
+
+  const getStatusIcon = (status: 'ok' | 'missing' | 'incomplete') => {
+    switch (status) {
+      case 'ok':
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case 'missing':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'incomplete':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+    }
   };
 
   const renderStepContent = () => {
@@ -384,28 +510,109 @@ const Setup = () => {
                 رجوع
               </Button>
               <Button 
-                onClick={handleDetectData} 
+                onClick={handleSchemaCheck} 
                 disabled={!connectionTested || isLoading}
                 className="flex-1"
               >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
-                التالي - فحص البيانات
+                التالي - فحص الهيكل
                 <ArrowLeft className="h-4 w-4 mr-2" />
               </Button>
             </div>
           </div>
         );
 
-      case 'detect':
+      case 'schema-check':
         return (
-          <div className="text-center space-y-6">
-            <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                ) : schemaValidation?.isValid ? (
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                ) : (
+                  <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                )}
+              </div>
+              <h2 className="text-xl font-bold">
+                {isLoading ? 'جاري فحص هيكل قاعدة البيانات...' : 
+                 schemaValidation?.isValid ? 'قاعدة البيانات متوافقة!' : 'يوجد جداول مفقودة'}
+              </h2>
             </div>
-            <h2 className="text-xl font-bold">جاري فحص قاعدة البيانات...</h2>
-            <p className="text-muted-foreground">
-              يرجى الانتظار بينما نتحقق من وجود بيانات سابقة
-            </p>
+
+            {isLoading && (
+              <div className="space-y-2">
+                <Progress value={checkProgress} className="h-2" />
+                <p className="text-sm text-center text-muted-foreground">
+                  فحص الجداول... {checkProgress}%
+                </p>
+              </div>
+            )}
+
+            {schemaValidation && !isLoading && (
+              <div className="space-y-4">
+                <div className="bg-muted/50 border rounded-lg p-4 max-h-64 overflow-y-auto">
+                  <h3 className="font-semibold mb-3">نتائج الفحص:</h3>
+                  <div className="space-y-2">
+                    {schemaValidation.results.map((result) => (
+                      <div key={result.table} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(result.status)}
+                          <span className={result.status === 'ok' ? 'text-foreground' : 'text-muted-foreground'}>
+                            {result.table}
+                          </span>
+                        </div>
+                        <span className={`text-xs ${
+                          result.status === 'ok' ? 'text-green-500' : 
+                          result.status === 'missing' ? 'text-red-500' : 'text-yellow-500'
+                        }`}>
+                          {result.status === 'ok' ? 'متوفر' : 
+                           result.status === 'missing' ? 'مفقود' : 'غير مكتمل'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {!schemaValidation.isValid && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      <strong>ملاحظة:</strong> يجب تشغيل ملف SQL لإنشاء الجداول المفقودة قبل المتابعة.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => {
+                    setConnectionTested(false);
+                    setSchemaValidation(null);
+                    setCurrentStep('supabase');
+                  }}>
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                    تغيير الاتصال
+                  </Button>
+                  
+                  {schemaValidation.isValid ? (
+                    <Button 
+                      onClick={() => setCurrentStep('import-confirm')}
+                      className="flex-1"
+                    >
+                      متابعة
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => setCurrentStep('database')}
+                      className="flex-1"
+                    >
+                      تهيئة الجداول
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         );
 
@@ -416,25 +623,49 @@ const Setup = () => {
               <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                 <Database className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-bold">تم اكتشاف بيانات موجودة!</h2>
+              <h2 className="text-xl font-bold">تم التحقق من قاعدة البيانات!</h2>
             </div>
             
             <div className="bg-muted/50 border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">اسم المتجر:</span>
-                <span className="font-semibold">{existingData?.existingStoreName || 'غير محدد'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">حساب أدمن:</span>
-                <span className="font-semibold text-green-600">
-                  {existingData?.hasAdmin ? '✓ موجود' : '✗ غير موجود'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">المنتجات:</span>
-                <span className="font-semibold">{existingData?.productsCount || 0} منتج</span>
+              <h3 className="font-semibold mb-2">ملخص البيانات:</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">اسم المتجر:</span>
+                  <span className="font-semibold">{existingData?.existingStoreName || 'غير محدد'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">حساب أدمن:</span>
+                  <span className={`font-semibold ${existingData?.hasAdmin ? 'text-green-600' : 'text-red-500'}`}>
+                    {existingData?.hasAdmin ? '✓ موجود' : '✗ غير موجود'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">المنتجات:</span>
+                  <span className="font-semibold">{existingData?.productsCount || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">التصنيفات:</span>
+                  <span className="font-semibold">{existingData?.categoriesCount || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">البراندات:</span>
+                  <span className="font-semibold">{existingData?.brandsCount || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">الطلبات:</span>
+                  <span className="font-semibold">{existingData?.ordersCount || 0}</span>
+                </div>
               </div>
             </div>
+
+            {schemaValidation && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>جميع الجداول ({schemaValidation.results.filter(r => r.status === 'ok').length}/{schemaValidation.results.length}) متوافقة مع الإصدار الحالي</span>
+                </p>
+              </div>
+            )}
 
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
               <p className="text-sm text-blue-800 dark:text-blue-200">
@@ -461,7 +692,7 @@ const Setup = () => {
                 }}
                 className="w-full"
               >
-                إعداد جديد (حذف البيانات القديمة)
+                إعداد جديد (تجاهل البيانات الموجودة)
               </Button>
             </div>
             
@@ -469,6 +700,7 @@ const Setup = () => {
               variant="ghost" 
               onClick={() => {
                 setConnectionTested(false);
+                setSchemaValidation(null);
                 setCurrentStep('supabase');
               }}
               className="w-full"
@@ -488,6 +720,17 @@ const Setup = () => {
                 قم بتشغيل ملف SQL في Supabase لإنشاء الجداول المطلوبة
               </p>
             </div>
+            
+            {schemaValidation && schemaValidation.missingTables.length > 0 && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <p className="text-sm text-red-800 dark:text-red-200 font-semibold mb-2">
+                  الجداول المفقودة ({schemaValidation.missingTables.length}):
+                </p>
+                <p className="text-xs text-red-700 dark:text-red-300">
+                  {schemaValidation.missingTables.join('، ')}
+                </p>
+              </div>
+            )}
             
             <div className="space-y-4">
               <div className="bg-muted/50 border rounded-lg p-4 space-y-3">
@@ -525,7 +768,7 @@ const Setup = () => {
 
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  <strong>ملاحظة:</strong> تأكد من تشغيل SQL بالكامل قبل المتابعة. إذا ظهرت أخطاء، تحقق من أن المشروع جديد وفارغ.
+                  <strong>ملاحظة:</strong> تأكد من تشغيل SQL بالكامل قبل المتابعة.
                 </p>
               </div>
             </div>
@@ -536,10 +779,29 @@ const Setup = () => {
                 رجوع
               </Button>
               <Button 
-                onClick={() => setCurrentStep('admin')}
+                onClick={async () => {
+                  // Re-check schema after SQL execution
+                  setIsLoading(true);
+                  const validation = await validateSchema();
+                  setSchemaValidation(validation);
+                  setIsLoading(false);
+                  
+                  if (validation.isValid) {
+                    toast({ title: 'نجاح!', description: 'تم التحقق من الجداول' });
+                    setCurrentStep('admin');
+                  } else {
+                    toast({ 
+                      title: 'لا يزال هناك جداول مفقودة', 
+                      description: 'تأكد من تشغيل ملف SQL بالكامل',
+                      variant: 'destructive'
+                    });
+                  }
+                }}
+                disabled={isLoading}
                 className="flex-1"
               >
-                قمت بتشغيل SQL - التالي
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
+                إعادة الفحص والمتابعة
                 <ArrowLeft className="h-4 w-4 mr-2" />
               </Button>
             </div>
@@ -593,7 +855,7 @@ const Setup = () => {
 
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>تنبيه:</strong> تأكد من تفعيل "Enable email confirmations" في إعدادات Supabase Auth أو استخدم "Auto-confirm" للتسهيل.
+                  <strong>تنبيه:</strong> تأكد من تفعيل "Auto-confirm" في إعدادات Supabase Auth للتسهيل.
                 </p>
               </div>
             </div>
@@ -702,6 +964,8 @@ const Setup = () => {
               <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
                 <p><strong>اسم المتجر:</strong> {existingData.existingStoreName}</p>
                 <p><strong>المنتجات:</strong> {existingData.productsCount} منتج</p>
+                <p><strong>التصنيفات:</strong> {existingData.categoriesCount} تصنيف</p>
+                <p><strong>الطلبات:</strong> {existingData.ordersCount} طلب</p>
                 <p><strong>رابط لوحة التحكم:</strong> /admin123</p>
               </div>
             )}
