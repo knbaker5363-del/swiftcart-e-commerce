@@ -585,6 +585,7 @@ export type Database = {
           font_family: string | null
           gift_display_mode: string | null
           gift_icon_style: string | null
+          header_bg_color: string | null
           header_layout: string | null
           header_logo_position: string | null
           hero_banner_color: string | null
@@ -619,6 +620,7 @@ export type Database = {
           show_image_border: boolean | null
           show_offer_badges: boolean | null
           show_offers_button: boolean | null
+          show_stock_to_customers: boolean | null
           site_style: string | null
           social_facebook: string | null
           social_icon_style: string | null
@@ -681,6 +683,7 @@ export type Database = {
           font_family?: string | null
           gift_display_mode?: string | null
           gift_icon_style?: string | null
+          header_bg_color?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hero_banner_color?: string | null
@@ -715,6 +718,7 @@ export type Database = {
           show_image_border?: boolean | null
           show_offer_badges?: boolean | null
           show_offers_button?: boolean | null
+          show_stock_to_customers?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
           social_icon_style?: string | null
@@ -777,6 +781,7 @@ export type Database = {
           font_family?: string | null
           gift_display_mode?: string | null
           gift_icon_style?: string | null
+          header_bg_color?: string | null
           header_layout?: string | null
           header_logo_position?: string | null
           hero_banner_color?: string | null
@@ -811,6 +816,7 @@ export type Database = {
           show_image_border?: boolean | null
           show_offer_badges?: boolean | null
           show_offers_button?: boolean | null
+          show_stock_to_customers?: boolean | null
           site_style?: string | null
           social_facebook?: string | null
           social_icon_style?: string | null
