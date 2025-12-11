@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useSupabaseContext } from '@/contexts/SupabaseContext';
-import { testSupabaseConnection, createRuntimeSupabaseClient } from '@/lib/supabase-runtime';
+import { testSupabaseConnection, createRuntimeSupabaseClient, clearAllSupabaseData } from '@/lib/supabase-runtime';
 import { reinitializeSupabase } from '@/lib/supabase-wrapper';
 import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy } from 'lucide-react';
 
@@ -159,30 +159,40 @@ const Setup = () => {
     setIsLoading(false);
   };
 
-  const handleComplete = () => {
-    // Clear ALL cached data to ensure fresh data from new database
-    const keysToRemove = [
-      'store_settings_cache',
-      'store_settings',
-      'storeSettings',
-      'store_categories', 
-      'store_products',
-      'store_brands',
-      'cart',
-      'my_orders',
-      'favorites_guest',
-      'favorites',
-      'welcome_popup_shown',
-      'visitor_id'
-    ];
-    
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-    
-    // Reinitialize Supabase client with new credentials
-    reinitializeSupabase();
-    
-    // Force full page reload
-    window.location.href = '/';
+  const handleComplete = async () => {
+    try {
+      console.log('Starting setup completion...');
+      
+      // Sign out from any existing session first
+      try {
+        const oldClient = reinitializeSupabase();
+        if (oldClient) {
+          await oldClient.auth.signOut({ scope: 'local' });
+          console.log('Signed out from existing session');
+        }
+      } catch (e) {
+        console.log('No existing session to sign out from');
+      }
+      
+      // Clear ALL Supabase auth tokens and cached data
+      clearAllSupabaseData();
+      console.log('Cleared all old Supabase data');
+      
+      // Reinitialize Supabase client with new credentials
+      reinitializeSupabase(supabaseUrl, supabaseAnonKey);
+      console.log('Reinitialized Supabase with new credentials');
+      
+      // Small delay to ensure everything is cleared and reinitialized
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force full page reload to fresh state
+      console.log('Reloading page...');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error during completion:', error);
+      // Force reload anyway
+      window.location.href = '/';
+    }
   };
 
   const copyToClipboard = (text: string) => {
