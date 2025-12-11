@@ -63,6 +63,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
   const stockQuantity = product.stock_quantity ?? null;
   const isOutOfStock = trackStock && stockQuantity !== null && stockQuantity <= 0;
   const isLowStock = trackStock && stockQuantity !== null && stockQuantity > 0 && stockQuantity < 5;
+  const showStockToCustomers = (settings as any)?.show_stock_to_customers !== false;
 
   // Size option type for new pricing structure
   interface SizeOption {
@@ -428,11 +429,15 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
                 ) : isLowStock ? (
                   <Badge variant="secondary" className="flex items-center gap-1 bg-orange-100 text-orange-700">
                     <AlertCircle className="h-3 w-3" />
-                    متبقي {stockQuantity} فقط
+                    {showStockToCustomers ? `متبقي ${stockQuantity} فقط` : 'كمية محدودة'}
+                  </Badge>
+                ) : showStockToCustomers ? (
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    متوفر ({stockQuantity})
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-green-100 text-green-700">
-                    متوفر ({stockQuantity})
+                    متوفر
                   </Badge>
                 )}
               </div>

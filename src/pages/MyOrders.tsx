@@ -3,9 +3,10 @@ import { PublicHeader } from '@/components/PublicHeader';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Clock, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, ShoppingBag, Copy } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 
 interface Order {
@@ -110,6 +111,32 @@ const MyOrders = () => {
     }
   };
 
+  const copyOrderDetails = (order: Order) => {
+    const orderText = `
+🛒 طلب #${order.id.substring(0, 8).toUpperCase()}
+━━━━━━━━━━━━━━━━
+👤 الاسم: ${order.customer_name}
+📱 الهاتف: ${order.customer_phone}
+📍 العنوان: ${order.customer_address}
+💰 المجموع: ${order.total_amount.toFixed(2)} ₪
+📊 الحالة: ${getStatusText(order.status)}
+📅 التاريخ: ${new Date(order.created_at).toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })}
+━━━━━━━━━━━━━━━━
+    `.trim();
+    
+    navigator.clipboard.writeText(orderText);
+    toast({
+      title: 'تم النسخ',
+      description: 'تم نسخ تفاصيل الطلب',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <PublicHeader onCartOpen={() => setCartOpen(true)} />
@@ -185,6 +212,19 @@ const MyOrders = () => {
                     <span className="font-medium text-sm flex-1">
                       {order.customer_address}
                     </span>
+                  </div>
+                  
+                  {/* Copy button */}
+                  <div className="pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyOrderDetails(order)}
+                      className="gap-2 w-full sm:w-auto"
+                    >
+                      <Copy className="h-4 w-4" />
+                      نسخ تفاصيل الطلب
+                    </Button>
                   </div>
                 </div>
               </Card>

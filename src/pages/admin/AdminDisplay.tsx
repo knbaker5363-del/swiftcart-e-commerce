@@ -277,6 +277,10 @@ const AdminDisplay = () => {
   const [showImageBorder, setShowImageBorder] = useState(true);
   const [storeNameBlack, setStoreNameBlack] = useState(false);
   const [heroBannerColor, setHeroBannerColor] = useState('#000000');
+  const [headerBgColor, setHeaderBgColor] = useState('#ffffff');
+  
+  // Stock settings
+  const [showStockToCustomers, setShowStockToCustomers] = useState(true);
 
   // Card display settings
   const [cardSize, setCardSize] = useState('medium');
@@ -340,6 +344,8 @@ const AdminDisplay = () => {
       setShowImageBorder((settings as any)?.show_image_border !== false);
       setStoreNameBlack((settings as any)?.store_name_black || false);
       setHeroBannerColor((settings as any)?.hero_banner_color || '#000000');
+      setHeaderBgColor((settings as any)?.header_bg_color || '#ffffff');
+      setShowStockToCustomers((settings as any)?.show_stock_to_customers !== false);
       setCardSize((settings as any)?.card_size || 'medium');
       setCardsPerRowMobile((settings as any)?.cards_per_row_mobile || 2);
       setCardsPerRowDesktop((settings as any)?.cards_per_row_desktop || 4);
@@ -468,6 +474,8 @@ const AdminDisplay = () => {
           show_image_border: showImageBorder,
           store_name_black: storeNameBlack,
           hero_banner_color: heroBannerColor,
+          header_bg_color: headerBgColor,
+          show_stock_to_customers: showStockToCustomers,
           card_size: cardSize,
           cards_per_row_mobile: cardsPerRowMobile,
           cards_per_row_desktop: cardsPerRowDesktop,
@@ -1295,6 +1303,123 @@ const AdminDisplay = () => {
                 <p className="text-sm opacity-70">تسوق من أفضل العلامات</p>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Header Background Color */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            لون خلفية الهيدر
+          </CardTitle>
+          <CardDescription>تخصيص لون خلفية شريط التنقل العلوي</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Label>اللون:</Label>
+              <Input
+                type="color"
+                value={headerBgColor}
+                onChange={(e) => setHeaderBgColor(e.target.value)}
+                className="w-16 h-10 cursor-pointer p-1"
+              />
+              <Input
+                type="text"
+                value={headerBgColor}
+                onChange={(e) => setHeaderBgColor(e.target.value)}
+                className="w-28"
+                placeholder="#ffffff"
+                dir="ltr"
+              />
+            </div>
+          </div>
+          
+          {/* Quick color presets */}
+          <div>
+            <Label className="text-sm mb-2 block">ألوان سريعة:</Label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { color: '#ffffff', name: 'أبيض' },
+                { color: '#f8f9fa', name: 'رمادي فاتح' },
+                { color: '#f1f5f9', name: 'سماوي فاتح' },
+                { color: '#fef3c7', name: 'أصفر فاتح' },
+                { color: '#fce7f3', name: 'وردي فاتح' },
+                { color: '#dbeafe', name: 'أزرق فاتح' },
+                { color: '#d1fae5', name: 'أخضر فاتح' },
+                { color: '#1a1a1a', name: 'أسود' },
+                { color: '#0f172a', name: 'كحلي' },
+                { color: '#171717', name: 'داكن' },
+              ].map((preset) => (
+                <button
+                  key={preset.color}
+                  onClick={() => setHeaderBgColor(preset.color)}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                    headerBgColor === preset.color ? 'border-primary shadow-md' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg border border-gray-200"
+                    style={{ backgroundColor: preset.color }}
+                  />
+                  <span className="text-[10px]">{preset.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Preview */}
+          <div>
+            <Label className="text-sm mb-2 block">معاينة:</Label>
+            <div 
+              className="w-full h-16 rounded-lg flex items-center justify-between px-4 border"
+              style={{ backgroundColor: headerBgColor }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-primary rounded-full" />
+                <span className={`font-bold ${headerBgColor.startsWith('#f') || headerBgColor === '#ffffff' ? 'text-black' : 'text-white'}`}>اسم المتجر</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-6 h-6 rounded ${headerBgColor.startsWith('#f') || headerBgColor === '#ffffff' ? 'bg-gray-300' : 'bg-white/20'}`} />
+                <div className={`w-6 h-6 rounded ${headerBgColor.startsWith('#f') || headerBgColor === '#ffffff' ? 'bg-gray-300' : 'bg-white/20'}`} />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stock Display Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            إعدادات المخزون
+          </CardTitle>
+          <CardDescription>التحكم في عرض معلومات المخزون للزبائن</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <div className="space-y-1">
+              <Label className="text-base font-medium">إظهار الكمية المتبقية للزبائن</Label>
+              <p className="text-sm text-muted-foreground">
+                عند التفعيل، سيظهر عدد القطع المتبقية في المخزون للمنتجات التي تم تفعيل تتبع المخزون لها
+              </p>
+            </div>
+            <Switch
+              checked={showStockToCustomers}
+              onCheckedChange={setShowStockToCustomers}
+            />
+          </div>
+          
+          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+            <p className="text-sm font-medium">ملاحظة:</p>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <li>يجب تفعيل "تتبع المخزون" لكل منتج من صفحة تعديل المنتج</li>
+              <li>عند انخفاض الكمية عن 5، سيظهر تنبيه "كمية محدودة"</li>
+              <li>عند نفاذ الكمية، سيتم تعطيل زر الإضافة للسلة</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
