@@ -14,12 +14,10 @@ const hasEnvConfig = (): boolean => {
 export const getSupabaseClient = (): SupabaseClient<Database> | null => {
   if (supabaseInstance) return supabaseInstance;
   
-  // Try environment variables first (Lovable Cloud)
-  if (hasEnvConfig()) {
-    const envUrl = import.meta.env.VITE_SUPABASE_URL;
-    const envKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    
-    supabaseInstance = createClient<Database>(envUrl, envKey, {
+  // Try localStorage FIRST (allows overriding env vars for external hosting)
+  const config = getStoredConfig();
+  if (config?.supabaseUrl && config?.supabaseAnonKey && config?.isConfigured) {
+    supabaseInstance = createClient<Database>(config.supabaseUrl, config.supabaseAnonKey, {
       auth: { 
         storage: localStorage, 
         persistSession: true, 
@@ -29,10 +27,12 @@ export const getSupabaseClient = (): SupabaseClient<Database> | null => {
     return supabaseInstance;
   }
   
-  // Try localStorage (self-hosted)
-  const config = getStoredConfig();
-  if (config?.supabaseUrl && config?.supabaseAnonKey) {
-    supabaseInstance = createClient<Database>(config.supabaseUrl, config.supabaseAnonKey, {
+  // Fallback to environment variables (Lovable Cloud)
+  if (hasEnvConfig()) {
+    const envUrl = import.meta.env.VITE_SUPABASE_URL;
+    const envKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    supabaseInstance = createClient<Database>(envUrl, envKey, {
       auth: { 
         storage: localStorage, 
         persistSession: true, 
@@ -80,18 +80,22 @@ export const reinitializeSupabase = (url?: string, anonKey?: string): SupabaseCl
   return getSupabaseClient();
 };
 
-// Check if Supabase is configured (either via env or localStorage)
+// Check if Supabase is configured (localStorage takes priority over env)
 export const isSupabaseConfigured = (): boolean => {
-  if (hasEnvConfig()) return true;
   const config = getStoredConfig();
-  return !!(config?.supabaseUrl && config?.supabaseAnonKey && config?.isConfigured);
+  if (config?.supabaseUrl && config?.supabaseAnonKey && config?.isConfigured) return true;
+  if (hasEnvConfig()) return true;
+  return false;
 };
 
-// Get current Supabase URL (for edge functions, etc.)
+// Get current Supabase URL (localStorage takes priority)
 export const getSupabaseUrl = (): string | null => {
+  const config = getStoredConfig();
+  if (config?.supabaseUrl && config?.isConfigured) {
+    return config.supabaseUrl;
+  }
   if (hasEnvConfig()) {
     return import.meta.env.VITE_SUPABASE_URL;
   }
-  const config = getStoredConfig();
-  return config?.supabaseUrl || null;
+  return null;
 };
