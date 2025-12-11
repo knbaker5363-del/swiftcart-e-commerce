@@ -1,4 +1,2 @@
-{
-  "env_image_name": "fastapi_react_mongo_base_image_cloud_arm:release-08122025-2",
-  "source": "lovable"
-}
+env_image_name: "fastapi_react_mongo_base_image_cloud_arm:release-08122025-2"
+source: "lovable"
