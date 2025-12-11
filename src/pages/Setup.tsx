@@ -9,9 +9,18 @@ import { useConfig } from '@/contexts/ConfigContext';
 import { useSupabaseContext } from '@/contexts/SupabaseContext';
 import { testSupabaseConnection, createRuntimeSupabaseClient, clearAllSupabaseData } from '@/lib/supabase-runtime';
 import { reinitializeSupabase } from '@/lib/supabase-wrapper';
-import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy } from 'lucide-react';
+import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy, Upload, RefreshCw } from 'lucide-react';
 
-type Step = 'welcome' | 'supabase' | 'database' | 'admin' | 'store' | 'complete';
+type Step = 'welcome' | 'supabase' | 'detect' | 'database' | 'admin' | 'store' | 'import-confirm' | 'complete';
+type SetupMode = 'new' | 'import';
+
+interface ExistingData {
+  hasSettings: boolean;
+  hasAdmin: boolean;
+  hasProducts: boolean;
+  productsCount: number;
+  existingStoreName?: string;
+}
 
 const Setup = () => {
   const navigate = useNavigate();
@@ -21,6 +30,8 @@ const Setup = () => {
   
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [isLoading, setIsLoading] = useState(false);
+  const [setupMode, setSetupMode] = useState<SetupMode>('new');
+  const [existingData, setExistingData] = useState<ExistingData | null>(null);
   
   // Supabase credentials
   const [supabaseUrl, setSupabaseUrl] = useState('');
@@ -37,14 +48,49 @@ const Setup = () => {
   const [storeLocation, setStoreLocation] = useState('فلسطين');
   const [storePhone, setStorePhone] = useState('');
 
-  const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
-    { id: 'welcome', title: 'مرحباً', icon: <Sparkles className="h-5 w-5" /> },
-    { id: 'supabase', title: 'ربط قاعدة البيانات', icon: <Database className="h-5 w-5" /> },
-    { id: 'database', title: 'تهيئة الجداول', icon: <FileCode className="h-5 w-5" /> },
-    { id: 'admin', title: 'حساب المدير', icon: <User className="h-5 w-5" /> },
-    { id: 'store', title: 'إعدادات المتجر', icon: <Store className="h-5 w-5" /> },
-    { id: 'complete', title: 'انتهى!', icon: <Check className="h-5 w-5" /> },
-  ];
+  const getStepsForMode = (): { id: Step; title: string; icon: React.ReactNode }[] => {
+    if (setupMode === 'import') {
+      return [
+        { id: 'welcome', title: 'مرحباً', icon: <Sparkles className="h-5 w-5" /> },
+        { id: 'supabase', title: 'ربط قاعدة البيانات', icon: <Database className="h-5 w-5" /> },
+        { id: 'detect', title: 'فحص البيانات', icon: <RefreshCw className="h-5 w-5" /> },
+        { id: 'import-confirm', title: 'تأكيد الاستيراد', icon: <Upload className="h-5 w-5" /> },
+        { id: 'complete', title: 'انتهى!', icon: <Check className="h-5 w-5" /> },
+      ];
+    }
+    return [
+      { id: 'welcome', title: 'مرحباً', icon: <Sparkles className="h-5 w-5" /> },
+      { id: 'supabase', title: 'ربط قاعدة البيانات', icon: <Database className="h-5 w-5" /> },
+      { id: 'detect', title: 'فحص البيانات', icon: <RefreshCw className="h-5 w-5" /> },
+      { id: 'database', title: 'تهيئة الجداول', icon: <FileCode className="h-5 w-5" /> },
+      { id: 'admin', title: 'حساب المدير', icon: <User className="h-5 w-5" /> },
+      { id: 'store', title: 'إعدادات المتجر', icon: <Store className="h-5 w-5" /> },
+      { id: 'complete', title: 'انتهى!', icon: <Check className="h-5 w-5" /> },
+    ];
+  };
+
+  const steps = getStepsForMode();
+
+  const checkExistingData = async (): Promise<ExistingData> => {
+    const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
+    
+    // Check settings
+    const { data: settings } = await client.from('settings').select('id, store_name').limit(1);
+    
+    // Check admin users
+    const { data: admins } = await client.from('user_roles').select('id').eq('role', 'admin').limit(1);
+    
+    // Check products count
+    const { data: products, count } = await client.from('products').select('id', { count: 'exact' }).limit(1);
+    
+    return {
+      hasSettings: settings && settings.length > 0,
+      hasAdmin: admins && admins.length > 0,
+      hasProducts: products && products.length > 0,
+      productsCount: count || 0,
+      existingStoreName: settings?.[0]?.store_name
+    };
+  };
 
   const handleTestConnection = async () => {
     if (!supabaseUrl || !supabaseAnonKey) {
@@ -63,6 +109,54 @@ const Setup = () => {
       }
     } catch (error) {
       toast({ title: 'خطأ', description: 'فشل الاتصال', variant: 'destructive' });
+    }
+    setIsLoading(false);
+  };
+
+  const handleDetectData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await checkExistingData();
+      setExistingData(data);
+      
+      if (data.hasSettings && data.hasAdmin) {
+        // Database has existing data - use import mode
+        setSetupMode('import');
+        setCurrentStep('import-confirm');
+        if (data.existingStoreName) {
+          setStoreName(data.existingStoreName);
+        }
+        toast({ title: 'تم اكتشاف بيانات موجودة!', description: 'يمكنك استيراد البيانات مباشرة' });
+      } else {
+        // Empty database - proceed with new setup
+        setSetupMode('new');
+        setCurrentStep('database');
+        toast({ title: 'قاعدة بيانات جديدة', description: 'سيتم إعداد المتجر من الصفر' });
+      }
+    } catch (error) {
+      // If tables don't exist, it's a new setup
+      console.log('Tables not found, proceeding with new setup');
+      setSetupMode('new');
+      setCurrentStep('database');
+    }
+    setIsLoading(false);
+  };
+
+  const handleImportConfirm = async () => {
+    setIsLoading(true);
+    try {
+      // Save config to localStorage
+      saveConfig({
+        supabaseUrl,
+        supabaseAnonKey,
+        isConfigured: true,
+      });
+
+      toast({ title: 'نجاح!', description: 'تم ربط قاعدة البيانات بنجاح' });
+      setCurrentStep('complete');
+    } catch (error: any) {
+      console.error('Import error:', error);
+      toast({ title: 'خطأ', description: error.message || 'فشل الاستيراد', variant: 'destructive' });
     }
     setIsLoading(false);
   };
@@ -131,7 +225,7 @@ const Setup = () => {
           store_name: storeName,
           location: storeLocation,
           store_phone: storePhone,
-          setup_locked: true, // Lock setup after completion
+          setup_locked: true,
         }).eq('id', existingSettings[0].id);
       } else {
         // Insert new settings
@@ -139,7 +233,7 @@ const Setup = () => {
           store_name: storeName,
           location: storeLocation,
           store_phone: storePhone,
-          setup_locked: true, // Lock setup after completion
+          setup_locked: true,
         });
       }
 
@@ -185,12 +279,15 @@ const Setup = () => {
       // Small delay to ensure everything is cleared and reinitialized
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Force full page reload to fresh state
+      // For import mode, go to admin login; for new setup, go to home
       console.log('Reloading page...');
-      window.location.href = '/';
+      if (setupMode === 'import') {
+        window.location.href = '/admin123';
+      } else {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Error during completion:', error);
-      // Force reload anyway
       window.location.href = '/';
     }
   };
@@ -213,6 +310,13 @@ const Setup = () => {
               سنقوم معاً بإعداد متجرك الإلكتروني خطوة بخطوة. 
               العملية سهلة ولن تستغرق أكثر من 10 دقائق.
             </p>
+            <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
+              <p className="font-semibold">يمكنك:</p>
+              <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                <li>إعداد متجر جديد من الصفر</li>
+                <li>استيراد بيانات من متجر سابق (نفس قاعدة البيانات)</li>
+              </ul>
+            </div>
             <Button onClick={() => setCurrentStep('supabase')} size="lg" className="gap-2">
               ابدأ الإعداد
               <ArrowLeft className="h-4 w-4" />
@@ -280,14 +384,98 @@ const Setup = () => {
                 رجوع
               </Button>
               <Button 
-                onClick={() => setCurrentStep('database')} 
-                disabled={!connectionTested}
+                onClick={handleDetectData} 
+                disabled={!connectionTested || isLoading}
                 className="flex-1"
               >
-                التالي
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
+                التالي - فحص البيانات
                 <ArrowLeft className="h-4 w-4 mr-2" />
               </Button>
             </div>
+          </div>
+        );
+
+      case 'detect':
+        return (
+          <div className="text-center space-y-6">
+            <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+            </div>
+            <h2 className="text-xl font-bold">جاري فحص قاعدة البيانات...</h2>
+            <p className="text-muted-foreground">
+              يرجى الانتظار بينما نتحقق من وجود بيانات سابقة
+            </p>
+          </div>
+        );
+
+      case 'import-confirm':
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <Database className="h-8 w-8 text-green-600" />
+              </div>
+              <h2 className="text-xl font-bold">تم اكتشاف بيانات موجودة!</h2>
+            </div>
+            
+            <div className="bg-muted/50 border rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">اسم المتجر:</span>
+                <span className="font-semibold">{existingData?.existingStoreName || 'غير محدد'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">حساب أدمن:</span>
+                <span className="font-semibold text-green-600">
+                  {existingData?.hasAdmin ? '✓ موجود' : '✗ غير موجود'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">المنتجات:</span>
+                <span className="font-semibold">{existingData?.productsCount || 0} منتج</span>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>ملاحظة:</strong> سيتم استخدام بيانات المتجر الموجودة. يمكنك تسجيل الدخول بحسابك السابق بعد الانتهاء.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <Button 
+                onClick={handleImportConfirm}
+                disabled={isLoading}
+                className="w-full gap-2"
+                size="lg"
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                استيراد البيانات والمتابعة
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setSetupMode('new');
+                  setCurrentStep('database');
+                }}
+                className="w-full"
+              >
+                إعداد جديد (حذف البيانات القديمة)
+              </Button>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                setConnectionTested(false);
+                setCurrentStep('supabase');
+              }}
+              className="w-full"
+            >
+              <ArrowRight className="h-4 w-4 ml-2" />
+              تغيير قاعدة البيانات
+            </Button>
           </div>
         );
 
@@ -495,16 +683,30 @@ const Setup = () => {
             <div className="w-20 h-20 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
               <Check className="h-10 w-10 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold">تم إعداد المتجر بنجاح! 🎉</h2>
+            <h2 className="text-2xl font-bold">
+              {setupMode === 'import' ? 'تم ربط المتجر بنجاح! 🎉' : 'تم إعداد المتجر بنجاح! 🎉'}
+            </h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              متجرك جاهز الآن. يمكنك تسجيل الدخول بحساب المدير الذي أنشأته للبدء في إضافة المنتجات وتخصيص المتجر.
+              {setupMode === 'import' 
+                ? 'تم ربط متجرك بقاعدة البيانات السابقة. يمكنك تسجيل الدخول بحسابك القديم.'
+                : 'متجرك جاهز الآن. يمكنك تسجيل الدخول بحساب المدير الذي أنشأته للبدء في إضافة المنتجات وتخصيص المتجر.'
+              }
             </p>
-            <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
-              <p><strong>البريد الإلكتروني:</strong> {adminEmail}</p>
-              <p><strong>رابط لوحة التحكم:</strong> /admin/login</p>
-            </div>
+            {setupMode === 'new' && (
+              <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
+                <p><strong>البريد الإلكتروني:</strong> {adminEmail}</p>
+                <p><strong>رابط لوحة التحكم:</strong> /admin123</p>
+              </div>
+            )}
+            {setupMode === 'import' && existingData && (
+              <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
+                <p><strong>اسم المتجر:</strong> {existingData.existingStoreName}</p>
+                <p><strong>المنتجات:</strong> {existingData.productsCount} منتج</p>
+                <p><strong>رابط لوحة التحكم:</strong> /admin123</p>
+              </div>
+            )}
             <Button onClick={handleComplete} size="lg" className="gap-2">
-              الذهاب لتسجيل الدخول
+              {setupMode === 'import' ? 'الذهاب لتسجيل الدخول' : 'الذهاب للمتجر'}
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </div>
