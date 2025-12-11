@@ -64,35 +64,6 @@ const CITIES_DATA = {
       }
     }
   },
-  egypt: {
-    label: 'مصر 🇪🇬',
-    cities: [
-      'القاهرة', 'الإسكندرية', 'الجيزة', 'شبرا الخيمة', 'بورسعيد', 'السويس', 'المحلة الكبرى',
-      'الأقصر', 'أسوان', 'المنصورة', 'طنطا', 'الفيوم', 'الزقازيق', 'أسيوط', 'دمياط',
-      'الإسماعيلية', 'كفر الشيخ', 'قنا', 'بني سويف', 'سوهاج', 'المنيا', 'شرم الشيخ', 'الغردقة'
-    ]
-  },
-  saudi: {
-    label: 'السعودية 🇸🇦',
-    cities: [
-      'الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'الدمام', 'الخبر', 'الظهران',
-      'الطائف', 'تبوك', 'بريدة', 'خميس مشيط', 'أبها', 'القطيف', 'الجبيل', 'حائل',
-      'نجران', 'الهفوف', 'جيزان', 'ينبع', 'عرعر', 'سكاكا', 'القنفذة', 'رابغ'
-    ]
-  },
-  jordan: {
-    label: 'الأردن 🇯🇴',
-    cities: [
-      'عمان', 'إربد', 'الزرقاء', 'العقبة', 'السلط', 'مادبا', 'الكرك', 'جرش', 'معان',
-      'عجلون', 'الطفيلة', 'الرمثا', 'المفرق'
-    ]
-  },
-  uae: {
-    label: 'الإمارات 🇦🇪',
-    cities: [
-      'دبي', 'أبو ظبي', 'الشارقة', 'عجمان', 'رأس الخيمة', 'الفجيرة', 'أم القيوين', 'العين'
-    ]
-  },
   other: {
     label: 'دولة أخرى 🌍',
     cities: []
@@ -900,38 +871,6 @@ const Checkout = () => {
                           <SelectLabel className="text-muted-foreground font-semibold pr-4">{CITIES_DATA.palestine.regions.inside.label}</SelectLabel>
                           {CITIES_DATA.palestine.regions.inside.cities.map((city) => (
                             <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                        
-                        {/* Egypt */}
-                        <SelectGroup>
-                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.egypt.label}</SelectLabel>
-                          {CITIES_DATA.egypt.cities.map((city) => (
-                            <SelectItem key={`eg-${city}`} value={`مصر - ${city}`}>{city}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                        
-                        {/* Saudi Arabia */}
-                        <SelectGroup>
-                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.saudi.label}</SelectLabel>
-                          {CITIES_DATA.saudi.cities.map((city) => (
-                            <SelectItem key={`sa-${city}`} value={`السعودية - ${city}`}>{city}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                        
-                        {/* Jordan */}
-                        <SelectGroup>
-                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.jordan.label}</SelectLabel>
-                          {CITIES_DATA.jordan.cities.map((city) => (
-                            <SelectItem key={`jo-${city}`} value={`الأردن - ${city}`}>{city}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                        
-                        {/* UAE */}
-                        <SelectGroup>
-                          <SelectLabel className="text-muted-foreground font-bold text-base border-t mt-2 pt-2">{CITIES_DATA.uae.label}</SelectLabel>
-                          {CITIES_DATA.uae.cities.map((city) => (
-                            <SelectItem key={`ae-${city}`} value={`الإمارات - ${city}`}>{city}</SelectItem>
                           ))}
                         </SelectGroup>
                         

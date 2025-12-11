@@ -24,6 +24,8 @@ interface ExistingData {
   brandsCount: number;
   ordersCount: number;
   existingStoreName?: string;
+  existingPhone?: string;
+  existingAdminEmail?: string;
 }
 
 interface SchemaCheckResult {
@@ -207,11 +209,14 @@ const Setup = () => {
   const checkExistingData = async (): Promise<ExistingData> => {
     const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
     
-    // Check settings
-    const { data: settings } = await client.from('settings').select('id, store_name').limit(1);
+    // Check settings with phone number
+    const { data: settings } = await client.from('settings').select('id, store_name, store_phone, whatsapp_number').limit(1);
     
     // Check admin users
     const { data: admins } = await client.from('user_roles').select('id').eq('role', 'admin').limit(1);
+    
+    // Get admin email from profiles
+    const { data: profiles } = await client.from('profiles').select('email').limit(1);
     
     // Check products count
     const { count: productsCount } = await client.from('products').select('id', { count: 'exact', head: true });
@@ -233,7 +238,9 @@ const Setup = () => {
       categoriesCount: categoriesCount || 0,
       brandsCount: brandsCount || 0,
       ordersCount: ordersCount || 0,
-      existingStoreName: settings?.[0]?.store_name
+      existingStoreName: settings?.[0]?.store_name,
+      existingPhone: settings?.[0]?.store_phone || settings?.[0]?.whatsapp_number,
+      existingAdminEmail: profiles?.[0]?.email
     };
   };
 
@@ -719,6 +726,40 @@ const Setup = () => {
                 <strong>ملاحظة:</strong> سيتم استخدام بيانات المتجر الموجودة. يمكنك تسجيل الدخول بحسابك السابق بعد الانتهاء.
               </p>
             </div>
+
+            {/* Use Previous Settings Button */}
+            {(existingData?.existingStoreName || existingData?.existingPhone || existingData?.existingAdminEmail) && (
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-semibold text-purple-800 dark:text-purple-200">
+                  تم العثور على إعدادات سابقة:
+                </p>
+                <div className="text-xs text-purple-700 dark:text-purple-300 space-y-1">
+                  {existingData.existingStoreName && (
+                    <p>• اسم المتجر: {existingData.existingStoreName}</p>
+                  )}
+                  {existingData.existingPhone && (
+                    <p>• رقم الهاتف: {existingData.existingPhone}</p>
+                  )}
+                  {existingData.existingAdminEmail && (
+                    <p>• البريد الإلكتروني: {existingData.existingAdminEmail}</p>
+                  )}
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (existingData.existingStoreName) setStoreName(existingData.existingStoreName);
+                    if (existingData.existingPhone) setStorePhone(existingData.existingPhone);
+                    if (existingData.existingAdminEmail) setAdminEmail(existingData.existingAdminEmail);
+                    toast({ title: 'تم تحميل الإعدادات السابقة', description: 'يمكنك الآن المتابعة' });
+                  }}
+                  className="w-full gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  استخدام الإعدادات السابقة
+                </Button>
+              </div>
+            )}
             
             <div className="flex flex-col gap-3">
               <Button 
