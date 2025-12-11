@@ -17,7 +17,20 @@ const hasEnvConfig = (): boolean => {
 };
 
 export const getStoredConfig = (): RuntimeConfig | null => {
-  // First check if env variables are set (Lovable Cloud environment)
+  // FIRST: Check localStorage (user-configured in setup wizard - takes priority!)
+  try {
+    const stored = localStorage.getItem(CONFIG_KEY);
+    if (stored) {
+      const config = JSON.parse(stored);
+      if (config.isConfigured && config.supabaseUrl && config.supabaseAnonKey) {
+        return config;
+      }
+    }
+  } catch (e) {
+    console.error('Error reading config from localStorage:', e);
+  }
+  
+  // FALLBACK: Use env variables (Lovable Cloud environment)
   if (hasEnvConfig()) {
     return {
       supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
@@ -26,15 +39,6 @@ export const getStoredConfig = (): RuntimeConfig | null => {
     };
   }
   
-  // Otherwise check localStorage (self-hosted environment)
-  try {
-    const stored = localStorage.getItem(CONFIG_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error('Error reading config from localStorage:', e);
-  }
   return null;
 };
 
@@ -55,14 +59,23 @@ export const clearConfig = (): void => {
 };
 
 export const isStoreConfigured = (): boolean => {
-  // If env variables exist, store is configured
+  // FIRST: Check localStorage (takes priority!)
+  try {
+    const stored = localStorage.getItem(CONFIG_KEY);
+    if (stored) {
+      const config = JSON.parse(stored);
+      if (config?.isConfigured && config.supabaseUrl && config.supabaseAnonKey) {
+        return true;
+      }
+    }
+  } catch (e) {}
+  
+  // FALLBACK: Check env variables
   if (hasEnvConfig()) {
     return true;
   }
   
-  // Otherwise check localStorage
-  const config = getStoredConfig();
-  return config?.isConfigured === true && !!config.supabaseUrl && !!config.supabaseAnonKey;
+  return false;
 };
 
 export const createRuntimeSupabaseClient = (url: string, anonKey: string): SupabaseClient<Database> => {
