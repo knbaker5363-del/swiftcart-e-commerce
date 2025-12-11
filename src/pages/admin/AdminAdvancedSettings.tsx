@@ -157,6 +157,7 @@ const AdminAdvancedSettings = () => {
     }
   };
 
+  const handleSetupWebhook = async () => {
     if (!telegramBotToken) {
       toast({ title: 'يرجى إدخال توكين البوت أولاً', variant: 'destructive' });
       return;
