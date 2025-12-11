@@ -247,7 +247,7 @@ const ProductQuickView = ({ product, open, onOpenChange }: ProductQuickViewProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{product.name}</DialogTitle>
           <p className="sr-only">تفاصيل المنتج</p>
