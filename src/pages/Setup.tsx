@@ -149,10 +149,7 @@ const Setup = () => {
         isConfigured: true,
       });
 
-      // Reinitialize Supabase client with new credentials
-      reconnect(supabaseUrl, supabaseAnonKey);
-
-      toast({ title: 'نجاح!', description: 'تم حفظ الإعدادات' });
+      toast({ title: 'نجاح!', description: 'تم حفظ الإعدادات، جاري إعادة تحميل المتجر...' });
       setCurrentStep('complete');
     } catch (error: any) {
       console.error('Settings error:', error);
@@ -162,7 +159,14 @@ const Setup = () => {
   };
 
   const handleComplete = () => {
-    navigate('/admin/login');
+    // Clear any cached data to ensure fresh data from new database
+    localStorage.removeItem('store_settings');
+    localStorage.removeItem('store_categories');
+    localStorage.removeItem('store_products');
+    localStorage.removeItem('store_brands');
+    
+    // Force full page reload to reinitialize Supabase client with new credentials
+    window.location.href = '/';
   };
 
   const copyToClipboard = (text: string) => {

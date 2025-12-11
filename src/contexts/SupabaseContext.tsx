@@ -17,8 +17,8 @@ interface SupabaseProviderProps {
 }
 
 export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
-  const [client, setClient] = useState<SupabaseClient<Database> | null>(() => getSupabaseClient());
-  const [isConfigured, setIsConfigured] = useState(() => isSupabaseConfigured());
+  const [client, setClient] = useState<SupabaseClient<Database> | null>(null);
+  const [isConfigured, setIsConfigured] = useState(false);
 
   useEffect(() => {
     // Check configuration on mount
