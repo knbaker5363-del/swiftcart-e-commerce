@@ -14,6 +14,7 @@ import { SetupGuard } from "@/components/SetupGuard";
 import AnimatedEffects from "@/components/AnimatedEffects";
 import FaviconManager from "@/components/FaviconManager";
 import LoadingScreen from "@/components/LoadingScreen";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -61,16 +62,17 @@ const LoadingWrapper = () => {
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ConfigProvider>
-      <SupabaseProvider>
-        <BrowserRouter>
-          <SetupGuard>
-          <AuthProvider>
-            <SettingsProvider>
-              <CartProvider>
-                <FavoritesProvider>
-                  <TooltipProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider>
+        <SupabaseProvider>
+          <BrowserRouter>
+            <SetupGuard>
+            <AuthProvider>
+              <SettingsProvider>
+                <CartProvider>
+                  <FavoritesProvider>
+                    <TooltipProvider>
                     <LoadingWrapper />
                     <AnimatedEffectsWrapper />
                     <FaviconWrapper />
@@ -116,16 +118,17 @@ const App = () => (
                       {/* 404 */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
-                  </TooltipProvider>
-                </FavoritesProvider>
-              </CartProvider>
-            </SettingsProvider>
-          </AuthProvider>
-          </SetupGuard>
-        </BrowserRouter>
-      </SupabaseProvider>
-    </ConfigProvider>
-  </QueryClientProvider>
+                    </TooltipProvider>
+                  </FavoritesProvider>
+                </CartProvider>
+              </SettingsProvider>
+            </AuthProvider>
+            </SetupGuard>
+          </BrowserRouter>
+        </SupabaseProvider>
+      </ConfigProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

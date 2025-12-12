@@ -120,14 +120,17 @@ const ProductGrid = memo(({ products, onProductClick, getColorValue }: ProductGr
               )}
               <button
                 onClick={() => toggleFavorite(product.id)}
-                className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors"
+                className="absolute top-2 right-2 p-2 min-w-[40px] min-h-[40px] bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors flex items-center justify-center"
+                aria-label={isFavorite(product.id) ? `إزالة ${product.name} من المفضلة` : `إضافة ${product.name} للمفضلة`}
+                aria-pressed={isFavorite(product.id)}
               >
                 <Heart
-                  className={`h-4 w-4 ${
+                  className={`h-5 w-5 ${
                     isFavorite(product.id)
                       ? `fill-destructive text-destructive ${effects.heart_beat ? 'animate-heartbeat' : ''}`
                       : 'text-foreground'
                   }`}
+                  aria-hidden="true"
                 />
               </button>
             </div>
@@ -177,13 +180,15 @@ const ProductGrid = memo(({ products, onProductClick, getColorValue }: ProductGr
 
               {/* Colors */}
               {options?.colors && options.colors.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 mb-2">
+                <div className="flex flex-wrap justify-center gap-1 mb-2" role="list" aria-label="الألوان المتاحة">
                   {options.colors.map((color, idx) => (
                     <div
                       key={idx}
                       className={`${textSizes.colorSwatch} rounded border border-border`}
                       style={{ backgroundColor: getColorValue(color) }}
                       title={color}
+                      role="listitem"
+                      aria-label={`لون ${color}`}
                     />
                   ))}
                 </div>

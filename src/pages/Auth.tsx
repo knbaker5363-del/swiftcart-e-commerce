@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getArabicErrorMessage } from '@/lib/errorHandler';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -33,9 +34,10 @@ const Auth = () => {
     const { error } = await signIn(loginData.email, loginData.password);
 
     if (error) {
+      const errorMsg = getArabicErrorMessage(error);
       toast({
-        title: 'خطأ في تسجيل الدخول',
-        description: error.message,
+        title: errorMsg.title,
+        description: errorMsg.description,
         variant: 'destructive',
       });
     } else {
@@ -78,9 +80,10 @@ const Auth = () => {
     );
 
     if (error) {
+      const errorMsg = getArabicErrorMessage(error);
       toast({
-        title: 'خطأ في إنشاء الحساب',
-        description: error.message,
+        title: errorMsg.title,
+        description: errorMsg.description,
         variant: 'destructive',
       });
     } else {
@@ -111,8 +114,9 @@ const Auth = () => {
           <TabsContent value="login">
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label>البريد الإلكتروني</Label>
+                <Label htmlFor="login-email">البريد الإلكتروني</Label>
                 <Input
+                  id="login-email"
                   type="email"
                   value={loginData.email}
                   onChange={(e) =>
@@ -120,11 +124,15 @@ const Auth = () => {
                   }
                   required
                   dir="ltr"
+                  aria-required="true"
+                  autoComplete="email"
+                  className="min-h-[44px]"
                 />
               </div>
               <div>
-                <Label>كلمة المرور</Label>
+                <Label htmlFor="login-password">كلمة المرور</Label>
                 <Input
+                  id="login-password"
                   type="password"
                   value={loginData.password}
                   onChange={(e) =>
@@ -132,12 +140,16 @@ const Auth = () => {
                   }
                   required
                   dir="ltr"
+                  aria-required="true"
+                  autoComplete="current-password"
+                  className="min-h-[44px]"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-primary"
+                className="w-full bg-gradient-primary min-h-[44px]"
                 disabled={loading}
+                aria-label={loading ? 'جاري تسجيل الدخول' : 'تسجيل الدخول'}
               >
                 {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
               </Button>

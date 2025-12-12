@@ -102,7 +102,12 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
         <div className="flex items-center gap-1 lg:hidden">
           <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                aria-label="فتح القائمة"
+                className="min-w-[44px] min-h-[44px]"
+              >
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -129,7 +134,12 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
           {showAdminButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  aria-label="حسابي"
+                  className="min-w-[44px] min-h-[44px]"
+                >
                   <User className="h-6 w-6" />
                 </Button>
               </DropdownMenuTrigger>
@@ -149,20 +159,31 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({
             </DropdownMenu>
           )}
           
-          <Link to="/favorites">
-            <Button variant="ghost" size="icon" className="relative overflow-visible">
+          <Link to="/favorites" aria-label={`المفضلة - ${favoritesCount} عناصر`}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative overflow-visible min-w-[44px] min-h-[44px]"
+              aria-label={`المفضلة - ${favoritesCount} عناصر`}
+            >
               <Heart className="h-6 w-6" />
               {favoritesCount > 0 && (
-                <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center z-10">
+                <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center z-10" aria-hidden="true">
                   {favoritesCount}
                 </span>
               )}
             </Button>
           </Link>
-          <Button variant="outline" size="icon" className="relative overflow-visible" onClick={onCartOpen}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="relative overflow-visible min-w-[44px] min-h-[44px]" 
+            onClick={onCartOpen}
+            aria-label={`سلة التسوق - ${itemCount} عناصر`}
+          >
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center z-10">
+              <span className="absolute -top-2 -left-2 min-w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center z-10" aria-hidden="true">
                 {itemCount}
               </span>
             )}

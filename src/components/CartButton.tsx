@@ -29,9 +29,10 @@ const CartButton = ({ onClick, className = '', size = 'sm', variant = 'secondary
   return (
     <Button
       onClick={onClick}
-      className={`gap-1.5 text-xs px-3 py-1.5 h-auto mx-auto ${className}`}
+      className={`gap-1.5 text-xs px-3 py-1.5 h-auto min-h-[44px] mx-auto ${className}`}
       size={size}
       variant={variant}
+      aria-label={buttonText || 'أضف للسلة'}
     >
       <Icon className="h-3.5 w-3.5" />
       {buttonText && <span>{buttonText}</span>}
