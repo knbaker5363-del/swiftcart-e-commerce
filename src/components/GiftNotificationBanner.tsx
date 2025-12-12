@@ -1,6 +1,7 @@
 import { HiSparkles } from 'react-icons/hi2';
 import { PiGiftFill, PiStarFourFill, PiFireFill, PiCrownFill } from 'react-icons/pi';
 import { IoSparkles, IoRibbonSharp } from 'react-icons/io5';
+import { Shuffle } from 'lucide-react';
 import { GiftIcon, GiftIconStyleType } from '@/components/ui/gift-icon';
 import { useSettings } from '@/contexts/SettingsContext';
 
@@ -8,12 +9,14 @@ interface GiftNotificationBannerProps {
   currentAmount: number;
   minimumAmount: number;
   remainingAmount: number;
+  giftType?: 'choice' | 'random';
 }
 
 export const GiftNotificationBanner = ({
   currentAmount,
   minimumAmount,
   remainingAmount,
+  giftType = 'choice',
 }: GiftNotificationBannerProps) => {
   const { settings } = useSettings();
   const progress = Math.min((currentAmount / minimumAmount) * 100, 100);
@@ -65,8 +68,11 @@ export const GiftNotificationBanner = ({
             <div className="flex items-center gap-2 flex-wrap">
               <HiSparkles className="h-5 w-5 text-yellow-400" />
               <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">
-                مبروك! يمكنك اختيار هدية مجانية
+                {giftType === 'random' 
+                  ? 'مبروك! لديك هدية عشوائية بانتظارك' 
+                  : 'مبروك! يمكنك اختيار هدية مجانية'}
               </p>
+              {giftType === 'random' && <Shuffle className="h-5 w-5 text-purple-500" />}
               <PiCrownFill className="h-5 w-5 text-yellow-500" />
             </div>
           ) : (
@@ -145,7 +151,11 @@ export const GiftNotificationBanner = ({
         {isEligible ? (
           <>
             <IoSparkles className="h-4 w-4 text-yellow-400" />
-            <span>ستظهر لك قائمة الهدايا عند إتمام الطلب</span>
+            <span>
+              {giftType === 'random' 
+                ? 'ستحصل على هدية عشوائية عند إتمام الطلب' 
+                : 'ستظهر لك قائمة الهدايا عند إتمام الطلب'}
+            </span>
             <IoSparkles className="h-4 w-4 text-yellow-400" />
           </>
         ) : (

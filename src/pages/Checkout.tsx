@@ -230,11 +230,17 @@ const Checkout = () => {
         .limit(1)
         .single();
       if (error) return null;
-      return data;
+      return data as {
+        id: string;
+        name: string;
+        minimum_amount: number;
+        is_active: boolean;
+        gift_type: 'choice' | 'random';
+      };
     },
   });
 
-  // Fetch gift products for active offer
+  // Fetch gift products for active offer with weights
   const { data: giftProducts } = useQuery({
     queryKey: ['gift-products', activeGiftOffer?.id],
     queryFn: async () => {
@@ -243,12 +249,16 @@ const Checkout = () => {
         .from('gift_products')
         .select(`
           product_id,
+          weight,
           products (id, name, image_url, price)
         `)
         .eq('gift_offer_id', activeGiftOffer.id);
       if (error) return [];
       return data
-        .map((gp: any) => gp.products)
+        .map((gp: any) => ({
+          ...gp.products,
+          weight: gp.weight || 100
+        }))
         .filter((p: any) => p !== null);
     },
     enabled: !!activeGiftOffer,
@@ -740,6 +750,7 @@ const Checkout = () => {
                     currentAmount={total}
                     minimumAmount={activeGiftOffer.minimum_amount}
                     remainingAmount={remainingForGift}
+                    giftType={activeGiftOffer.gift_type || 'choice'}
                   />
                 )}
 
@@ -749,6 +760,7 @@ const Checkout = () => {
                   onOpenChange={setShowGiftDialog}
                   giftProducts={giftProducts || []}
                   minimumAmount={activeGiftOffer?.minimum_amount || 0}
+                  giftType={activeGiftOffer?.gift_type || 'choice'}
                   onSelectGift={(gift) => {
                     setSelectedGift(gift);
                     setShowGiftDialog(false);
@@ -796,6 +808,7 @@ const Checkout = () => {
                       }}
                       minimumAmount={activeGiftOffer?.minimum_amount || 0}
                       currentAmount={total}
+                      giftType={activeGiftOffer?.gift_type || 'choice'}
                     />
                   ) : (
                     <Button

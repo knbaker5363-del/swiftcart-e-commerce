@@ -103,6 +103,7 @@ export type Database = {
       gift_offers: {
         Row: {
           created_at: string
+          gift_type: string | null
           id: string
           is_active: boolean
           minimum_amount: number
@@ -111,6 +112,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          gift_type?: string | null
           id?: string
           is_active?: boolean
           minimum_amount?: number
@@ -119,6 +121,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          gift_type?: string | null
           id?: string
           is_active?: boolean
           minimum_amount?: number
@@ -133,18 +136,21 @@ export type Database = {
           gift_offer_id: string
           id: string
           product_id: string
+          weight: number | null
         }
         Insert: {
           created_at?: string
           gift_offer_id: string
           id?: string
           product_id: string
+          weight?: number | null
         }
         Update: {
           created_at?: string
           gift_offer_id?: string
           id?: string
           product_id?: string
+          weight?: number | null
         }
         Relationships: [
           {

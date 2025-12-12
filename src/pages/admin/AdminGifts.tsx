@@ -10,14 +10,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, Gift, Package, Edit, Save } from 'lucide-react';
+import { Plus, Trash2, Gift, Package, Edit, Save, Shuffle, MousePointer, Percent } from 'lucide-react';
+import { calculateProbabilities } from '@/lib/weightedRandom';
 
 interface GiftOffer {
   id: string;
   name: string;
   minimum_amount: number;
   is_active: boolean;
+  gift_type: 'choice' | 'random';
   created_at: string;
 }
 
@@ -28,6 +32,11 @@ interface Product {
   price: number;
 }
 
+interface GiftProductWithWeight {
+  product_id: string;
+  weight: number;
+}
+
 const AdminGifts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -36,10 +45,12 @@ const AdminGifts = () => {
   const [formData, setFormData] = useState({
     name: '',
     minimum_amount: 100,
+    gift_type: 'choice' as 'choice' | 'random',
   });
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<GiftProductWithWeight[]>([]);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [currentOfferId, setCurrentOfferId] = useState<string | null>(null);
+  const [currentOfferType, setCurrentOfferType] = useState<'choice' | 'random'>('choice');
 
   // Fetch gift offers
   const { data: giftOffers, isLoading: offersLoading } = useQuery({
@@ -68,19 +79,22 @@ const AdminGifts = () => {
     },
   });
 
-  // Fetch gift products for a specific offer
+  // Fetch gift products with weights for a specific offer
   const fetchGiftProducts = async (offerId: string) => {
     const { data, error } = await supabase
       .from('gift_products')
-      .select('product_id')
+      .select('product_id, weight')
       .eq('gift_offer_id', offerId);
     if (error) throw error;
-    return data.map((gp) => gp.product_id);
+    return data.map((gp) => ({ 
+      product_id: gp.product_id, 
+      weight: gp.weight || 100 
+    }));
   };
 
   // Create gift offer
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; minimum_amount: number }) => {
+    mutationFn: async (data: { name: string; minimum_amount: number; gift_type: string }) => {
       const { data: offer, error } = await supabase
         .from('gift_offers')
         .insert(data)
@@ -136,15 +150,19 @@ const AdminGifts = () => {
     },
   });
 
-  // Update gift products
+  // Update gift products with weights
   const updateGiftProductsMutation = useMutation({
-    mutationFn: async ({ offerId, productIds }: { offerId: string; productIds: string[] }) => {
+    mutationFn: async ({ offerId, products }: { offerId: string; products: GiftProductWithWeight[] }) => {
       // Delete existing
       await supabase.from('gift_products').delete().eq('gift_offer_id', offerId);
-      // Insert new
-      if (productIds.length > 0) {
+      // Insert new with weights
+      if (products.length > 0) {
         const { error } = await supabase.from('gift_products').insert(
-          productIds.map((pid) => ({ gift_offer_id: offerId, product_id: pid }))
+          products.map((p) => ({ 
+            gift_offer_id: offerId, 
+            product_id: p.product_id,
+            weight: p.weight
+          }))
         );
         if (error) throw error;
       }
@@ -161,13 +179,17 @@ const AdminGifts = () => {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', minimum_amount: 100 });
+    setFormData({ name: '', minimum_amount: 100, gift_type: 'choice' });
     setEditingOffer(null);
   };
 
   const handleEdit = (offer: GiftOffer) => {
     setEditingOffer(offer);
-    setFormData({ name: offer.name, minimum_amount: offer.minimum_amount });
+    setFormData({ 
+      name: offer.name, 
+      minimum_amount: offer.minimum_amount,
+      gift_type: offer.gift_type || 'choice'
+    });
     setIsDialogOpen(true);
   };
 
@@ -180,30 +202,50 @@ const AdminGifts = () => {
     }
   };
 
-  const handleOpenProductDialog = async (offerId: string) => {
+  const handleOpenProductDialog = async (offerId: string, giftType: 'choice' | 'random') => {
     setCurrentOfferId(offerId);
-    const productIds = await fetchGiftProducts(offerId);
-    setSelectedProducts(productIds);
+    setCurrentOfferType(giftType);
+    const giftProducts = await fetchGiftProducts(offerId);
+    setSelectedProducts(giftProducts);
     setIsProductDialogOpen(true);
   };
 
   const toggleProductSelection = (productId: string) => {
+    setSelectedProducts((prev) => {
+      const existing = prev.find(p => p.product_id === productId);
+      if (existing) {
+        return prev.filter((p) => p.product_id !== productId);
+      } else {
+        return [...prev, { product_id: productId, weight: 100 }];
+      }
+    });
+  };
+
+  const updateProductWeight = (productId: string, weight: number) => {
     setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+      prev.map((p) =>
+        p.product_id === productId ? { ...p, weight } : p
+      )
     );
   };
 
   const handleSaveProducts = () => {
     if (currentOfferId) {
-      updateGiftProductsMutation.mutate({ offerId: currentOfferId, productIds: selectedProducts });
+      updateGiftProductsMutation.mutate({ offerId: currentOfferId, products: selectedProducts });
     }
   };
 
   const toggleActive = (offer: GiftOffer) => {
     updateMutation.mutate({ id: offer.id, data: { is_active: !offer.is_active } });
   };
+
+  // Calculate probabilities for display
+  const productsWithProbabilities = calculateProbabilities(
+    selectedProducts.map(sp => ({
+      ...sp,
+      id: sp.product_id
+    }))
+  );
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -256,6 +298,38 @@ const AdminGifts = () => {
                   required
                 />
               </div>
+              <div>
+                <Label>نوع الهدية</Label>
+                <Select
+                  value={formData.gift_type}
+                  onValueChange={(value: 'choice' | 'random') => 
+                    setFormData({ ...formData, gift_type: value })
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="choice">
+                      <div className="flex items-center gap-2">
+                        <MousePointer className="h-4 w-4" />
+                        <span>العميل يختار</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="random">
+                      <div className="flex items-center gap-2">
+                        <Shuffle className="h-4 w-4" />
+                        <span>هدية عشوائية</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.gift_type === 'choice' 
+                    ? 'سيختار العميل هديته من القائمة المحددة'
+                    : 'سيحصل العميل على هدية عشوائية بناءً على نسب الظهور'}
+                </p>
+              </div>
               <Button type="submit" className="w-full" disabled={createMutation.isPending || updateMutation.isPending}>
                 <Save className="ml-2 h-4 w-4" />
                 {editingOffer ? 'تحديث' : 'إنشاء'}
@@ -275,9 +349,18 @@ const AdminGifts = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Gift className="h-6 w-6 text-primary" />
+                    {offer.gift_type === 'random' ? (
+                      <Shuffle className="h-6 w-6 text-purple-500" />
+                    ) : (
+                      <Gift className="h-6 w-6 text-primary" />
+                    )}
                     <div>
-                      <CardTitle className="text-xl">{offer.name}</CardTitle>
+                      <CardTitle className="text-xl flex items-center gap-2">
+                        {offer.name}
+                        <Badge variant="outline" className="text-xs">
+                          {offer.gift_type === 'random' ? '🎲 عشوائي' : '🎯 اختيار'}
+                        </Badge>
+                      </CardTitle>
                       <CardDescription>
                         اشترِ بـ {offer.minimum_amount} ₪ واحصل على هدية
                       </CardDescription>
@@ -299,7 +382,7 @@ const AdminGifts = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleOpenProductDialog(offer.id)}
+                    onClick={() => handleOpenProductDialog(offer.id, offer.gift_type || 'choice')}
                     className="gap-2"
                   >
                     <Package className="h-4 w-4" />
@@ -344,38 +427,113 @@ const AdminGifts = () => {
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle>اختر منتجات الهدايا</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {currentOfferType === 'random' ? (
+                <>
+                  <Shuffle className="h-5 w-5 text-purple-500" />
+                  اختر منتجات الهدايا وحدد نسب الظهور
+                </>
+              ) : (
+                <>
+                  <Gift className="h-5 w-5 text-primary" />
+                  اختر منتجات الهدايا
+                </>
+              )}
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-            {products?.map((product) => (
-              <Card
-                key={product.id}
-                onClick={() => toggleProductSelection(product.id)}
-                className={`p-3 cursor-pointer transition-all ${
-                  selectedProducts.includes(product.id)
-                    ? 'ring-2 ring-primary bg-primary/5'
-                    : 'hover:bg-muted/50'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    checked={selectedProducts.includes(product.id)}
-                    className="mt-1"
-                  />
-                  <div className="flex-1 min-w-0">
-                    {product.image_url && (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-20 object-cover rounded mb-2"
-                      />
-                    )}
-                    <p className="font-medium text-sm line-clamp-2">{product.name}</p>
-                    <p className="text-xs text-muted-foreground">{product.price} ₪</p>
+
+          {/* Probability visualization for random type */}
+          {currentOfferType === 'random' && selectedProducts.length > 0 && (
+            <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                <Percent className="h-4 w-4" />
+                توزيع نسب الظهور:
+              </p>
+              <div className="flex h-6 rounded-full overflow-hidden">
+                {productsWithProbabilities.map((p, idx) => {
+                  const product = products?.find(pr => pr.id === p.product_id);
+                  const colors = ['bg-primary', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500', 'bg-green-500'];
+                  return (
+                    <div
+                      key={p.product_id}
+                      className={`${colors[idx % colors.length]} flex items-center justify-center text-xs text-white font-medium`}
+                      style={{ width: `${p.probability}%` }}
+                      title={`${product?.name}: ${p.probability.toFixed(1)}%`}
+                    >
+                      {p.probability >= 10 && `${p.probability.toFixed(0)}%`}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+            {products?.map((product) => {
+              const selectedProduct = selectedProducts.find(sp => sp.product_id === product.id);
+              const isSelected = !!selectedProduct;
+              const probability = productsWithProbabilities.find(p => p.product_id === product.id)?.probability || 0;
+
+              return (
+                <Card
+                  key={product.id}
+                  className={`p-3 transition-all ${
+                    isSelected
+                      ? 'ring-2 ring-primary bg-primary/5'
+                      : 'hover:bg-muted/50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleProductSelection(product.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => toggleProductSelection(product.id)}
+                      >
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-20 object-cover rounded mb-2"
+                          />
+                        )}
+                        <p className="font-medium text-sm line-clamp-2">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{product.price} ₪</p>
+                      </div>
+
+                      {/* Weight slider for random type */}
+                      {currentOfferType === 'random' && isSelected && (
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">نسبة الظهور:</span>
+                            <Badge variant="outline" className="text-xs">
+                              {probability.toFixed(1)}%
+                            </Badge>
+                          </div>
+                          <Slider
+                            value={[selectedProduct?.weight || 100]}
+                            onValueChange={([value]) => updateProductWeight(product.id, value)}
+                            min={1}
+                            max={100}
+                            step={1}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-[10px] text-muted-foreground">
+                            <span>نادر</span>
+                            <span>الوزن: {selectedProduct?.weight}</span>
+                            <span>شائع</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
           <div className="flex gap-3 mt-4">
             <Button onClick={handleSaveProducts} className="flex-1">
