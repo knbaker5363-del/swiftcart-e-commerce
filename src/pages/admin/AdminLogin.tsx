@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSupabaseClient } from '@/lib/supabase-wrapper';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,11 +46,43 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     const { error } = await signIn(loginData.email, loginData.password);
     
     if (!error) {
-      // Will be redirected by useEffect when isAdmin updates
+      // التحقق يدوياً من حالة الأدمن بعد تسجيل الدخول
+      const client = getSupabaseClient();
+      if (client) {
+        const { data: { session } } = await client.auth.getSession();
+        console.log('Session after login:', session);
+        
+        if (session?.user) {
+          const { data: roleData, error: roleError } = await client
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
+          
+          console.log('Role check:', { roleData, roleError });
+          
+          if (roleData && !roleError) {
+            toast({
+              title: 'تم تسجيل الدخول بنجاح',
+              description: 'جاري التوجيه للوحة التحكم...',
+            });
+            navigate('/admin/products');
+          } else {
+            toast({
+              title: 'خطأ',
+              description: 'هذا الحساب ليس لديه صلاحيات المسؤول',
+              variant: 'destructive',
+            });
+          }
+        }
+      }
     }
+    
     setLoading(false);
   };
 
