@@ -368,7 +368,10 @@ const HeroSection = () => {
                 <img
                   src={slide.image}
                   alt={`شريحة ${index + 1}`}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
                   className="w-full h-full object-cover"
+                  style={effects.image_parallax ? { transform: `translateY(${scrollY}px)` } : undefined}
                 />
               </div>
             ))}

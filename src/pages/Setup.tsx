@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useSupabaseContext } from '@/contexts/SupabaseContext';
-import { testSupabaseConnection, createRuntimeSupabaseClient, clearAllSupabaseData } from '@/lib/supabase-runtime';
+import { testSupabaseConnection, createRuntimeSupabaseClient, clearAllSupabaseData, saveConfig as saveConfigToStorage } from '@/lib/supabase-runtime';
 import { reinitializeSupabase } from '@/lib/supabase-wrapper';
 import { Check, Loader2, Database, User, Store, ArrowLeft, ArrowRight, Sparkles, FileCode, ExternalLink, Copy, Upload, RefreshCw, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { retrySupabaseConnection } from '@/lib/retryWithBackoff';
 
 type Step = 'welcome' | 'supabase' | 'detect' | 'schema-check' | 'database' | 'admin' | 'store' | 'import-confirm' | 'complete';
 type SetupMode = 'new' | 'import';
@@ -252,15 +253,23 @@ const Setup = () => {
 
     setIsLoading(true);
     try {
-      const success = await testSupabaseConnection(supabaseUrl, supabaseAnonKey);
+      // Use retry with exponential backoff for connection testing
+      const success = await retrySupabaseConnection(
+        () => testSupabaseConnection(supabaseUrl, supabaseAnonKey),
+        3 // max 3 retries
+      );
+      
       if (success) {
         setConnectionTested(true);
         toast({ title: 'نجاح!', description: 'تم الاتصال بنجاح' });
       } else {
         toast({ title: 'خطأ', description: 'فشل الاتصال، تحقق من البيانات', variant: 'destructive' });
       }
-    } catch (error) {
-      toast({ title: 'خطأ', description: 'فشل الاتصال', variant: 'destructive' });
+    } catch (error: any) {
+      const message = error.message?.includes('Connection test') 
+        ? 'فشل الاتصال بعد عدة محاولات، تحقق من البيانات'
+        : 'فشل الاتصال، تحقق من اتصال الإنترنت';
+      toast({ title: 'خطأ', description: message, variant: 'destructive' });
     }
     setIsLoading(false);
   };
@@ -423,6 +432,22 @@ const Setup = () => {
     try {
       console.log('Starting setup completion...');
       
+      // CRITICAL FIX: Save config FIRST before any clearing operations
+      // This prevents data loss if clearAllSupabaseData succeeds but saveConfig fails
+      const newConfig = {
+        supabaseUrl,
+        supabaseAnonKey,
+        isConfigured: true,
+      };
+      
+      // Backup the config in a separate key temporarily
+      try {
+        localStorage.setItem('store_config_backup', JSON.stringify(newConfig));
+        console.log('Backed up new config before clearing');
+      } catch (e) {
+        console.warn('Failed to backup config');
+      }
+      
       try {
         const oldClient = reinitializeSupabase();
         if (oldClient) {
@@ -436,12 +461,20 @@ const Setup = () => {
       clearAllSupabaseData();
       console.log('Cleared all old Supabase data');
       
-      // IMPORTANT: Re-save config AFTER clearing (clearAllSupabaseData removes the config too)
-      saveConfig({
-        supabaseUrl,
-        supabaseAnonKey,
-        isConfigured: true,
-      });
+      // Restore config from backup or use newConfig
+      try {
+        const backupConfig = localStorage.getItem('store_config_backup');
+        if (backupConfig) {
+          const parsed = JSON.parse(backupConfig);
+          saveConfigToStorage(parsed);
+          localStorage.removeItem('store_config_backup');
+        } else {
+          saveConfigToStorage(newConfig);
+        }
+      } catch (e) {
+        // Fallback: use context saveConfig
+        saveConfig(newConfig);
+      }
       console.log('Saved new Supabase config to localStorage');
       
       reinitializeSupabase(supabaseUrl, supabaseAnonKey);
