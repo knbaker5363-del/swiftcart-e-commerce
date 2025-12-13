@@ -1335,14 +1335,19 @@ const Setup = () => {
                 
                 {/* تنبيه إضافة أدمن يدوياً */}
                 {!existingData.hasAdmin && (
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 space-y-2">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      <strong>ملاحظة:</strong> لم يتم العثور على حساب أدمن. يمكنك إضافته يدوياً من:
-                      <br />
-                      <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded text-xs">
-                        Supabase → user_roles → إضافة سجل (user_id + role: admin)
-                      </code>
+                      <strong>ملاحظة:</strong> لم يتم العثور على حساب أدمن.
                     </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = '/create-admin'}
+                      className="w-full gap-2 border-yellow-300 text-yellow-800 hover:bg-yellow-100 dark:border-yellow-700 dark:text-yellow-200 dark:hover:bg-yellow-900/30"
+                    >
+                      <User className="h-4 w-4" />
+                      إنشاء حساب أدمن جديد
+                    </Button>
                   </div>
                 )}
               </div>
