@@ -493,11 +493,12 @@ const Setup = () => {
       if (!roleInserted) {
         console.error('Failed to insert admin role after all retries');
         toast({ 
-          title: 'تحذير', 
-          description: 'تم إنشاء الحساب لكن فشل تعيين صلاحية المدير. تحقق من RLS policies في Supabase.', 
-          variant: 'destructive' 
+          title: 'تم إنشاء الحساب', 
+          description: 'تم إنشاء الحساب بنجاح. قد تحتاج لتعيين صلاحيات الأدمن يدوياً من Supabase.', 
         });
+        // المتابعة للخطوة التالية بدلاً من التوقف
         setIsLoading(false);
+        setCurrentStep('store');
         return;
       }
       
@@ -966,12 +967,15 @@ const Setup = () => {
               </div>
             )}
 
-            {/* Use Previous Settings Button - only show if no admin login option */}
-            {!existingData?.hasAdmin && (existingData?.existingStoreName || existingData?.existingPhone) && (
+            {/* زر أكمل بإعدادات المتجر القديم - بدون تسجيل دخول */}
+            {existingData?.hasSettings && (
               <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-3">
-                <p className="text-sm font-semibold text-purple-800 dark:text-purple-200">
-                  تم العثور على إعدادات سابقة:
-                </p>
+                <div className="flex items-center gap-2">
+                  <Store className="h-5 w-5 text-purple-600" />
+                  <p className="text-sm font-semibold text-purple-800 dark:text-purple-200">
+                    أكمل بإعدادات المتجر القديم
+                  </p>
+                </div>
                 <div className="text-xs text-purple-700 dark:text-purple-300 space-y-1">
                   {existingData.existingStoreName && (
                     <p>• اسم المتجر: {existingData.existingStoreName}</p>
@@ -979,19 +983,40 @@ const Setup = () => {
                   {existingData.existingPhone && (
                     <p>• رقم الهاتف: {existingData.existingPhone}</p>
                   )}
+                  <p className="text-purple-600 dark:text-purple-400 mt-2">
+                    ⚡ لا تحتاج كلمة مرور - ستضيف أدمن من Supabase لاحقاً
+                  </p>
                 </div>
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    if (existingData.existingStoreName) setStoreName(existingData.existingStoreName);
-                    if (existingData.existingPhone) setStorePhone(existingData.existingPhone);
-                    toast({ title: 'تم تحميل الإعدادات السابقة', description: 'يمكنك الآن المتابعة' });
+                  variant="default"
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      // حفظ الإعدادات
+                      saveConfig({
+                        supabaseUrl,
+                        supabaseAnonKey,
+                        isConfigured: true,
+                      });
+                      // تحميل الإعدادات القديمة
+                      if (existingData.existingStoreName) setStoreName(existingData.existingStoreName);
+                      if (existingData.existingPhone) setStorePhone(existingData.existingPhone);
+                      
+                      toast({ 
+                        title: 'تم!', 
+                        description: 'تم تحميل إعدادات المتجر. أضف أدمن من Supabase إذا لزم الأمر.' 
+                      });
+                      setCurrentStep('complete');
+                    } catch (error: any) {
+                      toast({ title: 'خطأ', description: error.message, variant: 'destructive' });
+                    }
+                    setIsLoading(false);
                   }}
+                  disabled={isLoading}
                   className="w-full gap-2"
                 >
-                  <RefreshCw className="h-4 w-4" />
-                  استخدام الإعدادات السابقة
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
+                  أكمل بإعدادات المتجر القديم (بدون تسجيل دخول)
                 </Button>
               </div>
             )}
@@ -1198,6 +1223,21 @@ const Setup = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
               </Button>
             </div>
+            
+            {/* زر تخطي إنشاء حساب الأدمن */}
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                toast({ 
+                  title: 'تم التخطي', 
+                  description: 'يمكنك إضافة أدمن من Supabase → user_roles لاحقاً' 
+                });
+                setCurrentStep('store');
+              }}
+              className="w-full text-muted-foreground"
+            >
+              تخطي - سأضيف الأدمن من Supabase يدوياً
+            </Button>
           </div>
         );
 
@@ -1284,12 +1324,27 @@ const Setup = () => {
               </div>
             )}
             {setupMode === 'import' && existingData && (
-              <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
-                <p><strong>اسم المتجر:</strong> {existingData.existingStoreName}</p>
-                <p><strong>المنتجات:</strong> {existingData.productsCount} منتج</p>
-                <p><strong>التصنيفات:</strong> {existingData.categoriesCount} تصنيف</p>
-                <p><strong>الطلبات:</strong> {existingData.ordersCount} طلب</p>
-                <p><strong>رابط لوحة التحكم:</strong> /admin123</p>
+              <div className="space-y-3">
+                <div className="bg-muted/50 border rounded-lg p-4 text-sm text-right space-y-2">
+                  <p><strong>اسم المتجر:</strong> {existingData.existingStoreName}</p>
+                  <p><strong>المنتجات:</strong> {existingData.productsCount} منتج</p>
+                  <p><strong>التصنيفات:</strong> {existingData.categoriesCount} تصنيف</p>
+                  <p><strong>الطلبات:</strong> {existingData.ordersCount} طلب</p>
+                  <p><strong>رابط لوحة التحكم:</strong> /admin123</p>
+                </div>
+                
+                {/* تنبيه إضافة أدمن يدوياً */}
+                {!existingData.hasAdmin && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      <strong>ملاحظة:</strong> لم يتم العثور على حساب أدمن. يمكنك إضافته يدوياً من:
+                      <br />
+                      <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded text-xs">
+                        Supabase → user_roles → إضافة سجل (user_id + role: admin)
+                      </code>
+                    </p>
+                  </div>
+                )}
               </div>
             )}
             <Button onClick={handleComplete} size="lg" className="gap-2">
