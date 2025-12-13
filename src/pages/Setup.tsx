@@ -369,18 +369,46 @@ const Setup = () => {
       if (signUpError) throw signUpError;
 
       if (authData.user) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // انتظار قليلاً للتأكد من اكتمال إنشاء الحساب
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        const { error: roleError } = await client.from('user_roles').insert({
-          user_id: authData.user.id,
-          role: 'admin'
-        });
+        // محاولة إضافة دور الأدمن مع إعادة المحاولة
+        let roleInserted = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (!roleInserted && retryCount < maxRetries) {
+          const { error: roleError } = await client.from('user_roles').insert({
+            user_id: authData.user.id,
+            role: 'admin'
+          });
 
-        if (roleError && !roleError.message.includes('duplicate')) {
-          console.error('Role error:', roleError);
+          if (!roleError) {
+            roleInserted = true;
+            console.log('Admin role inserted successfully');
+          } else if (roleError.message?.includes('duplicate')) {
+            // Role already exists - this is OK
+            roleInserted = true;
+            console.log('Admin role already exists');
+          } else {
+            console.error(`Role insert attempt ${retryCount + 1} failed:`, roleError);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
         }
 
-        toast({ title: 'نجاح!', description: 'تم إنشاء حساب المدير' });
+        if (!roleInserted) {
+          toast({ 
+            title: 'تحذير', 
+            description: 'تم إنشاء الحساب لكن فشل تعيين صلاحية المدير. جرب تسجيل الدخول.', 
+            variant: 'destructive' 
+          });
+        } else {
+          toast({ title: 'نجاح!', description: 'تم إنشاء حساب المدير بنجاح' });
+        }
+        
         setCurrentStep('store');
       }
     } catch (error: any) {
