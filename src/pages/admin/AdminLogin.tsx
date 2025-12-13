@@ -47,9 +47,23 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
     e.preventDefault();
     setLoading(true);
     
-    const { error } = await signIn(loginData.email, loginData.password);
-    
-    if (!error) {
+    try {
+      const { error } = await signIn(loginData.email, loginData.password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        toast({
+          title: 'خطأ في تسجيل الدخول',
+          description: error.message || 'تحقق من البريد الإلكتروني وكلمة المرور',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // انتظار قليلاً للتأكد من تحديث الجلسة
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // التحقق يدوياً من حالة الأدمن بعد تسجيل الدخول
       const client = getSupabaseClient();
       if (client) {
@@ -73,14 +87,30 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
             });
             navigate('/admin/products');
           } else {
+            console.error('Admin role not found:', { roleData, roleError });
             toast({
-              title: 'خطأ',
-              description: 'هذا الحساب ليس لديه صلاحيات المسؤول',
+              title: 'خطأ في الصلاحيات',
+              description: 'هذا الحساب ليس لديه صلاحيات المسؤول. تأكد من إعداد الحساب بشكل صحيح.',
               variant: 'destructive',
             });
+            // تسجيل الخروج لأن المستخدم ليس أدمن
+            await client.auth.signOut();
           }
+        } else {
+          toast({
+            title: 'خطأ',
+            description: 'فشل في الحصول على الجلسة بعد تسجيل الدخول',
+            variant: 'destructive',
+          });
         }
       }
+    } catch (err: any) {
+      console.error('Unexpected login error:', err);
+      toast({
+        title: 'خطأ غير متوقع',
+        description: err.message || 'حدث خطأ أثناء تسجيل الدخول',
+        variant: 'destructive',
+      });
     }
     
     setLoading(false);
