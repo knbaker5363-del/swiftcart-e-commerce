@@ -93,6 +93,10 @@ const Setup = () => {
   const [storeName, setStoreName] = useState('متجري');
   const [storeLocation, setStoreLocation] = useState('فلسطين');
   const [storePhone, setStorePhone] = useState('');
+  
+  // Login with existing admin
+  const [showExistingLogin, setShowExistingLogin] = useState(false);
+  const [existingAdminPassword, setExistingAdminPassword] = useState('');
 
   const getStepsForMode = (): { id: Step; title: string; icon: React.ReactNode }[] => {
     if (setupMode === 'import') {
@@ -339,6 +343,62 @@ const Setup = () => {
     } catch (error: any) {
       console.error('Import error:', error);
       toast({ title: 'خطأ', description: error.message || 'فشل الاستيراد', variant: 'destructive' });
+    }
+    setIsLoading(false);
+  };
+
+  const handleLoginExistingAdmin = async () => {
+    if (!existingData?.existingAdminEmail || !existingAdminPassword) {
+      toast({ title: 'خطأ', description: 'يرجى إدخال كلمة المرور', variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
+      
+      // Try to sign in with existing admin credentials
+      const { data, error } = await client.auth.signInWithPassword({
+        email: existingData.existingAdminEmail,
+        password: existingAdminPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
+        throw new Error('فشل تسجيل الدخول');
+      }
+
+      // Verify admin role
+      const { data: roleData, error: roleError } = await client
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (roleError || !roleData) {
+        await client.auth.signOut();
+        throw new Error('هذا الحساب ليس لديه صلاحيات المسؤول');
+      }
+
+      // Save config to localStorage
+      saveConfig({
+        supabaseUrl,
+        supabaseAnonKey,
+        isConfigured: true,
+      });
+
+      toast({ title: 'نجاح!', description: 'تم تسجيل الدخول بنجاح' });
+      setCurrentStep('complete');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const errorMessage = error.message?.includes('Invalid login') 
+        ? 'كلمة المرور غير صحيحة' 
+        : error.message || 'فشل تسجيل الدخول';
+      toast({ title: 'خطأ في تسجيل الدخول', description: errorMessage, variant: 'destructive' });
     }
     setIsLoading(false);
   };
@@ -840,8 +900,74 @@ const Setup = () => {
               </p>
             </div>
 
-            {/* Use Previous Settings Button */}
-            {(existingData?.existingStoreName || existingData?.existingPhone || existingData?.existingAdminEmail) && (
+            {/* Login with Existing Admin Account */}
+            {existingData?.hasAdmin && existingData?.existingAdminEmail && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+                    تم العثور على حساب أدمن موجود
+                  </p>
+                </div>
+                <p className="text-xs text-green-700 dark:text-green-300">
+                  البريد: {existingData.existingAdminEmail}
+                </p>
+                
+                {showExistingLogin ? (
+                  <div className="space-y-3 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="existingPassword" className="text-green-800 dark:text-green-200">
+                        كلمة المرور
+                      </Label>
+                      <Input
+                        id="existingPassword"
+                        type="password"
+                        placeholder="أدخل كلمة المرور"
+                        value={existingAdminPassword}
+                        onChange={(e) => setExistingAdminPassword(e.target.value)}
+                        className="bg-white dark:bg-gray-800"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && existingAdminPassword) {
+                            handleLoginExistingAdmin();
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleLoginExistingAdmin} 
+                        disabled={isLoading || !existingAdminPassword}
+                        className="flex-1 gap-2"
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <User className="h-4 w-4" />}
+                        تسجيل الدخول
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => {
+                          setShowExistingLogin(false);
+                          setExistingAdminPassword('');
+                        }}
+                      >
+                        إلغاء
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => setShowExistingLogin(true)}
+                    className="w-full gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    تسجيل الدخول بالحساب الموجود
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Use Previous Settings Button - only show if no admin login option */}
+            {!existingData?.hasAdmin && (existingData?.existingStoreName || existingData?.existingPhone) && (
               <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-3">
                 <p className="text-sm font-semibold text-purple-800 dark:text-purple-200">
                   تم العثور على إعدادات سابقة:
@@ -853,9 +979,6 @@ const Setup = () => {
                   {existingData.existingPhone && (
                     <p>• رقم الهاتف: {existingData.existingPhone}</p>
                   )}
-                  {existingData.existingAdminEmail && (
-                    <p>• البريد الإلكتروني: {existingData.existingAdminEmail}</p>
-                  )}
                 </div>
                 <Button
                   variant="secondary"
@@ -863,7 +986,6 @@ const Setup = () => {
                   onClick={() => {
                     if (existingData.existingStoreName) setStoreName(existingData.existingStoreName);
                     if (existingData.existingPhone) setStorePhone(existingData.existingPhone);
-                    if (existingData.existingAdminEmail) setAdminEmail(existingData.existingAdminEmail);
                     toast({ title: 'تم تحميل الإعدادات السابقة', description: 'يمكنك الآن المتابعة' });
                   }}
                   className="w-full gap-2"
