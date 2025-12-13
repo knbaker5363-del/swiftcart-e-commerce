@@ -48,6 +48,7 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
     setLoading(true);
     
     try {
+      console.log('Starting login process...');
       const { error } = await signIn(loginData.email, loginData.password);
       
       if (error) {
@@ -61,48 +62,83 @@ const AdminLogin = ({ secretAccess = false }: AdminLoginProps) => {
         return;
       }
       
-      // انتظار قليلاً للتأكد من تحديث الجلسة
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Login successful, waiting for session update...');
+      // انتظار أطول للتأكد من تحديث الجلسة
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // التحقق يدوياً من حالة الأدمن بعد تسجيل الدخول
       const client = getSupabaseClient();
-      if (client) {
-        const { data: { session } } = await client.auth.getSession();
-        console.log('Session after login:', session);
+      if (!client) {
+        console.error('Supabase client not available');
+        toast({
+          title: 'خطأ',
+          description: 'فشل الاتصال بقاعدة البيانات',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+      
+      const { data: { session } } = await client.auth.getSession();
+      console.log('Session after login:', session?.user?.id);
+      
+      if (!session?.user) {
+        console.error('No session found after login');
+        toast({
+          title: 'خطأ',
+          description: 'فشل في الحصول على الجلسة بعد تسجيل الدخول',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // محاولة التحقق من دور الأدمن مع إعادة المحاولة
+      let roleData = null;
+      let roleError = null;
+      const maxRetries = 3;
+      
+      for (let i = 0; i < maxRetries; i++) {
+        console.log(`Checking admin role, attempt ${i + 1}/${maxRetries}...`);
         
-        if (session?.user) {
-          const { data: roleData, error: roleError } = await client
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .eq('role', 'admin')
-            .maybeSingle();
-          
-          console.log('Role check:', { roleData, roleError });
-          
-          if (roleData && !roleError) {
-            toast({
-              title: 'تم تسجيل الدخول بنجاح',
-              description: 'جاري التوجيه للوحة التحكم...',
-            });
-            navigate('/admin/products');
-          } else {
-            console.error('Admin role not found:', { roleData, roleError });
-            toast({
-              title: 'خطأ في الصلاحيات',
-              description: 'هذا الحساب ليس لديه صلاحيات المسؤول. تأكد من إعداد الحساب بشكل صحيح.',
-              variant: 'destructive',
-            });
-            // تسجيل الخروج لأن المستخدم ليس أدمن
-            await client.auth.signOut();
-          }
-        } else {
-          toast({
-            title: 'خطأ',
-            description: 'فشل في الحصول على الجلسة بعد تسجيل الدخول',
-            variant: 'destructive',
-          });
+        const result = await client
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        roleData = result.data;
+        roleError = result.error;
+        
+        console.log(`Role check attempt ${i + 1}:`, { roleData, roleError });
+        
+        if (roleData && !roleError) {
+          console.log('Admin role found successfully!');
+          break;
         }
+        
+        // انتظار قبل المحاولة التالية
+        if (i < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+      
+      if (roleData && !roleError) {
+        toast({
+          title: 'تم تسجيل الدخول بنجاح',
+          description: 'جاري التوجيه للوحة التحكم...',
+        });
+        navigate('/admin/products');
+      } else {
+        console.error('Admin role not found after retries:', { roleData, roleError });
+        toast({
+          title: 'خطأ في الصلاحيات',
+          description: 'هذا الحساب ليس لديه صلاحيات المسؤول. إذا كنت قد أنشأت الحساب للتو، قد تحتاج لإعادة إعداد المتجر.',
+          variant: 'destructive',
+        });
+        // تسجيل الخروج لأن المستخدم ليس أدمن
+        await client.auth.signOut();
       }
     } catch (err: any) {
       console.error('Unexpected login error:', err);

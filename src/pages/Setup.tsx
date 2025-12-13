@@ -356,8 +356,27 @@ const Setup = () => {
 
     setIsLoading(true);
     try {
+      console.log('Starting admin creation process...');
       const client = createRuntimeSupabaseClient(supabaseUrl, supabaseAnonKey);
       
+      // التحقق من عدم وجود الحساب مسبقاً
+      const { data: existingUser } = await client
+        .from('profiles')
+        .select('id')
+        .eq('email', adminEmail)
+        .maybeSingle();
+      
+      if (existingUser) {
+        toast({ 
+          title: 'تنبيه', 
+          description: 'يوجد حساب بهذا البريد الإلكتروني مسبقاً. حاول تسجيل الدخول أو استخدم بريد آخر.', 
+          variant: 'destructive' 
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Creating new admin account...');
       const { data: authData, error: signUpError } = await client.auth.signUp({
         email: adminEmail,
         password: adminPassword,
@@ -366,49 +385,82 @@ const Setup = () => {
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        console.error('SignUp error:', signUpError);
+        throw signUpError;
+      }
 
-      if (authData.user) {
-        // انتظار قليلاً للتأكد من اكتمال إنشاء الحساب
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // محاولة إضافة دور الأدمن مع إعادة المحاولة
-        let roleInserted = false;
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (!roleInserted && retryCount < maxRetries) {
-          const { error: roleError } = await client.from('user_roles').insert({
-            user_id: authData.user.id,
-            role: 'admin'
-          });
+      if (!authData.user) {
+        throw new Error('فشل إنشاء المستخدم');
+      }
 
-          if (!roleError) {
-            roleInserted = true;
-            console.log('Admin role inserted successfully');
-          } else if (roleError.message?.includes('duplicate')) {
-            // Role already exists - this is OK
-            roleInserted = true;
-            console.log('Admin role already exists');
-          } else {
-            console.error(`Role insert attempt ${retryCount + 1} failed:`, roleError);
-            retryCount++;
-            if (retryCount < maxRetries) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+      console.log('User created successfully, ID:', authData.user.id);
+      
+      // انتظار أطول للتأكد من اكتمال إنشاء الحساب وتهيئة الجداول
+      console.log('Waiting for database triggers...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // محاولة إضافة دور الأدمن مع إعادة المحاولة
+      let roleInserted = false;
+      let retryCount = 0;
+      const maxRetries = 5;
+      
+      while (!roleInserted && retryCount < maxRetries) {
+        console.log(`Attempting to insert admin role, try ${retryCount + 1}/${maxRetries}...`);
+        
+        const { data: insertResult, error: roleError } = await client.from('user_roles').insert({
+          user_id: authData.user.id,
+          role: 'admin'
+        }).select();
+
+        if (!roleError) {
+          roleInserted = true;
+          console.log('Admin role inserted successfully:', insertResult);
+        } else if (roleError.message?.includes('duplicate') || roleError.message?.includes('already exists')) {
+          // Role already exists - this is OK
+          roleInserted = true;
+          console.log('Admin role already exists');
+        } else {
+          console.error(`Role insert attempt ${retryCount + 1} failed:`, roleError);
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log('Waiting before retry...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
           }
         }
+      }
 
-        if (!roleInserted) {
-          toast({ 
-            title: 'تحذير', 
-            description: 'تم إنشاء الحساب لكن فشل تعيين صلاحية المدير. جرب تسجيل الدخول.', 
-            variant: 'destructive' 
-          });
-        } else {
-          toast({ title: 'نجاح!', description: 'تم إنشاء حساب المدير بنجاح' });
-        }
-        
+      if (!roleInserted) {
+        console.error('Failed to insert admin role after all retries');
+        toast({ 
+          title: 'تحذير', 
+          description: 'تم إنشاء الحساب لكن فشل تعيين صلاحية المدير. تحقق من RLS policies في Supabase.', 
+          variant: 'destructive' 
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // التحقق من نجاح العملية
+      console.log('Verifying admin role...');
+      const { data: verifyRole } = await client
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authData.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      if (verifyRole) {
+        console.log('Admin role verified successfully!');
+        toast({ title: 'نجاح!', description: 'تم إنشاء حساب المدير بنجاح وتعيين الصلاحيات' });
+        setCurrentStep('store');
+      } else {
+        console.error('Admin role verification failed');
+        toast({ 
+          title: 'تحذير', 
+          description: 'تم إنشاء الحساب لكن فشل التحقق من الصلاحيات. حاول تسجيل الدخول.', 
+          variant: 'destructive' 
+        });
         setCurrentStep('store');
       }
     } catch (error: any) {
