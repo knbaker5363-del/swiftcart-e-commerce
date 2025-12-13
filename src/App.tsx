@@ -36,6 +36,7 @@ const Category = lazy(() => import("./pages/Category"));
 const Auth = lazy(() => import("./pages/Auth"));
 const SpecialOffers = lazy(() => import("./pages/SpecialOffers"));
 const SpecialOfferDetail = lazy(() => import("./pages/SpecialOfferDetail"));
+const CreateAdmin = lazy(() => import("./pages/CreateAdmin"));
 
 // Lazy loaded admin pages (heavy bundle)
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -98,8 +99,9 @@ const App = () => (
                     <Sonner />
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
-                        {/* Setup Route */}
+                        {/* Setup Routes */}
                         <Route path="/setup" element={<Setup />} />
+                        <Route path="/create-admin" element={<CreateAdmin />} />
 
                         {/* Public Routes - Critical (eager) */}
                         <Route path="/" element={<Home />} />
